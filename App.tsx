@@ -497,6 +497,24 @@ const App: React.FC = () => {
         return <DataTable<Letter> title="Arsip Surat" data={letters} role={role} onAdd={handleAdd} onEdit={handleEdit} onDelete={handleDelete} accentColor="indigo" columns={[{ key: 'date', label: 'Tanggal', isPublic: true }, { key: 'letterNumber', label: 'No Surat', isPublic: true }, { key: 'title', label: 'Perihal', isPublic: true }, { key: 'type', label: 'Jenis', isPublic: true }, { key: 'link', label: 'File', isPublic: true }, { key: 'createdBy', label: 'Nama Penginput' }]} />;
       case 'Assets':
         return <DataTable<Asset> title="Aset Kantor" data={assets} role={role} onAdd={handleAdd} onEdit={handleEdit} onDelete={handleDelete} accentColor="slate" columns={[{ key: 'assetNo', label: 'No Aset' }, { key: 'name', label: 'Nama Aset' }, { key: 'condition', label: 'Kondisi' }, { key: 'createdBy', label: 'Nama Penginput' }]} />;
+      case 'Tasks' as any:
+        return (
+          <DataTable<UserTask>
+            title="Daftar Antrian Tugas"
+            data={userTasks}
+            role={role}
+            onAdd={handleAdd}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+            accentColor="amber"
+            columns={[
+              { key: 'title', label: 'Tugas', isPublic: false },
+              { key: 'description', label: 'Deskripsi', isPublic: false },
+              { key: 'status', label: 'Status', isPublic: false },
+              { key: 'createdBy', label: 'Nama Penginput' },
+            ]}
+          />
+        );
       case 'Settings':
         return <DataTable<AppUser> title="User Management" data={users} role={role} onAdd={handleAdd} onEdit={handleEdit} onDelete={handleDelete} accentColor="slate" columns={[{ key: 'username', label: 'User' }, { key: 'fullName', label: 'Nama Lengkap' }, { key: 'role', label: 'Role' }]} />;
       default: return <div className="p-10 text-center font-bold text-slate-300 uppercase">Modul Tersedia Segera</div>;
