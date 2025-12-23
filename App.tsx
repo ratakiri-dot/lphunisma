@@ -791,9 +791,11 @@ const App: React.FC = () => {
                       <span className="text-[10px] font-bold text-slate-600 line-through truncate w-40">{task.title}</span>
                       <span className="text-[8px] font-black text-slate-400 italic">Oleh: {task.createdBy} | Selesai oleh: {task.completedBy}</span>
                     </div>
-                    <button onClick={() => handleTaskAction('delete', task)} className="p-1.5 text-rose-400 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Trash2 size={12} />
-                    </button>
+                    {role === UserRole.ADMIN && (
+                      <button onClick={() => handleTaskAction('delete', task)} className="p-1.5 text-rose-400 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Trash2 size={12} />
+                      </button>
+                    )}
                   </div>
                 ))}
               </div>
