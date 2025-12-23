@@ -12,18 +12,18 @@ export interface AppUser {
   password: string;
 }
 
-export type NavItem = 
-  | 'Dashboard' 
-  | 'PU Certified' 
-  | 'PU On Process' 
-  | 'PU Prospect' 
-  | 'Internal' 
-  | 'Auditor' 
-  | 'Partners' 
-  | 'Docs' 
-  | 'Letters' 
-  | 'Assets' 
-  | 'Schedule' 
+export type NavItem =
+  | 'Dashboard'
+  | 'PU Certified'
+  | 'PU On Process'
+  | 'PU Prospect'
+  | 'Internal'
+  | 'Auditor'
+  | 'Partners'
+  | 'Docs'
+  | 'Letters'
+  | 'Assets'
+  | 'Schedule'
   | 'Finance'
   | 'Settings';
 
@@ -39,6 +39,9 @@ export interface PUCertified {
   nib: string;
   halalId: string; // public
   expiryDate: string; // public
+  createdBy?: string;
+  updatedBy?: string;
+  updatedAt?: string;
 }
 
 export interface PUOnProcess {
@@ -53,6 +56,9 @@ export interface PUOnProcess {
   productionAddress: string;
   nib: string;
   status: string; // public
+  createdBy?: string;
+  updatedBy?: string;
+  updatedAt?: string;
 }
 
 export interface PUProspect {
@@ -64,6 +70,9 @@ export interface PUProspect {
   socialMedia: string;
   followUpDate: string;
   notes: string;
+  createdBy?: string;
+  updatedBy?: string;
+  updatedAt?: string;
 }
 
 export interface InternalMember {
@@ -101,6 +110,9 @@ export interface Documentation {
   category: string;
   uploadDate: string;
   link: string;
+  createdBy?: string;
+  updatedBy?: string;
+  updatedAt?: string;
 }
 
 export interface Letter {
@@ -110,6 +122,9 @@ export interface Letter {
   date: string;
   type: 'Incoming' | 'Outgoing';
   link: string;
+  createdBy?: string;
+  updatedBy?: string;
+  updatedAt?: string;
 }
 
 export interface Asset {
@@ -118,6 +133,9 @@ export interface Asset {
   receivedDate: string;
   estimatedValue: number;
   condition: 'Good' | 'Broken' | 'Maintenance';
+  createdBy?: string;
+  updatedBy?: string;
+  updatedAt?: string;
 }
 
 export interface Activity {
@@ -128,6 +146,9 @@ export interface Activity {
   time: string; // public
   date: string; // public
   notes: string; // public
+  createdBy?: string;
+  updatedBy?: string;
+  updatedAt?: string;
 }
 
 export interface FinanceRecord {
@@ -137,4 +158,7 @@ export interface FinanceRecord {
   debit: number;
   credit: number;
   balance: number;
+  createdBy?: string;
+  updatedBy?: string;
+  updatedAt?: string;
 }

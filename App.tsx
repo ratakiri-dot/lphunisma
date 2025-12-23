@@ -224,35 +224,37 @@ const App: React.FC = () => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     const data = Object.fromEntries(formData.entries());
+    const username = currentUser?.username || 'System';
+    const auditData = editingItem ? { updatedBy: username } : { createdBy: username, updatedBy: username };
 
     try {
       if (activeTab === 'PU Certified') {
-        const item = { ...data, id: editingItem?.id } as PUCertified;
+        const item = { ...data, ...auditData, id: editingItem?.id } as PUCertified;
         const saved = await dataService.upsertPUCertified(item);
         setPuCertified(prev => editingItem ? prev.map(i => i.id === saved.id ? saved : i) : [...prev, saved]);
       }
       if (activeTab === 'PU On Process') {
-        const item = { ...data, id: editingItem?.id } as PUOnProcess;
+        const item = { ...data, ...auditData, id: editingItem?.id } as PUOnProcess;
         const saved = await dataService.upsertPUOnProcess(item);
         setPuOnProcess(prev => editingItem ? prev.map(i => i.id === saved.id ? saved : i) : [...prev, saved]);
       }
       if (activeTab === 'PU Prospect') {
-        const item = { ...data, id: editingItem?.id } as PUProspect;
+        const item = { ...data, ...auditData, id: editingItem?.id } as PUProspect;
         const saved = await dataService.upsertPUProspect(item);
         setPuProspect(prev => editingItem ? prev.map(i => i.id === saved.id ? saved : i) : [...prev, saved]);
       }
       if (activeTab === 'Internal') {
-        const item = { ...data, id: editingItem?.id } as InternalMember;
+        const item = { ...data, ...auditData, id: editingItem?.id } as InternalMember;
         const saved = await dataService.upsertInternal(item);
         setInternal(prev => editingItem ? prev.map(i => i.id === saved.id ? saved : i) : [...prev, saved]);
       }
       if (activeTab === 'Auditor') {
-        const item = { ...data, id: editingItem?.id } as Auditor;
+        const item = { ...data, ...auditData, id: editingItem?.id } as Auditor;
         const saved = await dataService.upsertAuditor(item);
         setAuditors(prev => editingItem ? prev.map(i => i.id === saved.id ? saved : i) : [...prev, saved]);
       }
       if (activeTab === 'Partners') {
-        const item = { ...data, id: editingItem?.id } as Partner;
+        const item = { ...data, ...auditData, id: editingItem?.id } as Partner;
         const saved = await dataService.upsertPartner(item);
         setPartners(prev => editingItem ? prev.map(i => i.id === saved.id ? saved : i) : [...prev, saved]);
       }
@@ -262,27 +264,27 @@ const App: React.FC = () => {
         const newCredit = Number(data.credit) || 0;
         const calculatedBalance = lastBalance + newDebit - newCredit;
 
-        const item = { ...data, id: editingItem?.id, debit: newDebit, credit: newCredit, balance: calculatedBalance } as FinanceRecord;
+        const item = { ...data, ...auditData, id: editingItem?.id, debit: newDebit, credit: newCredit, balance: calculatedBalance } as FinanceRecord;
         const saved = await dataService.upsertFinance(item);
         setFinance(prev => editingItem ? prev.map(i => i.id === saved.id ? saved : i) : [...prev, saved]);
       }
       if (activeTab === 'Schedule') {
-        const item = { ...data, id: editingItem?.id, delegates: (data.delegates as string).split(',').map(s => s.trim()) } as Activity;
+        const item = { ...data, ...auditData, id: editingItem?.id, delegates: (data.delegates as string).split(',').map(s => s.trim()) } as Activity;
         const saved = await dataService.upsertActivity(item);
         setSchedule(prev => editingItem ? prev.map(i => i.id === saved.id ? saved : i) : [...prev, saved]);
       }
       if (activeTab === 'Assets') {
-        const item = { ...data, id: editingItem?.id, estimatedValue: Number(data.estimatedValue) || 0 } as Asset;
+        const item = { ...data, ...auditData, id: editingItem?.id, estimatedValue: Number(data.estimatedValue) || 0 } as Asset;
         const saved = await dataService.upsertAsset(item);
         setAssets(prev => editingItem ? prev.map(i => i.id === saved.id ? saved : i) : [...prev, saved]);
       }
       if (activeTab === 'Docs') {
-        const item = { ...data, id: editingItem?.id } as Documentation;
+        const item = { ...data, ...auditData, id: editingItem?.id } as Documentation;
         const saved = await dataService.upsertDoc(item);
         setDocs(prev => editingItem ? prev.map(i => i.id === saved.id ? saved : i) : [...prev, saved]);
       }
       if (activeTab === 'Letters') {
-        const item = { ...data, id: editingItem?.id } as Letter;
+        const item = { ...data, ...auditData, id: editingItem?.id } as Letter;
         const saved = await dataService.upsertLetter(item);
         setLetters(prev => editingItem ? prev.map(i => i.id === saved.id ? saved : i) : [...prev, saved]);
       }

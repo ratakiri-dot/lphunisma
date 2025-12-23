@@ -204,9 +204,16 @@ const DataTable = <T extends { id: string },>({
                 key={item.id}
                 className={`group transition-all duration-300 border-l-4 ${getRowStyle(item, rowIdx)}`}
               >
-                {displayedColumns.map(col => (
+                {displayedColumns.map((col, colIdx) => (
                   <td key={String(col.key)} className="py-4 px-6 text-sm whitespace-nowrap">
                     {renderCell(item, col)}
+                    {colIdx === 0 && (item as any).createdBy && (
+                      <div className="text-[8px] text-slate-400 mt-1 font-bold italic opacity-0 group-hover:opacity-100 transition-opacity whitespace-normal max-w-[200px]">
+                        Dibuat: {(item as any).createdBy}
+                        {(item as any).updatedBy && ` | Edit: ${(item as any).updatedBy}`}
+                        {(item as any).updatedAt && ` (${new Date((item as any).updatedAt).toLocaleDateString('id-ID')})`}
+                      </div>
+                    )}
                   </td>
                 ))}
                 {!isPublic && (canModify || canDelete) && (
