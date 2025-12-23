@@ -2,17 +2,38 @@
 import { supabase } from './supabaseClient';
 import { PUCertified, PUOnProcess, PUProspect, FinanceRecord, Activity, Asset, Documentation, Letter, InternalMember, Auditor, Partner, AppUser } from '../types';
 
+const mapToSnake = (obj: any) => {
+    if (!obj) return obj;
+    const mapped: any = {};
+    Object.keys(obj).forEach(key => {
+        const snakeKey = key.replace(/[A-Z]/g, match => `_${match.toLowerCase()}`);
+        mapped[snakeKey] = obj[key];
+    });
+    return mapped;
+};
+
+const mapToCamel = (obj: any) => {
+    if (!obj) return obj;
+    const mapped: any = {};
+    Object.keys(obj).forEach(key => {
+        const camelKey = key.replace(/(_\w)/g, match => match[1].toUpperCase());
+        mapped[camelKey] = obj[key];
+    });
+    return mapped;
+};
+
 export const dataService = {
     // PU Certified
     async getPUCertified() {
         const { data, error } = await supabase.from('pu_certified').select('*').order('created_at', { ascending: false });
         if (error) throw error;
-        return data;
+        return data.map(mapToCamel);
     },
     async upsertPUCertified(item: Partial<PUCertified>) {
-        const { data, error } = await supabase.from('pu_certified').upsert(item).select().single();
+        const snakeItem = mapToSnake(item);
+        const { data, error } = await supabase.from('pu_certified').upsert(snakeItem).select().single();
         if (error) throw error;
-        return data;
+        return mapToCamel(data);
     },
     async deletePUCertified(id: string) {
         const { error } = await supabase.from('pu_certified').delete().eq('id', id);
@@ -23,12 +44,13 @@ export const dataService = {
     async getPUOnProcess() {
         const { data, error } = await supabase.from('pu_on_process').select('*').order('created_at', { ascending: false });
         if (error) throw error;
-        return data;
+        return data.map(mapToCamel);
     },
     async upsertPUOnProcess(item: Partial<PUOnProcess>) {
-        const { data, error } = await supabase.from('pu_on_process').upsert(item).select().single();
+        const snakeItem = mapToSnake(item);
+        const { data, error } = await supabase.from('pu_on_process').upsert(snakeItem).select().single();
         if (error) throw error;
-        return data;
+        return mapToCamel(data);
     },
     async deletePUOnProcess(id: string) {
         const { error } = await supabase.from('pu_on_process').delete().eq('id', id);
@@ -39,12 +61,13 @@ export const dataService = {
     async getPUProspect() {
         const { data, error } = await supabase.from('pu_prospect').select('*').order('created_at', { ascending: false });
         if (error) throw error;
-        return data;
+        return data.map(mapToCamel);
     },
     async upsertPUProspect(item: Partial<PUProspect>) {
-        const { data, error } = await supabase.from('pu_prospect').upsert(item).select().single();
+        const snakeItem = mapToSnake(item);
+        const { data, error } = await supabase.from('pu_prospect').upsert(snakeItem).select().single();
         if (error) throw error;
-        return data;
+        return mapToCamel(data);
     },
     async deletePUProspect(id: string) {
         const { error } = await supabase.from('pu_prospect').delete().eq('id', id);
@@ -55,12 +78,13 @@ export const dataService = {
     async getFinance() {
         const { data, error } = await supabase.from('finance_records').select('*').order('date', { ascending: true });
         if (error) throw error;
-        return data;
+        return data.map(mapToCamel);
     },
     async upsertFinance(item: Partial<FinanceRecord>) {
-        const { data, error } = await supabase.from('finance_records').upsert(item).select().single();
+        const snakeItem = mapToSnake(item);
+        const { data, error } = await supabase.from('finance_records').upsert(snakeItem).select().single();
         if (error) throw error;
-        return data;
+        return mapToCamel(data);
     },
     async deleteFinance(id: string) {
         const { error } = await supabase.from('finance_records').delete().eq('id', id);
@@ -71,12 +95,13 @@ export const dataService = {
     async getActivities() {
         const { data, error } = await supabase.from('activities').select('*').order('date', { ascending: true });
         if (error) throw error;
-        return data;
+        return data.map(mapToCamel);
     },
     async upsertActivity(item: Partial<Activity>) {
-        const { data, error } = await supabase.from('activities').upsert(item).select().single();
+        const snakeItem = mapToSnake(item);
+        const { data, error } = await supabase.from('activities').upsert(snakeItem).select().single();
         if (error) throw error;
-        return data;
+        return mapToCamel(data);
     },
     async deleteActivity(id: string) {
         const { error } = await supabase.from('activities').delete().eq('id', id);
@@ -87,12 +112,13 @@ export const dataService = {
     async getAssets() {
         const { data, error } = await supabase.from('assets').select('*').order('created_at', { ascending: false });
         if (error) throw error;
-        return data;
+        return data.map(mapToCamel);
     },
     async upsertAsset(item: Partial<Asset>) {
-        const { data, error } = await supabase.from('assets').upsert(item).select().single();
+        const snakeItem = mapToSnake(item);
+        const { data, error } = await supabase.from('assets').upsert(snakeItem).select().single();
         if (error) throw error;
-        return data;
+        return mapToCamel(data);
     },
     async deleteAsset(id: string) {
         const { error } = await supabase.from('assets').delete().eq('id', id);
@@ -103,12 +129,13 @@ export const dataService = {
     async getInternal() {
         const { data, error } = await supabase.from('internal_members').select('*').order('created_at', { ascending: false });
         if (error) throw error;
-        return data;
+        return data.map(mapToCamel);
     },
     async upsertInternal(item: Partial<InternalMember>) {
-        const { data, error } = await supabase.from('internal_members').upsert(item).select().single();
+        const snakeItem = mapToSnake(item);
+        const { data, error } = await supabase.from('internal_members').upsert(snakeItem).select().single();
         if (error) throw error;
-        return data;
+        return mapToCamel(data);
     },
     async deleteInternal(id: string) {
         const { error } = await supabase.from('internal_members').delete().eq('id', id);
@@ -119,12 +146,13 @@ export const dataService = {
     async getAuditors() {
         const { data, error } = await supabase.from('auditors').select('*').order('created_at', { ascending: false });
         if (error) throw error;
-        return data;
+        return data.map(mapToCamel);
     },
     async upsertAuditor(item: Partial<Auditor>) {
-        const { data, error } = await supabase.from('auditors').upsert(item).select().single();
+        const snakeItem = mapToSnake(item);
+        const { data, error } = await supabase.from('auditors').upsert(snakeItem).select().single();
         if (error) throw error;
-        return data;
+        return mapToCamel(data);
     },
     async deleteAuditor(id: string) {
         const { error } = await supabase.from('auditors').delete().eq('id', id);
@@ -135,12 +163,13 @@ export const dataService = {
     async getPartners() {
         const { data, error } = await supabase.from('partners').select('*').order('created_at', { ascending: false });
         if (error) throw error;
-        return data;
+        return data.map(mapToCamel);
     },
     async upsertPartner(item: Partial<Partner>) {
-        const { data, error } = await supabase.from('partners').upsert(item).select().single();
+        const snakeItem = mapToSnake(item);
+        const { data, error } = await supabase.from('partners').upsert(snakeItem).select().single();
         if (error) throw error;
-        return data;
+        return mapToCamel(data);
     },
     async deletePartner(id: string) {
         const { error } = await supabase.from('partners').delete().eq('id', id);
@@ -151,12 +180,13 @@ export const dataService = {
     async getLetters() {
         const { data, error } = await supabase.from('letters').select('*').order('date', { ascending: false });
         if (error) throw error;
-        return data;
+        return data.map(mapToCamel);
     },
     async upsertLetter(item: Partial<Letter>) {
-        const { data, error } = await supabase.from('letters').upsert(item).select().single();
+        const snakeItem = mapToSnake(item);
+        const { data, error } = await supabase.from('letters').upsert(snakeItem).select().single();
         if (error) throw error;
-        return data;
+        return mapToCamel(data);
     },
     async deleteLetter(id: string) {
         const { error } = await supabase.from('letters').delete().eq('id', id);
@@ -167,12 +197,13 @@ export const dataService = {
     async getDocs() {
         const { data, error } = await supabase.from('documentation').select('*').order('upload_date', { ascending: false });
         if (error) throw error;
-        return data;
+        return data.map(mapToCamel);
     },
     async upsertDoc(item: Partial<Documentation>) {
-        const { data, error } = await supabase.from('documentation').upsert(item).select().single();
+        const snakeItem = mapToSnake(item);
+        const { data, error } = await supabase.from('documentation').upsert(snakeItem).select().single();
         if (error) throw error;
-        return data;
+        return mapToCamel(data);
     },
 
     // App Users

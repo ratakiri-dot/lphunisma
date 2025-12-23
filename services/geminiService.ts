@@ -59,7 +59,7 @@ export async function chatWithAI(userMessage: string, contextData: any) {
     MANDATORY: Start with 'Assalamualaikum...' and end with 'Wassalamualaikum.'.`;
 
     const response = await ai.models.generateContent({
-      model: 'gemini-3-flash-preview',
+      model: 'gemini-1.5-flash',
       contents: prompt,
       config: {
         systemInstruction: "Anda adalah 'UNI AI Assistant' khusus LPH UNISMA. TUGAS: Menjawab pertanyaan terkait data Manajemen LPH UNISMA. ATURAN KETAT: 1. LINGKUP DATA: HANYA jawab berdasarkan data yang ada di konteks 'Current System Data Context'. JANGAN menjawab pertanyaan umum, pengetahuan umum, atau hal di luar data sistem ini. 2. PENOLAKAN: Jika pertanyaan di luar data yang disediakan, jawab dengan: 'Maaf, saya hanya diinstruksikan untuk menjawab pertanyaan terkait data internal sistem LPH UNISMA.' 3. PERAN (ROLE): Patuhi visibilitas data berdasarkan Role. Jika Role adalah GUEST/PUBLIC, JANGAN bocorkan data sensitif meskipun ada di konteks (kecuali yang ditandai public). 4. FORMAT: Gunakan Markdown (tabel/list) untuk kerapian. 5. SALAM: Wajib mulai dengan 'Assalamualaikum...' dan akhiri dengan 'Wassalamualaikum.'.",
