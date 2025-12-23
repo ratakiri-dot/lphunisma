@@ -176,7 +176,7 @@ export interface FinanceRecord {
 }
 
 export interface UserTask {
-  id?: string;
+  id: string;
   title: string;
   description?: string;
   isPinned: boolean;

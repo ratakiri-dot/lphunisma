@@ -7,7 +7,7 @@ import Dashboard from './components/Dashboard';
 import DataTable from './components/DataTable';
 import Login from './components/Login';
 import { dataService } from './services/dataService';
-import { Shield, UserCircle, LogOut, Menu, X, Loader2, Bell, Pin, CheckCircle2, Plus, Trash2 } from 'lucide-react';
+import { Shield, UserCircle, LogOut, Menu, X, Loader2, Bell, Pin, CheckCircle2, Plus, Trash2, RefreshCcw } from 'lucide-react';
 
 const App: React.FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -52,10 +52,22 @@ const App: React.FC = () => {
     }
   }, [isAuthenticated]);
 
+  const fetchTasks = async () => {
+    try {
+      const tasks = await dataService.getTasks();
+      setUserTasks(tasks);
+    } catch (err) {
+      console.error('Fetch tasks error:', err);
+    }
+  };
+
   const fetchData = async () => {
     setIsLoading(true);
     try {
-      const [certified, onProcess, prospect, fin, activities, assetList, internalList, auditorList, partnerList, docList, letterList, taskList] = await Promise.all([
+      const auth = await dataService.getUsers();
+      setUsers(auth);
+
+      const [certified, onProcess, prospect, financeData, scheduleData, assetsData, members, auditorsData, partnersData, docsData, lettersData] = await Promise.all([
         dataService.getPUCertified(),
         dataService.getPUOnProcess(),
         dataService.getPUProspect(),
@@ -66,27 +78,33 @@ const App: React.FC = () => {
         dataService.getAuditors(),
         dataService.getPartners(),
         dataService.getDocs(),
-        dataService.getLetters(),
-        dataService.getTasks()
+        dataService.getLetters()
       ]);
       setPuCertified(certified);
       setPuOnProcess(onProcess);
       setPuProspect(prospect);
-      setFinance(fin);
-      setSchedule(activities);
-      setAssets(assetList);
-      setInternal(internalList);
-      setAuditors(auditorList);
-      setPartners(partnerList);
-      setDocs(docList);
-      setLetters(letterList);
-      setUserTasks(taskList);
+      setFinance(financeData);
+      setSchedule(scheduleData);
+      setAssets(assetsData);
+      setInternal(members);
+      setAuditors(auditorsData);
+      setPartners(partnersData);
+      setDocs(docsData);
+      setLetters(lettersData);
+      fetchTasks(); // Fetch tasks separately
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
       setIsLoading(false);
     }
   };
+
+  // Auto-refresh tasks every 60 seconds for sync across users
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    const interval = setInterval(fetchTasks, 60000);
+    return () => clearInterval(interval);
+  }, [isAuthenticated]);
 
   const role = currentUser?.role || UserRole.PUBLIC;
 
@@ -244,6 +262,10 @@ const App: React.FC = () => {
         if (activeTab === 'Letters') {
           await dataService.deleteLetter(item.id);
           setLetters(prev => prev.filter(i => i.id !== item.id));
+        }
+        if (activeTab === ('Tasks' as any)) {
+          await dataService.deleteTask(item.id);
+          setUserTasks(prev => prev.filter(i => i.id !== item.id));
         }
         if (activeTab === 'Settings') {
           await dataService.deleteUser(item.id);
@@ -689,6 +711,13 @@ const App: React.FC = () => {
                 className="p-2 neu-button rounded-lg text-indigo-600 active:scale-90"
               >
                 <Plus size={16} />
+              </button>
+              <button
+                onClick={fetchTasks}
+                className="p-2 neu-button rounded-lg text-slate-500 active:rotate-180 transition-transform duration-500"
+                title="Refresh Tugas"
+              >
+                <RefreshCcw size={16} />
               </button>
               <button onClick={() => setIsTaskPanelOpen(false)} className="p-2 neu-button rounded-lg text-slate-400"><X size={16} /></button>
             </div>
