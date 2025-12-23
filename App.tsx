@@ -253,7 +253,7 @@ const App: React.FC = () => {
 
   const renderContent = () => {
     switch (activeTab) {
-      case 'Dashboard': return <Dashboard role={role} />;
+      case 'Dashboard': return <Dashboard role={role} data={{ puCertified, puOnProcess, puProspect, internal, auditors, partners, finance }} />;
       case 'PU Certified':
         return (
           <DataTable<PUCertified>

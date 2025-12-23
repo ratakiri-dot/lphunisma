@@ -4,37 +4,56 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import NeumorphicCard from './NeumorphicCard';
 import { getDashboardInsight } from '../services/geminiService';
 import { Bot, TrendingUp, Users, CheckCircle } from 'lucide-react';
-import { UserRole } from '../types';
+import { PUCertified, PUOnProcess, PUProspect, InternalMember, Auditor, Partner, FinanceRecord, UserRole } from '../types';
 
 interface DashboardProps {
   role: UserRole;
+  data: {
+    puCertified: PUCertified[];
+    puOnProcess: PUOnProcess[];
+    puProspect: PUProspect[];
+    internal: InternalMember[];
+    auditors: Auditor[];
+    partners: Partner[];
+    finance: FinanceRecord[];
+  };
 }
 
-const Dashboard: React.FC<DashboardProps> = ({ role }) => {
+const Dashboard: React.FC<DashboardProps> = ({ role, data }) => {
   const [insight, setInsight] = useState<string>("Menganalisis data...");
   const isPublic = role === UserRole.PUBLIC;
 
-  // Mock data for charts
+  const { puCertified, puOnProcess, puProspect, internal, auditors, partners, finance } = data;
+
+  // Real data for charts
+  const totalPU = puCertified.length + puOnProcess.length + puProspect.length || 1; // avoid div by zero
   const puData = [
-    { name: 'Certified', value: 45, color: '#4CAF50' },
-    { name: 'On Process', value: 30, color: '#FFC107' },
-    { name: 'Prospect', value: 25, color: '#2196F3' },
+    { name: 'Certified', value: Math.round((puCertified.length / totalPU) * 100), color: '#4CAF50' },
+    { name: 'On Process', value: Math.round((puOnProcess.length / totalPU) * 100), color: '#FFC107' },
+    { name: 'Prospect', value: Math.round((puProspect.length / totalPU) * 100), color: '#2196F3' },
   ];
 
   const peopleData = [
-    { name: 'Internal', count: 12, color: '#6366F1' }, // Indigo
-    { name: 'Auditor', count: 8, color: '#A855F7' },  // Purple
-    { name: 'Partners', count: 15, color: '#0EA5E9' }, // Sky Blue
+    { name: 'Internal', count: internal.length, color: '#6366F1' },
+    { name: 'Auditor', count: auditors.length, color: '#A855F7' },
+    { name: 'Partners', count: partners.length, color: '#0EA5E9' },
   ];
 
-  const financeData = [
-    { month: 'Jan', balance: 4000 },
-    { month: 'Feb', balance: 5200 },
-    { month: 'Mar', balance: 4800 },
-    { month: 'Apr', balance: 7000 },
-    { month: 'May', balance: 6500 },
-    { month: 'Jun', balance: 9000 },
-  ];
+  // Group finance by month
+  const financeByMonth = finance.reduce((acc: any, curr) => {
+    const month = new Date(curr.date).toLocaleDateString('id-ID', { month: 'short' });
+    if (!acc[month]) acc[month] = 0;
+    acc[month] += Number(curr.balance);
+    return acc;
+  }, {});
+
+  const financeData = Object.keys(financeByMonth).length > 0
+    ? Object.entries(financeByMonth).map(([month, balance]) => ({ month, balance }))
+    : [
+      { month: 'Jan', balance: 0 },
+      { month: 'Feb', balance: 0 },
+      { month: 'Mar', balance: 0 },
+    ];
 
   useEffect(() => {
     const fetchInsight = async () => {
@@ -156,20 +175,20 @@ const Dashboard: React.FC<DashboardProps> = ({ role }) => {
             <AreaChart data={financeData}>
               <defs>
                 <linearGradient id="colorBal" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#818CF8" stopOpacity={0.8}/>
-                  <stop offset="95%" stopColor="#818CF8" stopOpacity={0}/>
+                  <stop offset="5%" stopColor="#818CF8" stopOpacity={0.8} />
+                  <stop offset="95%" stopColor="#818CF8" stopOpacity={0} />
                 </linearGradient>
               </defs>
               <XAxis dataKey="month" axisLine={false} tickLine={false} />
               <YAxis hide />
               <Tooltip content={<CustomTooltip />} />
-              <Area 
-                type="monotone" 
-                dataKey="balance" 
-                stroke="#818CF8" 
+              <Area
+                type="monotone"
+                dataKey="balance"
+                stroke="#818CF8"
                 strokeWidth={3}
-                fillOpacity={1} 
-                fill="url(#colorBal)" 
+                fillOpacity={1}
+                fill="url(#colorBal)"
               />
             </AreaChart>
           </ResponsiveContainer>
