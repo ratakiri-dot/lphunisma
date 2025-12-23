@@ -352,6 +352,7 @@ const App: React.FC = () => {
               { key: 'businessName', label: 'Nama Usaha', isPublic: true },
               { key: 'ownerName', label: 'Pemilik', isPublic: true },
               { key: 'followUpDate', label: 'Proyeksi Follow Up', isPublic: true },
+              { key: 'notes', label: 'Keterangan', isPublic: true },
               { key: 'waNumber', label: 'WhatsApp' },
             ]}
           />
