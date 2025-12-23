@@ -292,6 +292,11 @@ const App: React.FC = () => {
         const updatedUser = { ...data, id: editingItem?.id } as AppUser;
         const saved = await dataService.upsertUser(updatedUser);
         setUsers(prev => editingItem ? prev.map(i => i.id === saved.id ? saved : i) : [...prev, saved]);
+
+        // Update current user state if they edited themselves
+        if (currentUser && currentUser.id === saved.id) {
+          setCurrentUser(saved);
+        }
       }
 
       setIsModalOpen(false);
@@ -319,7 +324,7 @@ const App: React.FC = () => {
               { key: 'halalId', label: 'ID Halal', isPublic: true },
               { key: 'expiryDate', label: 'Berlaku Sampai', isPublic: true },
               { key: 'waNumber', label: 'WhatsApp' },
-              { key: 'createdBy', label: 'Operator' },
+              { key: 'createdBy', label: 'Nama Penginput' },
             ]}
           />
         );
@@ -338,7 +343,7 @@ const App: React.FC = () => {
               { key: 'businessName', label: 'Usaha', isPublic: true },
               { key: 'status', label: 'Status', isPublic: true },
               { key: 'ownerName', label: 'Pemilik' },
-              { key: 'createdBy', label: 'Operator' },
+              { key: 'createdBy', label: 'Nama Penginput' },
             ]}
           />
         );
@@ -358,7 +363,7 @@ const App: React.FC = () => {
               { key: 'followUpDate', label: 'Proyeksi Follow Up', isPublic: true },
               { key: 'notes', label: 'Keterangan', isPublic: true },
               { key: 'waNumber', label: 'WhatsApp' },
-              { key: 'createdBy', label: 'Operator' },
+              { key: 'createdBy', label: 'Nama Penginput' },
             ]}
           />
         );
@@ -376,7 +381,7 @@ const App: React.FC = () => {
               { key: 'fullName', label: 'Nama Lengkap', isPublic: true },
               { key: 'position', label: 'Jabatan', isPublic: true },
               { key: 'waNumber', label: 'WhatsApp' },
-              { key: 'createdBy', label: 'Operator' },
+              { key: 'createdBy', label: 'Nama Penginput' },
             ]}
           />
         );
@@ -394,7 +399,7 @@ const App: React.FC = () => {
               { key: 'fullName', label: 'Nama', isPublic: true },
               { key: 'position', label: 'Bidang', isPublic: true },
               { key: 'certNumber', label: 'No Sertifikat' },
-              { key: 'createdBy', label: 'Operator' },
+              { key: 'createdBy', label: 'Nama Penginput' },
             ]}
           />
         );
@@ -413,7 +418,7 @@ const App: React.FC = () => {
               { key: 'position', label: 'Bidang Kerjasama', isPublic: true },
               { key: 'waNumber', label: 'Kontak', isPublic: true },
               { key: 'cert', label: 'Keterangan' },
-              { key: 'createdBy', label: 'Operator' },
+              { key: 'createdBy', label: 'Nama Penginput' },
             ]}
           />
         );
@@ -432,7 +437,7 @@ const App: React.FC = () => {
               { key: 'event', label: 'Kegiatan', isPublic: true },
               { key: 'delegates', label: 'Delegasi', isPublic: true },
               { key: 'location', label: 'Tempat', isPublic: true },
-              { key: 'createdBy', label: 'Operator' },
+              { key: 'createdBy', label: 'Nama Penginput' },
             ]}
           />
         );
