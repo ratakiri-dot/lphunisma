@@ -26,7 +26,8 @@ export type NavItem =
   | 'Assets'
   | 'Schedule'
   | 'Finance'
-  | 'Settings';
+  | 'Settings'
+  | 'Tasks';
 
 export interface PUCertified {
   id: string;

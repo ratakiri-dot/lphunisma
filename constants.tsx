@@ -1,19 +1,20 @@
 
 import React from 'react';
-import { 
-  LayoutDashboard, 
-  CheckCircle, 
-  Loader2, 
-  Target, 
-  Users, 
-  UserCheck, 
-  Handshake, 
-  FileText, 
-  Mail, 
-  Package, 
-  Calendar, 
-  Wallet, 
-  Settings 
+import {
+  LayoutDashboard,
+  CheckCircle,
+  Loader2,
+  Target,
+  Users,
+  UserCheck,
+  Handshake,
+  FileText,
+  Mail,
+  Package,
+  Calendar,
+  Wallet,
+  Settings,
+  ListTodo
 } from 'lucide-react';
 import { NavItem, PUCertified, PUOnProcess, PUProspect, InternalMember, Auditor, Partner, Documentation, Letter, Asset, Activity, FinanceRecord } from './types';
 
@@ -30,6 +31,7 @@ export const MENU_ITEMS: { name: NavItem; icon: React.ReactNode; category: strin
   { name: 'Assets', icon: <Package size={20} />, category: 'Office' },
   { name: 'Schedule', icon: <Calendar size={20} />, category: 'Admin' },
   { name: 'Finance', icon: <Wallet size={20} />, category: 'Admin' },
+  { name: 'Tasks', icon: <ListTodo size={20} />, category: 'System' },
   { name: 'Settings', icon: <Settings size={20} />, category: 'System' },
 ];
 
