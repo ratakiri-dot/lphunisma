@@ -82,6 +82,9 @@ export interface InternalMember {
   address: string;
   waNumber: string;
   email: string;
+  createdBy?: string;
+  updatedBy?: string;
+  updatedAt?: string;
 }
 
 export interface Auditor {
@@ -92,6 +95,9 @@ export interface Auditor {
   address: string;
   waNumber: string;
   email: string;
+  createdBy?: string;
+  updatedBy?: string;
+  updatedAt?: string;
 }
 
 export interface Partner {
@@ -102,6 +108,9 @@ export interface Partner {
   address: string;
   waNumber: string;
   email: string;
+  createdBy?: string;
+  updatedBy?: string;
+  updatedAt?: string;
 }
 
 export interface Documentation {
