@@ -1,8 +1,8 @@
 
 import React, { useState } from 'react';
-import { 
-  Search, Plus, Download, Printer, Edit, Trash2, 
-  ExternalLink, Phone, Mail, MapPin, User, Building2, Tag 
+import {
+  Search, Plus, Download, Printer, Edit, Trash2,
+  ExternalLink, Phone, Mail, MapPin, User, Building2, Tag
 } from 'lucide-react';
 import NeumorphicCard from './NeumorphicCard';
 import { UserRole } from '../types';
@@ -15,13 +15,13 @@ interface DataTableProps<T,> {
   onAdd?: () => void;
   onEdit?: (item: T) => void;
   onDelete?: (item: T) => void;
-  accentColor?: string; 
+  accentColor?: string;
 }
 
-const DataTable = <T extends { id: string },>({ 
-  title, 
-  data, 
-  columns, 
+const DataTable = <T extends { id: string },>({
+  title,
+  data,
+  columns,
   role,
   onAdd,
   onEdit,
@@ -29,13 +29,13 @@ const DataTable = <T extends { id: string },>({
   accentColor = 'indigo'
 }: DataTableProps<T>) => {
   const [searchTerm, setSearchTerm] = useState("");
-  
+
   const isPublic = role === UserRole.PUBLIC;
   const canModify = role === UserRole.ADMIN || role === UserRole.USER;
   const canDelete = role === UserRole.ADMIN;
 
-  const filteredData = data.filter(item => 
-    Object.values(item as object).some(val => 
+  const filteredData = data.filter(item =>
+    Object.values(item as object).some(val =>
       String(val).toLowerCase().includes(searchTerm.toLowerCase())
     )
   );
@@ -58,7 +58,7 @@ const DataTable = <T extends { id: string },>({
   // Logic to determine row color based on content (Semantic Coloring)
   const getRowStyle = (item: T, index: number) => {
     const itemStr = JSON.stringify(item);
-    
+
     // Status-based coloring (Semantic)
     if (itemStr.includes('"Good"') || itemStr.includes('"Certified"')) return 'bg-emerald-50/60 hover:bg-emerald-100/80 border-l-emerald-400';
     if (itemStr.includes('"Broken"')) return 'bg-rose-50/60 hover:bg-rose-100/80 border-l-rose-400';
@@ -68,15 +68,15 @@ const DataTable = <T extends { id: string },>({
     if (itemStr.includes('"ADMIN"')) return 'bg-indigo-50/60 hover:bg-indigo-100/80 border-l-indigo-400';
 
     // Default Alternating Theme Color
-    return index % 2 === 0 
-      ? `${currentTheme.row} hover:bg-white/80 border-l-transparent hover:border-l-${accentColor}-400` 
+    return index % 2 === 0
+      ? `${currentTheme.row} hover:bg-white/80 border-l-transparent hover:border-l-${accentColor}-400`
       : `bg-transparent hover:bg-white/80 border-l-transparent hover:border-l-${accentColor}-400`;
   };
 
   const renderCell = (item: T, col: { key: keyof T; label: string }) => {
     const value = item[col.key];
     const valStr = String(value);
-    
+
     // Badge Styling
     const badgeStyles: Record<string, string> = {
       'Good': 'bg-emerald-500 text-white',
@@ -117,12 +117,31 @@ const DataTable = <T extends { id: string },>({
       );
     }
 
-    if (col.key === 'waNumber') return <div className="flex items-center gap-1 text-emerald-600 font-bold"><Phone size={12}/>{valStr}</div>;
-    if (col.key === 'email') return <div className="flex items-center gap-1 text-blue-500 text-xs"><Mail size={12}/>{valStr}</div>;
-    
-    if (['address', 'location'].includes(col.key as string)) return <div className="flex items-center gap-1 text-slate-400 text-[11px] italic"><MapPin size={10}/>{valStr}</div>;
+    if (col.key === 'waNumber') return <div className="flex items-center gap-1 text-emerald-600 font-bold"><Phone size={12} />{valStr}</div>;
+    if (col.key === 'email') return <div className="flex items-center gap-1 text-blue-500 text-xs"><Mail size={12} />{valStr}</div>;
 
-    if (col.key === 'link' && valStr !== '#') return <a href={valStr} target="_blank" className={`${currentTheme.text} font-black hover:underline inline-flex items-center gap-1`}>File <ExternalLink size={12}/></a>;
+    if (['address', 'location'].includes(col.key as string)) return <div className="flex items-center gap-1 text-slate-400 text-[11px] italic"><MapPin size={10} />{valStr}</div>;
+
+    if (col.key === 'link') {
+      const isValid = value && valStr && valStr !== '#' && valStr !== 'null' && valStr !== 'undefined' && valStr.trim() !== '';
+      if (!isValid) return <span className="text-slate-300 italic text-[10px]">Tidak ada file</span>;
+
+      let href = valStr;
+      if (!href.startsWith('http') && !href.startsWith('mailto:') && !href.startsWith('tel:')) {
+        href = `https://${href}`;
+      }
+
+      return (
+        <a
+          href={href}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={`${currentTheme.text} font-black hover:underline inline-flex items-center gap-1.5 bg-white/50 px-3 py-1.5 rounded-xl shadow-sm border border-white/40 text-[10px] uppercase tracking-wider`}
+        >
+          Lihat <ExternalLink size={12} />
+        </a>
+      );
+    }
 
     return <span className="text-slate-600 font-medium">{valStr}</span>;
   };
@@ -131,21 +150,21 @@ const DataTable = <T extends { id: string },>({
     <NeumorphicCard className={`w-full overflow-hidden animate-in slide-in-from-bottom-4 duration-500 border-t-8 ${currentTheme.border}`}>
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
         <div className="flex items-center gap-4">
-           <div className={`p-3 rounded-2xl neu-button ${currentTheme.text}`}>
-             <Building2 size={24} />
-           </div>
-           <div>
-             <h2 className="text-2xl font-black text-slate-800 tracking-tight">{title}</h2>
-             <p className="text-[10px] text-slate-400 font-black uppercase tracking-[0.2em]">{filteredData.length} Records</p>
-           </div>
+          <div className={`p-3 rounded-2xl neu-button ${currentTheme.text}`}>
+            <Building2 size={24} />
+          </div>
+          <div>
+            <h2 className="text-2xl font-black text-slate-800 tracking-tight">{title}</h2>
+            <p className="text-[10px] text-slate-400 font-black uppercase tracking-[0.2em]">{filteredData.length} Records</p>
+          </div>
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-            <input 
-              type="text" 
-              placeholder="Filter data..." 
+            <input
+              type="text"
+              placeholder="Filter data..."
               className="neu-inset pl-9 pr-4 py-2 rounded-xl outline-none w-full md:w-48 text-xs font-bold focus:ring-2 ring-indigo-200 transition-all"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -181,8 +200,8 @@ const DataTable = <T extends { id: string },>({
           </thead>
           <tbody className="divide-y divide-white/20">
             {filteredData.map((item, rowIdx) => (
-              <tr 
-                key={item.id} 
+              <tr
+                key={item.id}
                 className={`group transition-all duration-300 border-l-4 ${getRowStyle(item, rowIdx)}`}
               >
                 {displayedColumns.map(col => (
