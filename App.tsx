@@ -338,6 +338,24 @@ const App: React.FC = () => {
             ]}
           />
         );
+      case 'PU Prospect':
+        return (
+          <DataTable<PUProspect>
+            title="Prospek Pelaku Usaha"
+            data={puProspect}
+            role={role}
+            onAdd={handleAdd}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+            accentColor="amber"
+            columns={[
+              { key: 'businessName', label: 'Nama Usaha', isPublic: true },
+              { key: 'ownerName', label: 'Pemilik', isPublic: true },
+              { key: 'followUpDate', label: 'Proyeksi Follow Up', isPublic: true },
+              { key: 'waNumber', label: 'WhatsApp' },
+            ]}
+          />
+        );
       case 'Internal':
         return (
           <DataTable<InternalMember>
@@ -369,6 +387,24 @@ const App: React.FC = () => {
               { key: 'fullName', label: 'Nama', isPublic: true },
               { key: 'position', label: 'Bidang', isPublic: true },
               { key: 'certNumber', label: 'No Sertifikat' },
+            ]}
+          />
+        );
+      case 'Partners':
+        return (
+          <DataTable<Partner>
+            title="Daftar Partner & Kemitraan"
+            data={partners}
+            role={role}
+            onAdd={handleAdd}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+            accentColor="orange"
+            columns={[
+              { key: 'fullName', label: 'Nama Instansi/Partner', isPublic: true },
+              { key: 'position', label: 'Bidang Kerjasama', isPublic: true },
+              { key: 'waNumber', label: 'Kontak', isPublic: true },
+              { key: 'cert', label: 'Keterangan' },
             ]}
           />
         );
