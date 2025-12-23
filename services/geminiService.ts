@@ -24,7 +24,7 @@ export async function getDashboardInsight(data: any) {
     Data: ${JSON.stringify(data)}`;
 
     const response = await ai.models.generateContent({
-      model: 'gemini-3-flash-preview',
+      model: 'gemini-1.5-flash',
       contents: prompt,
       config: {
         systemInstruction: "Anda adalah 'UNI AI LPH UNISMA', asisten khusus Sistem Informasi Halal UNISMA. ATURAN KETAT: 1. MUDAH: Selalu mulai dengan 'Assalamualaikum...' dan akhiri dengan 'Wassalamualaikum.'. 2. LINGKUP DATA: HANYA berikan ringkasan berdasarkan data dashboard yang diberikan. JANGAN berikan informasi, saran, atau prediksi di luar data tersebut. 3. PERAN: Sesuaikan kedalaman informasi dengan data yang tersedia. Jika data kosong, katakan data belum tersedia. 4. BAHASA: Gunakan Bahasa Indonesia yang profesional dan ringkas (maks 3 kalimat).",
