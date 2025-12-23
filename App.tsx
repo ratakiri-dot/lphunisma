@@ -478,6 +478,7 @@ const App: React.FC = () => {
               { key: 'fullName', label: 'Nama', isPublic: true },
               { key: 'position', label: 'Bidang', isPublic: true },
               { key: 'certNumber', label: 'No Sertifikat' },
+              { key: 'waNumber', label: 'WhatsApp' },
               { key: 'createdBy', label: 'Nama Penginput' },
             ]}
           />
@@ -608,6 +609,7 @@ const App: React.FC = () => {
           <input name="fullName" defaultValue={editingItem?.fullName} placeholder="Nama Auditor" className="w-full p-4 neu-inset rounded-xl outline-none" required />
           <input name="position" defaultValue={editingItem?.position} placeholder="Bidang" className="w-full p-4 neu-inset rounded-xl outline-none" required />
           <input name="certNumber" defaultValue={editingItem?.certNumber} placeholder="No Sertifikat" className="w-full p-4 neu-inset rounded-xl outline-none" required />
+          <input name="waNumber" defaultValue={editingItem?.waNumber} placeholder="Nomor WhatsApp" className="w-full p-4 neu-inset rounded-xl outline-none" required />
         </>
       );
     }
