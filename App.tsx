@@ -6,7 +6,6 @@ import NeumorphicCard from './components/NeumorphicCard';
 import Dashboard from './components/Dashboard';
 import DataTable from './components/DataTable';
 import Login from './components/Login';
-import ChatWidget from './components/ChatWidget';
 import { dataService } from './services/dataService';
 import { Shield, UserCircle, LogOut, Menu, X, Loader2 } from 'lucide-react';
 
@@ -507,7 +506,7 @@ const App: React.FC = () => {
         </section>
 
         {/* Floating Chat Widget */}
-        <ChatWidget contextData={systemContext} />
+
       </main>
 
       {isModalOpen && (
