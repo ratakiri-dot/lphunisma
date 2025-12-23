@@ -1,13 +1,13 @@
 
 import React, { useState, useEffect } from 'react';
-import { NavItem, UserRole, PUCertified, PUOnProcess, PUProspect, FinanceRecord, Activity, AppUser, Asset, Documentation, Letter, InternalMember, Auditor, Partner } from './types';
+import { NavItem, UserRole, PUCertified, PUOnProcess, PUProspect, FinanceRecord, Activity, AppUser, Asset, Documentation, Letter, InternalMember, Auditor, Partner, UserTask } from './types';
 import { MENU_ITEMS, MOCK_PU_CERTIFIED, MOCK_PU_ON_PROCESS, MOCK_PU_PROSPECT, MOCK_FINANCE, MOCK_SCHEDULE, MOCK_ASSETS, MOCK_DOCS, MOCK_LETTERS, MOCK_INTERNAL, MOCK_AUDITORS, MOCK_PARTNERS } from './constants';
 import NeumorphicCard from './components/NeumorphicCard';
 import Dashboard from './components/Dashboard';
 import DataTable from './components/DataTable';
 import Login from './components/Login';
 import { dataService } from './services/dataService';
-import { Shield, UserCircle, LogOut, Menu, X, Loader2 } from 'lucide-react';
+import { Shield, UserCircle, LogOut, Menu, X, Loader2, Bell, Pin, CheckCircle2, Plus, Trash2 } from 'lucide-react';
 
 const App: React.FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -29,6 +29,8 @@ const App: React.FC = () => {
   const [partners, setPartners] = useState<Partner[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [users, setUsers] = useState<AppUser[]>([]);
+  const [userTasks, setUserTasks] = useState<UserTask[]>([]);
+  const [isTaskPanelOpen, setIsTaskPanelOpen] = useState(false);
 
   // Fetch users for login on mount
   useEffect(() => {
@@ -53,7 +55,7 @@ const App: React.FC = () => {
   const fetchData = async () => {
     setIsLoading(true);
     try {
-      const [certified, onProcess, prospect, fin, activities, assetList, internalList, auditorList, partnerList, docList, letterList] = await Promise.all([
+      const [certified, onProcess, prospect, fin, activities, assetList, internalList, auditorList, partnerList, docList, letterList, taskList] = await Promise.all([
         dataService.getPUCertified(),
         dataService.getPUOnProcess(),
         dataService.getPUProspect(),
@@ -64,7 +66,8 @@ const App: React.FC = () => {
         dataService.getAuditors(),
         dataService.getPartners(),
         dataService.getDocs(),
-        dataService.getLetters()
+        dataService.getLetters(),
+        dataService.getTasks()
       ]);
       setPuCertified(certified);
       setPuOnProcess(onProcess);
@@ -77,6 +80,7 @@ const App: React.FC = () => {
       setPartners(partnerList);
       setDocs(docList);
       setLetters(letterList);
+      setUserTasks(taskList);
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
@@ -156,6 +160,43 @@ const App: React.FC = () => {
     handleResize();
     return () => window.removeEventListener('resize', handleResize);
   }, [isAuthenticated]);
+
+  const handleTaskAction = async (action: 'add' | 'pin' | 'complete' | 'delete', taskData?: any) => {
+    const username = currentUser?.fullName || currentUser?.username || 'System';
+    try {
+      if (action === 'add') {
+        const newTask: Partial<UserTask> = {
+          title: taskData.title,
+          description: taskData.description,
+          isPinned: false,
+          status: 'Pending',
+          createdBy: username
+        };
+        const saved = await dataService.upsertTask(newTask);
+        setUserTasks(prev => [saved, ...prev]);
+        setIsModalOpen(false);
+      } else if (action === 'pin') {
+        const updated = { ...taskData, isPinned: !taskData.isPinned };
+        const saved = await dataService.upsertTask(updated);
+        setUserTasks(prev => prev.map(t => t.id === saved.id ? saved : t));
+      } else if (action === 'complete') {
+        const updated: UserTask = {
+          ...taskData,
+          status: 'Completed',
+          completedBy: username,
+          completedAt: new Date().toISOString()
+        };
+        const saved = await dataService.upsertTask(updated);
+        setUserTasks(prev => prev.map(t => t.id === saved.id ? saved : t));
+      } else if (action === 'delete') {
+        if (!window.confirm('Hapus tugas ini?')) return;
+        await dataService.deleteTask(taskData.id);
+        setUserTasks(prev => prev.filter(t => t.id !== taskData.id));
+      }
+    } catch (err) {
+      alert('Gagal memproses tugas');
+    }
+  };
 
   const handleDelete = async (item: any) => {
     if (window.confirm('Hapus data ini secara permanen?')) {
@@ -291,6 +332,9 @@ const App: React.FC = () => {
         const item = { ...data, ...auditData, id: editingItem?.id } as Letter;
         const saved = await dataService.upsertLetter(item);
         setLetters(prev => editingItem ? prev.map(i => i.id === saved.id ? saved : i) : [...prev, saved]);
+      }
+      if (activeTab === ('Tasks' as any)) {
+        await handleTaskAction('add', data);
       }
       if (activeTab === 'Settings') {
         const updatedUser = { ...data, id: editingItem?.id } as AppUser;
@@ -598,7 +642,88 @@ const App: React.FC = () => {
         </>
       );
     }
+    if (activeTab === ('Tasks' as any)) {
+      return (
+        <>
+          <input name="title" placeholder="Judul Tugas" className="w-full p-4 neu-inset rounded-xl outline-none" required />
+          <textarea name="description" placeholder="Deskripsi Tugas (Opsional)" className="w-full p-4 neu-inset rounded-xl outline-none min-h-[100px]" />
+        </>
+      );
+    }
     return <p className="text-center py-6 text-slate-400 font-bold italic">Formulir dasar untuk {activeTab}</p>;
+  };
+
+  const renderTaskPanel = () => {
+    if (!isTaskPanelOpen) return null;
+    const pendingTasks = userTasks.filter(t => t.status === 'Pending');
+    const completedTasks = userTasks.filter(t => t.status === 'Completed');
+
+    return (
+      <div className="fixed top-24 right-6 lg:right-8 w-full max-w-sm z-[100] animate-in slide-in-from-top-4 duration-300">
+        <NeumorphicCard className="flex flex-col max-h-[70vh]">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="font-black text-slate-700 flex items-center gap-2">
+              <Bell size={18} className="text-indigo-500" /> DAFTAR TUGAS
+            </h3>
+            <div className="flex gap-2">
+              <button
+                onClick={() => { setEditingItem(null); setActiveTab('Tasks' as any); setIsModalOpen(true); }}
+                className="p-2 neu-button rounded-lg text-indigo-600 active:scale-90"
+              >
+                <Plus size={16} />
+              </button>
+              <button onClick={() => setIsTaskPanelOpen(false)} className="p-2 neu-button rounded-lg text-slate-400"><X size={16} /></button>
+            </div>
+          </div>
+
+          <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar space-y-4">
+            {pendingTasks.length === 0 && completedTasks.length === 0 && (
+              <p className="text-center py-8 text-slate-400 font-bold italic text-xs uppercase">Belum ada tugas</p>
+            )}
+
+            {pendingTasks.map(task => (
+              <div key={task.id} className="p-4 neu-inset rounded-2xl space-y-3">
+                <div className="flex justify-between items-start gap-2">
+                  <h4 className="font-black text-slate-700 text-sm leading-tight">{task.title}</h4>
+                  <div className="flex gap-1 shrink-0">
+                    <button onClick={() => handleTaskAction('pin', task)} className={`p-1.5 rounded-lg transition-colors ${task.isPinned ? 'text-amber-500 bg-amber-50' : 'text-slate-300 hover:text-slate-600'}`}>
+                      <Pin size={12} fill={task.isPinned ? 'currentColor' : 'none'} />
+                    </button>
+                  </div>
+                </div>
+                {task.description && <p className="text-[10px] text-slate-500 font-bold line-clamp-2">{task.description}</p>}
+                <div className="flex justify-between items-center pt-2">
+                  <span className="text-[9px] font-black text-indigo-400 uppercase">Oleh: {task.createdBy}</span>
+                  <button
+                    onClick={() => handleTaskAction('complete', task)}
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500 text-white text-[10px] font-black rounded-xl shadow-lg active:scale-95"
+                  >
+                    SELESAI <CheckCircle2 size={12} />
+                  </button>
+                </div>
+              </div>
+            ))}
+
+            {completedTasks.length > 0 && (
+              <div className="pt-4 border-t border-slate-200">
+                <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Selesai</h4>
+                {completedTasks.slice(0, 5).map(task => (
+                  <div key={task.id} className="p-3 opacity-60 flex justify-between items-center group">
+                    <div className="flex flex-col">
+                      <span className="text-[10px] font-bold text-slate-600 line-through truncate w-40">{task.title}</span>
+                      <span className="text-[8px] font-black text-slate-400 italic">Oleh: {task.completedBy}</span>
+                    </div>
+                    <button onClick={() => handleTaskAction('delete', task)} className="p-1.5 text-rose-400 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Trash2 size={12} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </NeumorphicCard>
+      </div>
+    );
   };
 
   if (!isAuthenticated) {
@@ -661,6 +786,19 @@ const App: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-4">
+            {role !== UserRole.PUBLIC && (
+              <button
+                onClick={() => setIsTaskPanelOpen(!isTaskPanelOpen)}
+                className={`p-3 neu-button rounded-2xl relative transition-all active:scale-95 ${isTaskPanelOpen ? 'text-indigo-600 neu-inset' : 'text-slate-500'}`}
+              >
+                <Bell size={20} />
+                {userTasks.filter(t => t.status === 'Pending').length > 0 && (
+                  <span className="absolute top-2 right-2 w-4 h-4 bg-rose-500 text-white text-[8px] font-black rounded-full flex items-center justify-center border-2 border-[#E0E5EC] animate-bounce">
+                    {userTasks.filter(t => t.status === 'Pending').length}
+                  </span>
+                )}
+              </button>
+            )}
             <div className="flex items-center gap-3 px-4 py-2 neu-inset rounded-2xl">
               <UserCircle size={22} className="text-indigo-500" />
               <div className="hidden md:block">
@@ -676,10 +814,32 @@ const App: React.FC = () => {
           <div className="max-w-7xl mx-auto space-y-8 animate-in fade-in duration-500">
             <div className="flex justify-between items-end">
               <div>
-                <h1 className="text-2xl lg:text-3xl font-black text-slate-800">Assalamu'alaikum, {currentUser?.username}</h1>
+                <h1 className="text-2xl lg:text-3xl font-black text-slate-800">Assalamu'alaikum, {currentUser?.fullName || currentUser?.username}</h1>
                 <p className="text-slate-400 font-bold text-sm">LPH UNISMA - Management Information System</p>
               </div>
             </div>
+
+            {/* Pinned Tasks - Sticky Notes */}
+            {userTasks.filter(t => t.isPinned && t.status === 'Pending').length > 0 && (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {userTasks.filter(t => t.isPinned && t.status === 'Pending').map(task => (
+                  <div key={task.id} className="relative group p-6 bg-amber-50 border-2 border-amber-200 rounded-3xl shadow-sm transform hover:-rotate-1 transition-all duration-300">
+                    <div className="absolute top-4 right-4 text-amber-500"><Pin size={18} fill="currentColor" /></div>
+                    <h3 className="text-amber-900 font-black text-lg mb-2 mr-6">{task.title}</h3>
+                    <p className="text-amber-700/80 text-sm font-bold leading-relaxed mb-4">{task.description}</p>
+                    <div className="flex justify-between items-center">
+                      <span className="text-[10px] font-black text-amber-600 uppercase">Input: {task.createdBy}</span>
+                      <button
+                        onClick={() => handleTaskAction('complete', task)}
+                        className="p-2 bg-amber-200 text-amber-800 rounded-xl hover:bg-amber-300 active:scale-95 transition-all shadow-sm flex items-center gap-2 font-black text-[10px]"
+                      >
+                        TANDAI SELESAI <CheckCircle2 size={14} />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
             {isLoading ? (
               <div className="flex flex-col items-center justify-center py-20 animate-pulse">
                 <Loader2 className="w-12 h-12 text-indigo-500 animate-spin mb-4" />
@@ -690,7 +850,7 @@ const App: React.FC = () => {
         </section>
 
         {/* Floating Chat Widget */}
-
+        {renderTaskPanel()}
       </main>
 
       {isModalOpen && (

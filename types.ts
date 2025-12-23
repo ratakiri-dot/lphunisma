@@ -173,3 +173,15 @@ export interface FinanceRecord {
   updatedBy?: string;
   updatedAt?: string;
 }
+
+export interface UserTask {
+  id?: string;
+  title: string;
+  description?: string;
+  isPinned: boolean;
+  status: 'Pending' | 'Completed';
+  createdBy: string;
+  completedBy?: string;
+  completedAt?: string;
+  createdAt?: string;
+}

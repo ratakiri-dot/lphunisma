@@ -1,6 +1,6 @@
 
 import { supabase } from './supabaseClient';
-import { PUCertified, PUOnProcess, PUProspect, FinanceRecord, Activity, Asset, Documentation, Letter, InternalMember, Auditor, Partner, AppUser } from '../types';
+import { PUCertified, PUOnProcess, PUProspect, FinanceRecord, Activity, Asset, Documentation, Letter, InternalMember, Auditor, Partner, AppUser, UserTask } from '../types';
 
 const mapToSnake = (obj: any) => {
     if (!obj) return obj;
@@ -235,5 +235,22 @@ export const dataService = {
             .single();
         if (error) return null;
         return mapToCamel(data) as AppUser;
+    },
+
+    // Tasks API
+    async getTasks() {
+        const { data, error } = await supabase.from('user_tasks').select('*').order('created_at', { ascending: false });
+        if (error) throw error;
+        return data.map(mapToCamel);
+    },
+    async upsertTask(task: Partial<UserTask>) {
+        const snakeItem = mapToSnake(task);
+        const { data, error } = await supabase.from('user_tasks').upsert(snakeItem).select().single();
+        if (error) throw error;
+        return mapToCamel(data);
+    },
+    async deleteTask(id: string) {
+        const { error } = await supabase.from('user_tasks').delete().eq('id', id);
+        if (error) throw error;
     }
 };
