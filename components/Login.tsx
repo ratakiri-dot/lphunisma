@@ -5,32 +5,31 @@ import NeumorphicCard from './NeumorphicCard';
 import { UserRole, AppUser } from '../types';
 
 interface LoginProps {
-  onLogin: (user: AppUser) => void;
+  onLogin: (username: string, password: string) => Promise<boolean>;
   onGuestAccess: () => void;
-  users: AppUser[];
 }
 
-const Login: React.FC<LoginProps> = ({ onLogin, onGuestAccess, users }) => {
+const Login: React.FC<LoginProps> = ({ onLogin, onGuestAccess }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setLoading(true);
 
-    // Simulate network delay
-    setTimeout(() => {
-      const user = users.find(u => u.username === username && u.password === password);
-      if (user) {
-        onLogin(user);
-      } else {
+    try {
+      const success = await onLogin(username, password);
+      if (!success) {
         setError('Username atau password salah.');
         setLoading(false);
       }
-    }, 800);
+    } catch (err) {
+      setError('Terjadi kesalahan sistem. Coba lagi.');
+      setLoading(false);
+    }
   };
 
   return (

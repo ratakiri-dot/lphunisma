@@ -190,5 +190,15 @@ export const dataService = {
     async deleteUser(id: string) {
         const { error } = await supabase.from('app_users').delete().eq('id', id);
         if (error) throw error;
+    },
+    async verifyUser(username: string, password: string) {
+        const { data, error } = await supabase
+            .from('app_users')
+            .select('*')
+            .eq('username', username)
+            .eq('password', password)
+            .single();
+        if (error) return null;
+        return data as AppUser;
     }
 };

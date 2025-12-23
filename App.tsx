@@ -106,11 +106,21 @@ const App: React.FC = () => {
   const [editingItem, setEditingItem] = useState<any>(null);
 
   // Auth Handlers
-  const handleLogin = (user: AppUser) => {
-    setCurrentUser(user);
-    setIsAuthenticated(true);
-    setActiveTab('Dashboard');
-    if (window.innerWidth < 1024) setIsSidebarOpen(false);
+  const handleLogin = async (username: string, password: string) => {
+    try {
+      const user = await dataService.verifyUser(username, password);
+      if (user) {
+        setCurrentUser(user);
+        setIsAuthenticated(true);
+        setActiveTab('Dashboard');
+        if (window.innerWidth < 1024) setIsSidebarOpen(false);
+        return true;
+      }
+      return false;
+    } catch (err) {
+      console.error("Login verification failed:", err);
+      return false;
+    }
   };
 
   const handleGuestAccess = () => {
@@ -409,7 +419,7 @@ const App: React.FC = () => {
   };
 
   if (!isAuthenticated) {
-    return <Login onLogin={handleLogin} onGuestAccess={handleGuestAccess} users={users} />;
+    return <Login onLogin={handleLogin} onGuestAccess={handleGuestAccess} />;
   }
 
   return (
