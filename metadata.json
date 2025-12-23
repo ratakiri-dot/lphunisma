@@ -1,0 +1,7 @@
+{
+  "name": "LPH UNISMA - Management Information System",
+  "description": "The official Management Information System for LPH Universitas Islam Malang, providing comprehensive halal certification management and real-time data insights.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
