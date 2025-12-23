@@ -579,6 +579,7 @@ const App: React.FC = () => {
       return (
         <>
           <input name="username" defaultValue={editingItem?.username} placeholder="Username" className="w-full p-4 neu-inset rounded-xl outline-none" required />
+          <input name="fullName" defaultValue={editingItem?.fullName} placeholder="Nama Lengkap" className="w-full p-4 neu-inset rounded-xl outline-none" />
           <input name="password" defaultValue={editingItem?.password} placeholder="Password" id="user-password" type="text" className="w-full p-4 neu-inset rounded-xl outline-none" required />
           <select name="role" defaultValue={editingItem?.role || UserRole.USER} className="w-full p-4 neu-inset rounded-xl outline-none bg-[#E0E5EC] cursor-pointer">
             <option value={UserRole.ADMIN}>ADMIN</option>

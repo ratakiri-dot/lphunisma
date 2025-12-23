@@ -210,13 +210,13 @@ export const dataService = {
     async getUsers() {
         const { data, error } = await supabase.from('app_users').select('*').order('username', { ascending: true });
         if (error) throw error;
-        return data;
+        return data.map(mapToCamel);
     },
     async upsertUser(item: Partial<AppUser>) {
-        // Map types to DB columns if necessary, but AppUser matches app_users table
-        const { data, error } = await supabase.from('app_users').upsert(item).select().single();
+        const snakeItem = mapToSnake(item);
+        const { data, error } = await supabase.from('app_users').upsert(snakeItem).select().single();
         if (error) throw error;
-        return data;
+        return mapToCamel(data);
     },
     async deleteUser(id: string) {
         const { error } = await supabase.from('app_users').delete().eq('id', id);
@@ -230,6 +230,6 @@ export const dataService = {
             .eq('password', password)
             .single();
         if (error) return null;
-        return data as AppUser;
+        return mapToCamel(data) as AppUser;
     }
 };
