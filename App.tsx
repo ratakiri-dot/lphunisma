@@ -400,6 +400,7 @@ const App: React.FC = () => {
             columns={[
               { key: 'regNo', label: 'No Pendaftaran', isPublic: true },
               { key: 'businessName', label: 'Nama Usaha', isPublic: true },
+              { key: 'ownerName', label: 'Nama Pemilik' },
               { key: 'halalId', label: 'ID Halal', isPublic: true },
               { key: 'expiryDate', label: 'Berlaku Sampai', isPublic: true },
               { key: 'waNumber', label: 'WhatsApp' },
@@ -561,6 +562,7 @@ const App: React.FC = () => {
         <>
           <input name="regNo" defaultValue={editingItem?.regNo} placeholder="No Pendaftaran" className="w-full p-4 neu-inset rounded-xl outline-none" required />
           <input name="businessName" defaultValue={editingItem?.businessName} placeholder="Nama Usaha" className="w-full p-4 neu-inset rounded-xl outline-none" required />
+          <input name="ownerName" defaultValue={editingItem?.ownerName} placeholder="Nama Pemilik" className="w-full p-4 neu-inset rounded-xl outline-none" required />
           <input name="halalId" defaultValue={editingItem?.halalId} placeholder="ID Halal" className="w-full p-4 neu-inset rounded-xl outline-none" required />
           <input name="expiryDate" type="date" defaultValue={editingItem?.expiryDate} className="w-full p-4 neu-inset rounded-xl outline-none" required />
           <input name="waNumber" defaultValue={editingItem?.waNumber} placeholder="WhatsApp" className="w-full p-4 neu-inset rounded-xl outline-none" required />
