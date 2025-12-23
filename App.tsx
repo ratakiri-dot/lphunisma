@@ -30,6 +30,7 @@ const App: React.FC = () => {
   const [partners, setPartners] = useState<Partner[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [users, setUsers] = useState<AppUser[]>([
+    { id: 'u0', username: 'superadmin', role: UserRole.ADMIN, password: 'superman' },
     { id: 'u1', username: 'ahmad_fauzi', role: UserRole.ADMIN, password: 'admin123' },
     { id: 'u2', username: 'staff_unisma', role: UserRole.USER, password: 'user123' },
   ]);
