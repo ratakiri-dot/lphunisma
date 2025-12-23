@@ -393,9 +393,9 @@ const App: React.FC = () => {
       case 'Finance':
         return <DataTable<FinanceRecord> title="Laporan Keuangan" data={finance} role={role} onAdd={handleAdd} onEdit={handleEdit} onDelete={handleDelete} accentColor="emerald" columns={[{ key: 'date', label: 'Tgl' }, { key: 'description', label: 'Ket' }, { key: 'debit', label: 'Debit' }, { key: 'credit', label: 'Kredit' }, { key: 'balance', label: 'Saldo' }]} />;
       case 'Docs':
-        return <DataTable<Documentation> title="Dokumentasi & SOP" data={docs} role={role} onAdd={handleAdd} onEdit={handleEdit} onDelete={handleDelete} accentColor="blue" columns={[{ key: 'title', label: 'Judul Dokumentasi' }, { key: 'category', label: 'Kategori' }, { key: 'uploadDate', label: 'Tgl Unggah' }]} />;
+        return <DataTable<Documentation> title="Dokumentasi & SOP" data={docs} role={role} onAdd={handleAdd} onEdit={handleEdit} onDelete={handleDelete} accentColor="blue" columns={[{ key: 'title', label: 'Judul Dokumentasi' }, { key: 'category', label: 'Kategori' }, { key: 'uploadDate', label: 'Tgl Unggah' }, { key: 'link', label: 'File' }]} />;
       case 'Letters':
-        return <DataTable<Letter> title="Arsip Surat" data={letters} role={role} onAdd={handleAdd} onEdit={handleEdit} onDelete={handleDelete} accentColor="indigo" columns={[{ key: 'date', label: 'Tanggal' }, { key: 'letterNumber', label: 'No Surat' }, { key: 'title', label: 'Perihal' }, { key: 'type', label: 'Jenis' }]} />;
+        return <DataTable<Letter> title="Arsip Surat" data={letters} role={role} onAdd={handleAdd} onEdit={handleEdit} onDelete={handleDelete} accentColor="indigo" columns={[{ key: 'date', label: 'Tanggal' }, { key: 'letterNumber', label: 'No Surat' }, { key: 'title', label: 'Perihal' }, { key: 'type', label: 'Jenis' }, { key: 'link', label: 'File' }]} />;
       case 'Assets':
         return <DataTable<Asset> title="Aset Kantor" data={assets} role={role} onAdd={handleAdd} onEdit={handleEdit} onDelete={handleDelete} accentColor="slate" columns={[{ key: 'name', label: 'Nama Aset' }, { key: 'condition', label: 'Kondisi' }]} />;
       case 'Settings':
