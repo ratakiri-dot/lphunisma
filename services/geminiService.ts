@@ -4,8 +4,16 @@ import { GoogleGenAI } from "@google/genai";
 const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
 
 let ai: any = null;
-if (apiKey) {
-  ai = new GoogleGenAI(apiKey);
+// Robust check for API Key
+if (apiKey && typeof apiKey === 'string' && apiKey.length > 10) {
+  try {
+    ai = new GoogleGenAI({ apiKey });
+    console.log("UNI AI: Client initialized successfully");
+  } catch (err) {
+    console.error("UNI AI: Initialization error:", err);
+  }
+} else {
+  console.warn("UNI AI: API Key missing or invalid. Check VITE_GEMINI_API_KEY in Vercel Settings.");
 }
 
 export async function getDashboardInsight(data: any) {
