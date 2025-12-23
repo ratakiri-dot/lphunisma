@@ -821,7 +821,9 @@ const App: React.FC = () => {
         <div className="w-72 h-full p-6 flex flex-col">
           <div className="flex items-center justify-between mb-8 shrink-0">
             <div className="flex items-center gap-4">
-              <div className="w-10 h-10 neu-button rounded-xl flex items-center justify-center bg-indigo-500 text-white shadow-lg"><Shield size={24} /></div>
+              <div className="w-10 h-10 neu-button rounded-xl flex items-center justify-center bg-white overflow-hidden shadow-lg p-1">
+                <img src="/assets/logo.jpg" alt="Logo" className="w-full h-full object-contain" />
+              </div>
               <div className={isSidebarOpen ? 'block' : 'hidden'}>
                 <h1 className="font-black text-xl leading-none">LPH UNISMA</h1>
                 <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest mt-1">Management Information System</p>

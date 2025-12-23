@@ -36,8 +36,8 @@ const Login: React.FC<LoginProps> = ({ onLogin, onGuestAccess }) => {
     <div className="min-h-screen w-full flex items-center justify-center p-6 bg-[#E0E5EC]">
       <div className="w-full max-w-md animate-in fade-in zoom-in duration-500">
         <div className="flex flex-col items-center mb-10 text-center">
-          <div className="w-20 h-20 neu-button rounded-3xl flex items-center justify-center bg-indigo-500 text-white mb-6 shadow-xl">
-            <Shield size={40} />
+          <div className="w-24 h-24 neu-button rounded-3xl flex items-center justify-center bg-white mb-6 shadow-xl p-3 overflow-hidden">
+            <img src="/assets/logo.jpg" alt="Logo" className="w-full h-full object-contain" />
           </div>
           <h1 className="text-3xl font-black text-slate-800 tracking-tighter leading-none">LPH UNISMA</h1>
           <p className="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em] mt-3 max-w-[300px] leading-relaxed">
