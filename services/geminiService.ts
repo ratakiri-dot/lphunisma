@@ -1,13 +1,20 @@
 
 import { GoogleGenAI } from "@google/genai";
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+
+let ai: any = null;
+if (apiKey) {
+  ai = new GoogleGenAI(apiKey);
+}
 
 export async function getDashboardInsight(data: any) {
   try {
+    if (!ai) return "Assalamualaikum... Sistem siap melayani. Wassalamualaikum.";
+
     const prompt = `Analyze this LPH UNISMA Dashboard data and provide a brief professional summary (max 3 sentences) in Indonesian for the dashboard.
     Data: ${JSON.stringify(data)}`;
-    
+
     const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
       contents: prompt,
@@ -26,6 +33,8 @@ export async function getDashboardInsight(data: any) {
 
 export async function chatWithAI(userMessage: string, contextData: any) {
   try {
+    if (!ai) return "Assalamualaikum... Layanan AI belum dikonfigurasi. Silakan hubungi admin. Wassalamualaikum.";
+
     const prompt = `User Question: ${userMessage}
     
     Current System Data Context (Role: ${contextData.viewerRole}):
