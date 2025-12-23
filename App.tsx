@@ -402,7 +402,7 @@ const App: React.FC = () => {
               { key: 'businessName', label: 'Nama Usaha', isPublic: true },
               { key: 'ownerName', label: 'Nama Pemilik' },
               { key: 'halalId', label: 'ID Halal', isPublic: true },
-              { key: 'expiryDate', label: 'Berlaku Sampai', isPublic: true },
+              { key: 'expiryDate', label: 'Tanggal Terbit', isPublic: true },
               { key: 'waNumber', label: 'WhatsApp' },
               { key: 'createdBy', label: 'Nama Penginput' },
             ]}
