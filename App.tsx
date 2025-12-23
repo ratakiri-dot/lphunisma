@@ -224,7 +224,7 @@ const App: React.FC = () => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     const data = Object.fromEntries(formData.entries());
-    const username = currentUser?.username || 'System';
+    const username = currentUser?.fullName || currentUser?.username || 'System';
     const auditData = editingItem ? { updatedBy: username } : { createdBy: username, updatedBy: username };
 
     try {
@@ -319,6 +319,7 @@ const App: React.FC = () => {
               { key: 'halalId', label: 'ID Halal', isPublic: true },
               { key: 'expiryDate', label: 'Berlaku Sampai', isPublic: true },
               { key: 'waNumber', label: 'WhatsApp' },
+              { key: 'createdBy', label: 'Operator' },
             ]}
           />
         );
@@ -337,6 +338,7 @@ const App: React.FC = () => {
               { key: 'businessName', label: 'Usaha', isPublic: true },
               { key: 'status', label: 'Status', isPublic: true },
               { key: 'ownerName', label: 'Pemilik' },
+              { key: 'createdBy', label: 'Operator' },
             ]}
           />
         );
@@ -356,6 +358,7 @@ const App: React.FC = () => {
               { key: 'followUpDate', label: 'Proyeksi Follow Up', isPublic: true },
               { key: 'notes', label: 'Keterangan', isPublic: true },
               { key: 'waNumber', label: 'WhatsApp' },
+              { key: 'createdBy', label: 'Operator' },
             ]}
           />
         );
@@ -373,6 +376,7 @@ const App: React.FC = () => {
               { key: 'fullName', label: 'Nama Lengkap', isPublic: true },
               { key: 'position', label: 'Jabatan', isPublic: true },
               { key: 'waNumber', label: 'WhatsApp' },
+              { key: 'createdBy', label: 'Operator' },
             ]}
           />
         );
@@ -390,6 +394,7 @@ const App: React.FC = () => {
               { key: 'fullName', label: 'Nama', isPublic: true },
               { key: 'position', label: 'Bidang', isPublic: true },
               { key: 'certNumber', label: 'No Sertifikat' },
+              { key: 'createdBy', label: 'Operator' },
             ]}
           />
         );
@@ -408,6 +413,7 @@ const App: React.FC = () => {
               { key: 'position', label: 'Bidang Kerjasama', isPublic: true },
               { key: 'waNumber', label: 'Kontak', isPublic: true },
               { key: 'cert', label: 'Keterangan' },
+              { key: 'createdBy', label: 'Operator' },
             ]}
           />
         );
@@ -426,19 +432,20 @@ const App: React.FC = () => {
               { key: 'event', label: 'Kegiatan', isPublic: true },
               { key: 'delegates', label: 'Delegasi', isPublic: true },
               { key: 'location', label: 'Tempat', isPublic: true },
+              { key: 'createdBy', label: 'Operator' },
             ]}
           />
         );
       case 'Finance':
-        return <DataTable<FinanceRecord> title="Laporan Keuangan" data={finance} role={role} onAdd={handleAdd} onEdit={handleEdit} onDelete={handleDelete} accentColor="emerald" columns={[{ key: 'date', label: 'Tgl' }, { key: 'description', label: 'Ket' }, { key: 'debit', label: 'Debit' }, { key: 'credit', label: 'Kredit' }, { key: 'balance', label: 'Saldo' }]} />;
+        return <DataTable<FinanceRecord> title="Laporan Keuangan" data={finance} role={role} onAdd={handleAdd} onEdit={handleEdit} onDelete={handleDelete} accentColor="emerald" columns={[{ key: 'date', label: 'Tgl' }, { key: 'description', label: 'Ket' }, { key: 'debit', label: 'Debit' }, { key: 'credit', label: 'Kredit' }, { key: 'balance', label: 'Saldo' }, { key: 'createdBy', label: 'Operator' }]} />;
       case 'Docs':
-        return <DataTable<Documentation> title="Dokumentasi & SOP" data={docs} role={role} onAdd={handleAdd} onEdit={handleEdit} onDelete={handleDelete} accentColor="blue" columns={[{ key: 'title', label: 'Judul Dokumentasi', isPublic: true }, { key: 'category', label: 'Kategori', isPublic: true }, { key: 'uploadDate', label: 'Tgl Unggah', isPublic: true }, { key: 'link', label: 'File', isPublic: true }]} />;
+        return <DataTable<Documentation> title="Dokumentasi & SOP" data={docs} role={role} onAdd={handleAdd} onEdit={handleEdit} onDelete={handleDelete} accentColor="blue" columns={[{ key: 'title', label: 'Judul Dokumentasi', isPublic: true }, { key: 'category', label: 'Kategori', isPublic: true }, { key: 'uploadDate', label: 'Tgl Unggah', isPublic: true }, { key: 'link', label: 'File', isPublic: true }, { key: 'createdBy', label: 'Operator' }]} />;
       case 'Letters':
-        return <DataTable<Letter> title="Arsip Surat" data={letters} role={role} onAdd={handleAdd} onEdit={handleEdit} onDelete={handleDelete} accentColor="indigo" columns={[{ key: 'date', label: 'Tanggal', isPublic: true }, { key: 'letterNumber', label: 'No Surat', isPublic: true }, { key: 'title', label: 'Perihal', isPublic: true }, { key: 'type', label: 'Jenis', isPublic: true }, { key: 'link', label: 'File', isPublic: true }]} />;
+        return <DataTable<Letter> title="Arsip Surat" data={letters} role={role} onAdd={handleAdd} onEdit={handleEdit} onDelete={handleDelete} accentColor="indigo" columns={[{ key: 'date', label: 'Tanggal', isPublic: true }, { key: 'letterNumber', label: 'No Surat', isPublic: true }, { key: 'title', label: 'Perihal', isPublic: true }, { key: 'type', label: 'Jenis', isPublic: true }, { key: 'link', label: 'File', isPublic: true }, { key: 'createdBy', label: 'Operator' }]} />;
       case 'Assets':
-        return <DataTable<Asset> title="Aset Kantor" data={assets} role={role} onAdd={handleAdd} onEdit={handleEdit} onDelete={handleDelete} accentColor="slate" columns={[{ key: 'name', label: 'Nama Aset' }, { key: 'condition', label: 'Kondisi' }]} />;
+        return <DataTable<Asset> title="Aset Kantor" data={assets} role={role} onAdd={handleAdd} onEdit={handleEdit} onDelete={handleDelete} accentColor="slate" columns={[{ key: 'name', label: 'Nama Aset' }, { key: 'condition', label: 'Kondisi' }, { key: 'createdBy', label: 'Operator' }]} />;
       case 'Settings':
-        return <DataTable<AppUser> title="User Management" data={users} role={role} onAdd={handleAdd} onEdit={handleEdit} onDelete={handleDelete} accentColor="slate" columns={[{ key: 'username', label: 'User' }, { key: 'role', label: 'Role' }]} />;
+        return <DataTable<AppUser> title="User Management" data={users} role={role} onAdd={handleAdd} onEdit={handleEdit} onDelete={handleDelete} accentColor="slate" columns={[{ key: 'username', label: 'User' }, { key: 'fullName', label: 'Nama Lengkap' }, { key: 'role', label: 'Role' }]} />;
       default: return <div className="p-10 text-center font-bold text-slate-300 uppercase">Modul Tersedia Segera</div>;
     }
   };

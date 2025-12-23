@@ -8,6 +8,7 @@ export enum UserRole {
 export interface AppUser {
   id: string;
   username: string;
+  fullName?: string;
   role: UserRole;
   password: string;
 }

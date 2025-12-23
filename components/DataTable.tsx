@@ -143,6 +143,26 @@ const DataTable = <T extends { id: string },>({
       );
     }
 
+    if (col.key === 'createdBy' || col.key === 'updatedBy') {
+      const creator = valStr || 'Sistem';
+      const updater = (item as any).updatedBy;
+      return (
+        <div className="flex flex-col gap-0.5">
+          <div className="flex items-center gap-1.5 overflow-hidden">
+            <div className="w-5 h-5 rounded-lg bg-indigo-100 flex items-center justify-center shrink-0">
+              <User size={10} className="text-indigo-600" />
+            </div>
+            <span className="font-black text-slate-700 text-[10px] truncate">{creator}</span>
+          </div>
+          {updater && updater !== creator && (
+            <div className="flex items-center gap-1 opacity-50 pl-1.5 border-l border-slate-200 ml-2.5">
+              <span className="text-[8px] font-bold text-slate-400 uppercase tracking-tighter">Edit: {updater}</span>
+            </div>
+          )}
+        </div>
+      );
+    }
+
     return <span className="text-slate-600 font-medium">{valStr}</span>;
   };
 
@@ -207,13 +227,6 @@ const DataTable = <T extends { id: string },>({
                 {displayedColumns.map((col, colIdx) => (
                   <td key={String(col.key)} className={`py-4 px-6 text-sm ${colIdx === 0 ? 'min-w-[150px]' : 'whitespace-nowrap'}`}>
                     {renderCell(item, col)}
-                    {colIdx === 0 && (item as any).id && (
-                      <div className="text-[9px] text-slate-500 mt-1.5 font-bold italic whitespace-normal max-w-[250px] leading-tight">
-                        <span className="text-indigo-500">●</span> {(item as any).createdBy ? `Dibuat: ${(item as any).createdBy}` : 'Input Sistem'}
-                        {(item as any).updatedBy && ` | Edit: ${(item as any).updatedBy}`}
-                        {(item as any).updatedAt && ` (${new Date((item as any).updatedAt || (item as any).created_at || Date.now()).toLocaleDateString('id-ID')})`}
-                      </div>
-                    )}
                   </td>
                 ))}
                 {!isPublic && (canModify || canDelete) && (
