@@ -533,7 +533,8 @@ const App: React.FC = () => {
               { key: 'title', label: 'Tugas', isPublic: false },
               { key: 'description', label: 'Deskripsi', isPublic: false },
               { key: 'status', label: 'Status', isPublic: false },
-              { key: 'createdBy', label: 'Nama Penginput' },
+              { key: 'createdBy', label: 'Pemberi Tugas' },
+              { key: 'completedBy', label: 'Penyelesai' },
             ]}
           />
         );
@@ -758,7 +759,7 @@ const App: React.FC = () => {
                   <div key={task.id} className="p-3 opacity-60 flex justify-between items-center group">
                     <div className="flex flex-col">
                       <span className="text-[10px] font-bold text-slate-600 line-through truncate w-40">{task.title}</span>
-                      <span className="text-[8px] font-black text-slate-400 italic">Oleh: {task.completedBy}</span>
+                      <span className="text-[8px] font-black text-slate-400 italic">Oleh: {task.createdBy} | Selesai oleh: {task.completedBy}</span>
                     </div>
                     <button onClick={() => handleTaskAction('delete', task)} className="p-1.5 text-rose-400 opacity-0 group-hover:opacity-100 transition-opacity">
                       <Trash2 size={12} />
@@ -875,7 +876,10 @@ const App: React.FC = () => {
                     <h3 className="text-amber-900 font-black text-lg mb-2 mr-6">{task.title}</h3>
                     <p className="text-amber-700/80 text-sm font-bold leading-relaxed mb-4">{task.description}</p>
                     <div className="flex justify-between items-center">
-                      <span className="text-[10px] font-black text-amber-600 uppercase">Input: {task.createdBy}</span>
+                      <div className="flex flex-col">
+                        <span className="text-[10px] font-black text-amber-600 uppercase">Input: {task.createdBy}</span>
+                        {task.status === 'Completed' && <span className="text-[10px] font-black text-emerald-600 uppercase">Selesai: {task.completedBy}</span>}
+                      </div>
                       <button
                         onClick={() => handleTaskAction('complete', task)}
                         className="p-2 bg-amber-200 text-amber-800 rounded-xl hover:bg-amber-300 active:scale-95 transition-all shadow-sm flex items-center gap-2 font-black text-[10px]"
