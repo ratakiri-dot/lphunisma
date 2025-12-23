@@ -536,7 +536,7 @@ const App: React.FC = () => {
             role={role}
             onAdd={handleAdd}
             onEdit={handleEdit}
-            onDelete={handleDelete}
+            onDelete={role === UserRole.ADMIN ? handleDelete : undefined}
             accentColor="amber"
             columns={[
               { key: 'title', label: 'Tugas', isPublic: false },
