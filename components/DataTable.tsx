@@ -207,11 +207,11 @@ const DataTable = <T extends { id: string },>({
                 {displayedColumns.map((col, colIdx) => (
                   <td key={String(col.key)} className="py-4 px-6 text-sm whitespace-nowrap">
                     {renderCell(item, col)}
-                    {colIdx === 0 && (item as any).createdBy && (
-                      <div className="text-[8px] text-slate-400 mt-1 font-bold italic opacity-0 group-hover:opacity-100 transition-opacity whitespace-normal max-w-[200px]">
-                        Dibuat: {(item as any).createdBy}
+                    {colIdx === 0 && ((item as any).createdBy || (item as any).updatedBy) && (
+                      <div className="text-[7px] text-slate-400 mt-1.5 font-bold italic opacity-70 whitespace-normal max-w-[200px] leading-tight">
+                        <span className="text-indigo-400">●</span> {(item as any).createdBy ? `Dibuat: ${(item as any).createdBy}` : 'Input Sistem'}
                         {(item as any).updatedBy && ` | Edit: ${(item as any).updatedBy}`}
-                        {(item as any).updatedAt && ` (${new Date((item as any).updatedAt).toLocaleDateString('id-ID')})`}
+                        {(item as any).updatedAt && ` (${new Date((item as any).updatedAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })})`}
                       </div>
                     )}
                   </td>
