@@ -105,8 +105,15 @@ const Login: React.FC<LoginProps> = ({ onLogin, onGuestAccess }) => {
           </div>
         </NeumorphicCard>
 
-        <p className="text-center mt-8 text-xs text-slate-400 font-bold">
-          &copy; {new Date().getFullYear()} LPH UNISMA MALANG. Semua Hak Dilindungi.
+        <p className="text-center mt-8">
+          <a
+            href="https://lph.unisma.ac.id"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-xs text-slate-400 font-bold hover:text-indigo-500 transition-colors"
+          >
+            &copy; {new Date().getFullYear()} LPH UNISMA MALANG. Semua Hak Dilindungi.
+          </a>
         </p>
       </div>
     </div>

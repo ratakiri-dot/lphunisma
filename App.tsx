@@ -949,6 +949,17 @@ const App: React.FC = () => {
                 <p className="text-slate-400 font-bold uppercase tracking-widest">Memuat Data...</p>
               </div>
             ) : renderContent()}
+
+            <footer className="pt-8 pb-4 text-center border-t border-white/20 mt-8">
+              <a
+                href="https://lph.unisma.ac.id"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[10px] font-black text-slate-400 hover:text-indigo-500 transition-colors uppercase tracking-[0.2em]"
+              >
+                &copy; {new Date().getFullYear()} LPH UNISMA MALANG. Semua Hak Dilindungi.
+              </a>
+            </footer>
           </div>
         </section>
 
