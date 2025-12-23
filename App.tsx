@@ -31,7 +31,20 @@ const App: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [users, setUsers] = useState<AppUser[]>([]);
 
-  // Fetch data on mount
+  // Fetch users for login on mount
+  useEffect(() => {
+    const initUsers = async () => {
+      try {
+        const userList = await dataService.getUsers();
+        setUsers(userList);
+      } catch (error) {
+        console.error('Failed to fetch users for login:', error);
+      }
+    };
+    initUsers();
+  }, []);
+
+  // Fetch restricted data on authentication
   useEffect(() => {
     if (isAuthenticated) {
       fetchData();
@@ -41,7 +54,7 @@ const App: React.FC = () => {
   const fetchData = async () => {
     setIsLoading(true);
     try {
-      const [certified, onProcess, prospect, fin, activities, assetList, internalList, auditorList, partnerList, userList] = await Promise.all([
+      const [certified, onProcess, prospect, fin, activities, assetList, internalList, auditorList, partnerList] = await Promise.all([
         dataService.getPUCertified(),
         dataService.getPUOnProcess(),
         dataService.getPUProspect(),
@@ -50,8 +63,7 @@ const App: React.FC = () => {
         dataService.getAssets(),
         dataService.getInternal(),
         dataService.getAuditors(),
-        dataService.getPartners(),
-        dataService.getUsers()
+        dataService.getPartners()
       ]);
       setPuCertified(certified);
       setPuOnProcess(onProcess);
@@ -62,7 +74,6 @@ const App: React.FC = () => {
       setInternal(internalList);
       setAuditors(auditorList);
       setPartners(partnerList);
-      setUsers(userList);
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
