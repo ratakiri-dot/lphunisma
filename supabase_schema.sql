@@ -1,13 +1,25 @@
 
 -- Tables for LPH UNISMA MIS
 
--- 1. Profiles (for users)
-CREATE TABLE profiles (
-  id UUID REFERENCES auth.users ON DELETE CASCADE PRIMARY KEY,
+-- 1. Profiles (Legacy - requires auth.users)
+-- CREATE TABLE profiles (
+--   id UUID REFERENCES auth.users ON DELETE CASCADE PRIMARY KEY,
+--   username TEXT UNIQUE NOT NULL,
+--   role TEXT DEFAULT 'USER',
+--   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+-- );
+
+-- 1. App Users (Standalone for Simple MIS Auth)
+CREATE TABLE app_users (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   username TEXT UNIQUE NOT NULL,
-  role TEXT DEFAULT 'USER',
+  password TEXT NOT NULL,
+  role TEXT CHECK (role IN ('ADMIN', 'USER', 'PUBLIC')) DEFAULT 'USER',
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
+
+-- Seed with Superadmin if not exists
+-- INSERT INTO app_users (username, password, role) VALUES ('superadmin', 'superman', 'ADMIN');
 
 -- 2. PU Certified
 CREATE TABLE pu_certified (

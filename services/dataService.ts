@@ -1,6 +1,6 @@
 
 import { supabase } from './supabaseClient';
-import { PUCertified, PUOnProcess, PUProspect, FinanceRecord, Activity, Asset, Documentation, Letter, InternalMember, Auditor, Partner } from '../types';
+import { PUCertified, PUOnProcess, PUProspect, FinanceRecord, Activity, Asset, Documentation, Letter, InternalMember, Auditor, Partner, AppUser } from '../types';
 
 export const dataService = {
     // PU Certified
@@ -173,5 +173,22 @@ export const dataService = {
         const { data, error } = await supabase.from('documentation').upsert(item).select().single();
         if (error) throw error;
         return data;
+    },
+
+    // App Users
+    async getUsers() {
+        const { data, error } = await supabase.from('app_users').select('*').order('username', { ascending: true });
+        if (error) throw error;
+        return data;
+    },
+    async upsertUser(item: Partial<AppUser>) {
+        // Map types to DB columns if necessary, but AppUser matches app_users table
+        const { data, error } = await supabase.from('app_users').upsert(item).select().single();
+        if (error) throw error;
+        return data;
+    },
+    async deleteUser(id: string) {
+        const { error } = await supabase.from('app_users').delete().eq('id', id);
+        if (error) throw error;
     }
 };

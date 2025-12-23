@@ -29,11 +29,7 @@ const App: React.FC = () => {
   const [auditors, setAuditors] = useState<Auditor[]>([]);
   const [partners, setPartners] = useState<Partner[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [users, setUsers] = useState<AppUser[]>([
-    { id: 'u0', username: 'superadmin', role: UserRole.ADMIN, password: 'superman' },
-    { id: 'u1', username: 'ahmad_fauzi', role: UserRole.ADMIN, password: 'admin123' },
-    { id: 'u2', username: 'staff_unisma', role: UserRole.USER, password: 'user123' },
-  ]);
+  const [users, setUsers] = useState<AppUser[]>([]);
 
   // Fetch data on mount
   useEffect(() => {
@@ -45,7 +41,7 @@ const App: React.FC = () => {
   const fetchData = async () => {
     setIsLoading(true);
     try {
-      const [certified, onProcess, prospect, fin, activities, assetList, internalList, auditorList, partnerList] = await Promise.all([
+      const [certified, onProcess, prospect, fin, activities, assetList, internalList, auditorList, partnerList, userList] = await Promise.all([
         dataService.getPUCertified(),
         dataService.getPUOnProcess(),
         dataService.getPUProspect(),
@@ -54,7 +50,8 @@ const App: React.FC = () => {
         dataService.getAssets(),
         dataService.getInternal(),
         dataService.getAuditors(),
-        dataService.getPartners()
+        dataService.getPartners(),
+        dataService.getUsers()
       ]);
       setPuCertified(certified);
       setPuOnProcess(onProcess);
@@ -65,6 +62,7 @@ const App: React.FC = () => {
       setInternal(internalList);
       setAuditors(auditorList);
       setPartners(partnerList);
+      setUsers(userList);
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
@@ -179,6 +177,7 @@ const App: React.FC = () => {
           setLetters(prev => prev.filter(i => i.id !== item.id));
         }
         if (activeTab === 'Settings') {
+          await dataService.deleteUser(item.id);
           setUsers(prev => prev.filter(i => i.id !== item.id));
         }
       } catch (err) {
@@ -249,8 +248,9 @@ const App: React.FC = () => {
         setAssets(prev => editingItem ? prev.map(i => i.id === saved.id ? saved : i) : [...prev, saved]);
       }
       if (activeTab === 'Settings') {
-        const updatedUser = { ...data, id: editingItem?.id || Date.now().toString() } as AppUser;
-        setUsers(prev => editingItem ? prev.map(i => i.id === editingItem.id ? { ...i, ...updatedUser } : i) : [...prev, updatedUser]);
+        const updatedUser = { ...data, id: editingItem?.id } as AppUser;
+        const saved = await dataService.upsertUser(updatedUser);
+        setUsers(prev => editingItem ? prev.map(i => i.id === saved.id ? saved : i) : [...prev, saved]);
       }
 
       setIsModalOpen(false);
