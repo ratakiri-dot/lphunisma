@@ -392,6 +392,66 @@ const App: React.FC = () => {
         </>
       );
     }
+    if (activeTab === 'PU On Process') {
+      return (
+        <>
+          <input name="regNo" defaultValue={editingItem?.regNo} placeholder="No Reg" className="w-full p-4 neu-inset rounded-xl outline-none" required />
+          <input name="businessName" defaultValue={editingItem?.businessName} placeholder="Usaha" className="w-full p-4 neu-inset rounded-xl outline-none" required />
+          <input name="ownerName" defaultValue={editingItem?.ownerName} placeholder="Pemilik" className="w-full p-4 neu-inset rounded-xl outline-none" required />
+          <input name="waNumber" defaultValue={editingItem?.waNumber} placeholder="WhatsApp" className="w-full p-4 neu-inset rounded-xl outline-none" required />
+          <input name="email" defaultValue={editingItem?.email} placeholder="Email" className="w-full p-4 neu-inset rounded-xl outline-none" required />
+          <input name="status" defaultValue={editingItem?.status} placeholder="Status" className="w-full p-4 neu-inset rounded-xl outline-none" required />
+        </>
+      );
+    }
+    if (activeTab === 'PU Prospect') {
+      return (
+        <>
+          <input name="businessName" defaultValue={editingItem?.businessName} placeholder="Nama Usaha" className="w-full p-4 neu-inset rounded-xl outline-none" required />
+          <input name="ownerName" defaultValue={editingItem?.ownerName} placeholder="Pemilik" className="w-full p-4 neu-inset rounded-xl outline-none" required />
+          <input name="waNumber" defaultValue={editingItem?.waNumber} placeholder="WhatsApp" className="w-full p-4 neu-inset rounded-xl outline-none" required />
+          <input name="followUpDate" type="date" defaultValue={editingItem?.followUpDate} className="w-full p-4 neu-inset rounded-xl outline-none" required />
+          <textarea name="notes" defaultValue={editingItem?.notes} placeholder="Catatan" className="w-full p-4 neu-inset rounded-xl outline-none h-24" required />
+        </>
+      );
+    }
+    if (activeTab === 'Internal') {
+      return (
+        <>
+          <input name="fullName" defaultValue={editingItem?.fullName} placeholder="Nama Lengkap" className="w-full p-4 neu-inset rounded-xl outline-none" required />
+          <input name="position" defaultValue={editingItem?.position} placeholder="Jabatan" className="w-full p-4 neu-inset rounded-xl outline-none" required />
+          <input name="waNumber" defaultValue={editingItem?.waNumber} placeholder="WhatsApp" className="w-full p-4 neu-inset rounded-xl outline-none" required />
+        </>
+      );
+    }
+    if (activeTab === 'Auditor') {
+      return (
+        <>
+          <input name="fullName" defaultValue={editingItem?.fullName} placeholder="Nama Auditor" className="w-full p-4 neu-inset rounded-xl outline-none" required />
+          <input name="position" defaultValue={editingItem?.position} placeholder="Bidang" className="w-full p-4 neu-inset rounded-xl outline-none" required />
+          <input name="certNumber" defaultValue={editingItem?.certNumber} placeholder="No Sertifikat" className="w-full p-4 neu-inset rounded-xl outline-none" required />
+        </>
+      );
+    }
+    if (activeTab === 'Partners') {
+      return (
+        <>
+          <input name="fullName" defaultValue={editingItem?.fullName} placeholder="Nama Partner" className="w-full p-4 neu-inset rounded-xl outline-none" required />
+          <input name="position" defaultValue={editingItem?.position} placeholder="Posisi" className="w-full p-4 neu-inset rounded-xl outline-none" required />
+          <input name="waNumber" defaultValue={editingItem?.waNumber} placeholder="WhatsApp" className="w-full p-4 neu-inset rounded-xl outline-none" required />
+        </>
+      );
+    }
+    if (activeTab === 'Schedule') {
+      return (
+        <>
+          <input name="date" type="date" defaultValue={editingItem?.date} className="w-full p-4 neu-inset rounded-xl outline-none" required />
+          <input name="event" defaultValue={editingItem?.event} placeholder="Kegiatan" className="w-full p-4 neu-inset rounded-xl outline-none" required />
+          <input name="location" defaultValue={editingItem?.location} placeholder="Tempat" className="w-full p-4 neu-inset rounded-xl outline-none" required />
+          <input name="delegates" defaultValue={editingItem?.delegates?.join(',')} placeholder="Delegasi (pisah koma)" className="w-full p-4 neu-inset rounded-xl outline-none" required />
+        </>
+      );
+    }
     if (activeTab === 'Finance') {
       return (
         <>
@@ -399,6 +459,18 @@ const App: React.FC = () => {
           <input name="description" defaultValue={editingItem?.description} placeholder="Keterangan" className="w-full p-4 neu-inset rounded-xl outline-none" required />
           <input name="debit" type="number" defaultValue={editingItem?.debit} placeholder="Debit" className="w-full p-4 neu-inset rounded-xl outline-none" />
           <input name="credit" type="number" defaultValue={editingItem?.credit} placeholder="Kredit" className="w-full p-4 neu-inset rounded-xl outline-none" />
+        </>
+      );
+    }
+    if (activeTab === 'Assets') {
+      return (
+        <>
+          <input name="name" defaultValue={editingItem?.name} placeholder="Nama Aset" className="w-full p-4 neu-inset rounded-xl outline-none" required />
+          <select name="condition" defaultValue={editingItem?.condition || 'Good'} className="w-full p-4 neu-inset rounded-xl outline-none bg-[#E0E5EC] cursor-pointer">
+            <option value="Good">Bagus</option>
+            <option value="Maintenance">Pemeliharaan</option>
+            <option value="Broken">Rusak</option>
+          </select>
         </>
       );
     }
