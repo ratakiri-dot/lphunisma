@@ -205,13 +205,13 @@ const DataTable = <T extends { id: string },>({
                 className={`group transition-all duration-300 border-l-4 ${getRowStyle(item, rowIdx)}`}
               >
                 {displayedColumns.map((col, colIdx) => (
-                  <td key={String(col.key)} className="py-4 px-6 text-sm whitespace-nowrap">
+                  <td key={String(col.key)} className={`py-4 px-6 text-sm ${colIdx === 0 ? 'min-w-[150px]' : 'whitespace-nowrap'}`}>
                     {renderCell(item, col)}
-                    {colIdx === 0 && ((item as any).createdBy || (item as any).updatedBy) && (
-                      <div className="text-[7px] text-slate-400 mt-1.5 font-bold italic opacity-70 whitespace-normal max-w-[200px] leading-tight">
-                        <span className="text-indigo-400">●</span> {(item as any).createdBy ? `Dibuat: ${(item as any).createdBy}` : 'Input Sistem'}
+                    {colIdx === 0 && (item as any).id && (
+                      <div className="text-[9px] text-slate-500 mt-1.5 font-bold italic whitespace-normal max-w-[250px] leading-tight">
+                        <span className="text-indigo-500">●</span> {(item as any).createdBy ? `Dibuat: ${(item as any).createdBy}` : 'Input Sistem'}
                         {(item as any).updatedBy && ` | Edit: ${(item as any).updatedBy}`}
-                        {(item as any).updatedAt && ` (${new Date((item as any).updatedAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })})`}
+                        {(item as any).updatedAt && ` (${new Date((item as any).updatedAt || (item as any).created_at || Date.now()).toLocaleDateString('id-ID')})`}
                       </div>
                     )}
                   </td>
