@@ -53,7 +53,7 @@ const App: React.FC = () => {
   const fetchData = async () => {
     setIsLoading(true);
     try {
-      const [certified, onProcess, prospect, fin, activities, assetList, internalList, auditorList, partnerList] = await Promise.all([
+      const [certified, onProcess, prospect, fin, activities, assetList, internalList, auditorList, partnerList, docList, letterList] = await Promise.all([
         dataService.getPUCertified(),
         dataService.getPUOnProcess(),
         dataService.getPUProspect(),
@@ -62,7 +62,9 @@ const App: React.FC = () => {
         dataService.getAssets(),
         dataService.getInternal(),
         dataService.getAuditors(),
-        dataService.getPartners()
+        dataService.getPartners(),
+        dataService.getDocs(),
+        dataService.getLetters()
       ]);
       setPuCertified(certified);
       setPuOnProcess(onProcess);
@@ -73,6 +75,8 @@ const App: React.FC = () => {
       setInternal(internalList);
       setAuditors(auditorList);
       setPartners(partnerList);
+      setDocs(docList);
+      setLetters(letterList);
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
@@ -253,19 +257,34 @@ const App: React.FC = () => {
         setPartners(prev => editingItem ? prev.map(i => i.id === saved.id ? saved : i) : [...prev, saved]);
       }
       if (activeTab === 'Finance') {
-        const item = { ...data, id: editingItem?.id, debit: Number(data.debit) || 0, credit: Number(data.credit) || 0 } as FinanceRecord;
+        const lastBalance = finance.length > 0 ? finance[finance.length - 1].balance : 0;
+        const newDebit = Number(data.debit) || 0;
+        const newCredit = Number(data.credit) || 0;
+        const calculatedBalance = lastBalance + newDebit - newCredit;
+
+        const item = { ...data, id: editingItem?.id, debit: newDebit, credit: newCredit, balance: calculatedBalance } as FinanceRecord;
         const saved = await dataService.upsertFinance(item);
         setFinance(prev => editingItem ? prev.map(i => i.id === saved.id ? saved : i) : [...prev, saved]);
       }
       if (activeTab === 'Schedule') {
-        const item = { ...data, id: editingItem?.id, delegates: (data.delegates as string).split(',') } as Activity;
+        const item = { ...data, id: editingItem?.id, delegates: (data.delegates as string).split(',').map(s => s.trim()) } as Activity;
         const saved = await dataService.upsertActivity(item);
         setSchedule(prev => editingItem ? prev.map(i => i.id === saved.id ? saved : i) : [...prev, saved]);
       }
       if (activeTab === 'Assets') {
-        const item = { ...data, id: editingItem?.id } as Asset;
+        const item = { ...data, id: editingItem?.id, estimatedValue: Number(data.estimatedValue) || 0 } as Asset;
         const saved = await dataService.upsertAsset(item);
         setAssets(prev => editingItem ? prev.map(i => i.id === saved.id ? saved : i) : [...prev, saved]);
+      }
+      if (activeTab === 'Docs') {
+        const item = { ...data, id: editingItem?.id } as Documentation;
+        const saved = await dataService.upsertDoc(item);
+        setDocs(prev => editingItem ? prev.map(i => i.id === saved.id ? saved : i) : [...prev, saved]);
+      }
+      if (activeTab === 'Letters') {
+        const item = { ...data, id: editingItem?.id } as Letter;
+        const saved = await dataService.upsertLetter(item);
+        setLetters(prev => editingItem ? prev.map(i => i.id === saved.id ? saved : i) : [...prev, saved]);
       }
       if (activeTab === 'Settings') {
         const updatedUser = { ...data, id: editingItem?.id } as AppUser;
@@ -366,12 +385,17 @@ const App: React.FC = () => {
             columns={[
               { key: 'date', label: 'Tanggal', isPublic: true },
               { key: 'event', label: 'Kegiatan', isPublic: true },
+              { key: 'delegates', label: 'Delegasi', isPublic: true },
               { key: 'location', label: 'Tempat', isPublic: true },
             ]}
           />
         );
       case 'Finance':
         return <DataTable<FinanceRecord> title="Laporan Keuangan" data={finance} role={role} onAdd={handleAdd} onEdit={handleEdit} onDelete={handleDelete} accentColor="emerald" columns={[{ key: 'date', label: 'Tgl' }, { key: 'description', label: 'Ket' }, { key: 'debit', label: 'Debit' }, { key: 'credit', label: 'Kredit' }, { key: 'balance', label: 'Saldo' }]} />;
+      case 'Docs':
+        return <DataTable<Documentation> title="Dokumentasi & SOP" data={docs} role={role} onAdd={handleAdd} onEdit={handleEdit} onDelete={handleDelete} accentColor="blue" columns={[{ key: 'title', label: 'Judul Dokumentasi' }, { key: 'category', label: 'Kategori' }, { key: 'uploadDate', label: 'Tgl Unggah' }]} />;
+      case 'Letters':
+        return <DataTable<Letter> title="Arsip Surat" data={letters} role={role} onAdd={handleAdd} onEdit={handleEdit} onDelete={handleDelete} accentColor="indigo" columns={[{ key: 'date', label: 'Tanggal' }, { key: 'letterNumber', label: 'No Surat' }, { key: 'title', label: 'Perihal' }, { key: 'type', label: 'Jenis' }]} />;
       case 'Assets':
         return <DataTable<Asset> title="Aset Kantor" data={assets} role={role} onAdd={handleAdd} onEdit={handleEdit} onDelete={handleDelete} accentColor="slate" columns={[{ key: 'name', label: 'Nama Aset' }, { key: 'condition', label: 'Kondisi' }]} />;
       case 'Settings':
@@ -399,7 +423,11 @@ const App: React.FC = () => {
           <input name="businessName" defaultValue={editingItem?.businessName} placeholder="Usaha" className="w-full p-4 neu-inset rounded-xl outline-none" required />
           <input name="ownerName" defaultValue={editingItem?.ownerName} placeholder="Pemilik" className="w-full p-4 neu-inset rounded-xl outline-none" required />
           <input name="waNumber" defaultValue={editingItem?.waNumber} placeholder="WhatsApp" className="w-full p-4 neu-inset rounded-xl outline-none" required />
-          <input name="email" defaultValue={editingItem?.email} placeholder="Email" className="w-full p-4 neu-inset rounded-xl outline-none" required />
+          <input name="email" defaultValue={editingItem?.email} placeholder="Email" className="w-full p-4 neu-inset rounded-xl outline-none" />
+          <input name="socialMedia" defaultValue={editingItem?.socialMedia} placeholder="Social Media" className="w-full p-4 neu-inset rounded-xl outline-none" />
+          <input name="businessAddress" defaultValue={editingItem?.businessAddress} placeholder="Alamat Usaha" className="w-full p-4 neu-inset rounded-xl outline-none" />
+          <input name="productionAddress" defaultValue={editingItem?.productionAddress} placeholder="Alamat Produksi" className="w-full p-4 neu-inset rounded-xl outline-none" />
+          <input name="nib" defaultValue={editingItem?.nib} placeholder="NIB" className="w-full p-4 neu-inset rounded-xl outline-none" />
           <input name="status" defaultValue={editingItem?.status} placeholder="Status" className="w-full p-4 neu-inset rounded-xl outline-none" required />
         </>
       );
@@ -438,7 +466,10 @@ const App: React.FC = () => {
         <>
           <input name="fullName" defaultValue={editingItem?.fullName} placeholder="Nama Partner" className="w-full p-4 neu-inset rounded-xl outline-none" required />
           <input name="position" defaultValue={editingItem?.position} placeholder="Posisi" className="w-full p-4 neu-inset rounded-xl outline-none" required />
+          <input name="cert" defaultValue={editingItem?.cert} placeholder="Sertifikat/Keterangan" className="w-full p-4 neu-inset rounded-xl outline-none" />
+          <input name="address" defaultValue={editingItem?.address} placeholder="Alamat" className="w-full p-4 neu-inset rounded-xl outline-none" />
           <input name="waNumber" defaultValue={editingItem?.waNumber} placeholder="WhatsApp" className="w-full p-4 neu-inset rounded-xl outline-none" required />
+          <input name="email" defaultValue={editingItem?.email} placeholder="Email" className="w-full p-4 neu-inset rounded-xl outline-none" />
         </>
       );
     }
@@ -471,6 +502,30 @@ const App: React.FC = () => {
             <option value="Maintenance">Pemeliharaan</option>
             <option value="Broken">Rusak</option>
           </select>
+        </>
+      );
+    }
+    if (activeTab === 'Docs') {
+      return (
+        <>
+          <input name="title" defaultValue={editingItem?.title} placeholder="Judul" className="w-full p-4 neu-inset rounded-xl outline-none" required />
+          <input name="category" defaultValue={editingItem?.category} placeholder="Kategori" className="w-full p-4 neu-inset rounded-xl outline-none" required />
+          <input name="uploadDate" type="date" defaultValue={editingItem?.uploadDate} className="w-full p-4 neu-inset rounded-xl outline-none" required />
+          <input name="link" defaultValue={editingItem?.link} placeholder="Link/URL" className="w-full p-4 neu-inset rounded-xl outline-none" />
+        </>
+      );
+    }
+    if (activeTab === 'Letters') {
+      return (
+        <>
+          <input name="title" defaultValue={editingItem?.title} placeholder="Perihal" className="w-full p-4 neu-inset rounded-xl outline-none" required />
+          <input name="letterNumber" defaultValue={editingItem?.letterNumber} placeholder="No Surat" className="w-full p-4 neu-inset rounded-xl outline-none" required />
+          <input name="date" type="date" defaultValue={editingItem?.date} className="w-full p-4 neu-inset rounded-xl outline-none" required />
+          <select name="type" defaultValue={editingItem?.type || 'Incoming'} className="w-full p-4 neu-inset rounded-xl outline-none bg-[#E0E5EC] cursor-pointer">
+            <option value="Incoming">Surat Masuk</option>
+            <option value="Outgoing">Surat Keluar</option>
+          </select>
+          <input name="link" defaultValue={editingItem?.link} placeholder="Link/URL" className="w-full p-4 neu-inset rounded-xl outline-none" />
         </>
       );
     }
