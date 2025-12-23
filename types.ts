@@ -139,6 +139,7 @@ export interface Letter {
 
 export interface Asset {
   id: string;
+  assetNo?: string;
   name: string;
   receivedDate: string;
   estimatedValue: number;
