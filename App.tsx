@@ -178,6 +178,9 @@ const App: React.FC = () => {
           await dataService.deleteLetter(item.id);
           setLetters(prev => prev.filter(i => i.id !== item.id));
         }
+        if (activeTab === 'Settings') {
+          setUsers(prev => prev.filter(i => i.id !== item.id));
+        }
       } catch (err) {
         alert('Gagal menghapus data');
       }
@@ -244,6 +247,10 @@ const App: React.FC = () => {
         const item = { ...data, id: editingItem?.id } as Asset;
         const saved = await dataService.upsertAsset(item);
         setAssets(prev => editingItem ? prev.map(i => i.id === saved.id ? saved : i) : [...prev, saved]);
+      }
+      if (activeTab === 'Settings') {
+        const updatedUser = { ...data, id: editingItem?.id || Date.now().toString() } as AppUser;
+        setUsers(prev => editingItem ? prev.map(i => i.id === editingItem.id ? { ...i, ...updatedUser } : i) : [...prev, updatedUser]);
       }
 
       setIsModalOpen(false);
@@ -372,6 +379,18 @@ const App: React.FC = () => {
           <input name="description" defaultValue={editingItem?.description} placeholder="Keterangan" className="w-full p-4 neu-inset rounded-xl outline-none" required />
           <input name="debit" type="number" defaultValue={editingItem?.debit} placeholder="Debit" className="w-full p-4 neu-inset rounded-xl outline-none" />
           <input name="credit" type="number" defaultValue={editingItem?.credit} placeholder="Kredit" className="w-full p-4 neu-inset rounded-xl outline-none" />
+        </>
+      );
+    }
+    if (activeTab === 'Settings') {
+      return (
+        <>
+          <input name="username" defaultValue={editingItem?.username} placeholder="Username" className="w-full p-4 neu-inset rounded-xl outline-none" required />
+          <input name="password" defaultValue={editingItem?.password} placeholder="Password" id="user-password" type="text" className="w-full p-4 neu-inset rounded-xl outline-none" required />
+          <select name="role" defaultValue={editingItem?.role || UserRole.USER} className="w-full p-4 neu-inset rounded-xl outline-none bg-[#E0E5EC] cursor-pointer">
+            <option value={UserRole.ADMIN}>ADMIN</option>
+            <option value={UserRole.USER}>USER</option>
+          </select>
         </>
       );
     }
