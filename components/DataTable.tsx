@@ -144,17 +144,23 @@ const DataTable = <T extends { id: string },>({
     }
 
     if (col.key === 'createdBy' || col.key === 'updatedBy') {
-      const creator = valStr || 'Sistem';
+      const creator = (valStr && valStr !== 'null') ? valStr : 'Sistem';
       const updater = (item as any).updatedBy;
+      const dateVal = (item as any).updatedAt || (item as any).createdAt || (item as any).created_at;
+      const formattedDate = dateVal ? new Date(dateVal).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' }) : '';
+
       return (
         <div className="flex flex-col gap-0.5">
           <div className="flex items-center gap-1.5 overflow-hidden">
             <div className="w-5 h-5 rounded-lg bg-indigo-100 flex items-center justify-center shrink-0">
               <User size={10} className="text-indigo-600" />
             </div>
-            <span className="font-black text-slate-700 text-[10px] truncate">{creator}</span>
+            <div className="flex flex-col truncate">
+              <span className="font-black text-slate-700 text-[10px] truncate">{creator}</span>
+              {formattedDate && <span className="text-[8px] text-slate-400 font-bold">{formattedDate}</span>}
+            </div>
           </div>
-          {updater && updater !== creator && (
+          {updater && updater !== creator && updater !== 'null' && (
             <div className="flex items-center gap-1 opacity-50 pl-1.5 border-l border-slate-200 ml-2.5">
               <span className="text-[8px] font-bold text-slate-400 uppercase tracking-tighter">Edit: {updater}</span>
             </div>
