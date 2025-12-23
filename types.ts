@@ -180,8 +180,10 @@ export interface UserTask {
   title: string;
   description?: string;
   isPinned: boolean;
-  status: 'Pending' | 'Completed';
+  status: 'Pending' | 'In Progress' | 'Completed';
   createdBy: string;
+  inProgressBy?: string;
+  inProgressAt?: string;
   completedBy?: string;
   completedAt?: string;
   createdAt?: string;

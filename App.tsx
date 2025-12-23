@@ -179,7 +179,7 @@ const App: React.FC = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, [isAuthenticated]);
 
-  const handleTaskAction = async (action: 'add' | 'pin' | 'complete' | 'delete', taskData?: any) => {
+  const handleTaskAction = async (action: 'add' | 'pin' | 'in_progress' | 'complete' | 'delete', taskData?: any) => {
     const username = currentUser?.fullName || currentUser?.username || 'System';
     try {
       if (action === 'add') {
@@ -195,6 +195,15 @@ const App: React.FC = () => {
         setIsModalOpen(false);
       } else if (action === 'pin') {
         const updated = { ...taskData, isPinned: !taskData.isPinned };
+        const saved = await dataService.upsertTask(updated);
+        setUserTasks(prev => prev.map(t => t.id === saved.id ? saved : t));
+      } else if (action === 'in_progress') {
+        const updated: UserTask = {
+          ...taskData,
+          status: 'In Progress',
+          inProgressBy: username,
+          inProgressAt: new Date().toISOString()
+        };
         const saved = await dataService.upsertTask(updated);
         setUserTasks(prev => prev.map(t => t.id === saved.id ? saved : t));
       } else if (action === 'complete') {
@@ -534,6 +543,7 @@ const App: React.FC = () => {
               { key: 'description', label: 'Deskripsi', isPublic: false },
               { key: 'status', label: 'Status', isPublic: false },
               { key: 'createdBy', label: 'Pemberi Tugas' },
+              { key: 'inProgressBy', label: 'Sedang Dikerjakan' },
               { key: 'completedBy', label: 'Penyelesai' },
             ]}
           />
@@ -725,14 +735,21 @@ const App: React.FC = () => {
           </div>
 
           <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar space-y-4">
-            {pendingTasks.length === 0 && completedTasks.length === 0 && (
+            {pendingTasks.length === 0 && userTasks.filter(t => t.status === 'In Progress').length === 0 && completedTasks.length === 0 && (
               <p className="text-center py-8 text-slate-400 font-bold italic text-xs uppercase">Belum ada tugas</p>
             )}
 
-            {pendingTasks.map(task => (
-              <div key={task.id} className="p-4 neu-inset rounded-2xl space-y-3">
+            {[...userTasks.filter(t => t.status === 'Pending'), ...userTasks.filter(t => t.status === 'In Progress')].map(task => (
+              <div key={task.id} className={`p-4 neu-inset rounded-2xl space-y-3 ${task.status === 'In Progress' ? 'border-l-4 border-indigo-500 bg-indigo-50/30' : ''}`}>
                 <div className="flex justify-between items-start gap-2">
-                  <h4 className="font-black text-slate-700 text-sm leading-tight">{task.title}</h4>
+                  <div className="flex flex-col">
+                    <h4 className="font-black text-slate-700 text-sm leading-tight">{task.title}</h4>
+                    {task.status === 'In Progress' && (
+                      <span className="text-[8px] font-black text-indigo-500 uppercase mt-1 flex items-center gap-1 italic">
+                        <Loader2 size={10} className="animate-spin" /> Sedang Dikerjakan oleh {task.inProgressBy}
+                      </span>
+                    )}
+                  </div>
                   <div className="flex gap-1 shrink-0">
                     <button onClick={() => handleTaskAction('pin', task)} className={`p-1.5 rounded-lg transition-colors ${task.isPinned ? 'text-amber-500 bg-amber-50' : 'text-slate-300 hover:text-slate-600'}`}>
                       <Pin size={12} fill={task.isPinned ? 'currentColor' : 'none'} />
@@ -741,13 +758,26 @@ const App: React.FC = () => {
                 </div>
                 {task.description && <p className="text-[10px] text-slate-500 font-bold line-clamp-2">{task.description}</p>}
                 <div className="flex justify-between items-center pt-2">
-                  <span className="text-[9px] font-black text-indigo-400 uppercase">Oleh: {task.createdBy}</span>
-                  <button
-                    onClick={() => handleTaskAction('complete', task)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500 text-white text-[10px] font-black rounded-xl shadow-lg active:scale-95"
-                  >
-                    SELESAI <CheckCircle2 size={12} />
-                  </button>
+                  <span className="text-[9px] font-black text-indigo-400 uppercase">Input: {task.createdBy}</span>
+                  <div className="flex gap-2">
+                    {task.status === 'Pending' ? (
+                      <button
+                        onClick={() => handleTaskAction('in_progress', task)}
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-500 text-white text-[10px] font-black rounded-xl shadow-lg active:scale-95 transition-all"
+                      >
+                        KERJAKAN <RefreshCcw size={12} />
+                      </button>
+                    ) : (
+                      task.inProgressBy === (currentUser?.fullName || currentUser?.username) && (
+                        <button
+                          onClick={() => handleTaskAction('complete', task)}
+                          className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500 text-white text-[10px] font-black rounded-xl shadow-lg active:scale-95 transition-all"
+                        >
+                          SELESAI <CheckCircle2 size={12} />
+                        </button>
+                      )
+                    )}
+                  </div>
                 </div>
               </div>
             ))}
@@ -868,24 +898,42 @@ const App: React.FC = () => {
             </div>
 
             {/* Pinned Tasks - Sticky Notes */}
-            {userTasks.filter(t => t.isPinned && t.status === 'Pending').length > 0 && (
+            {userTasks.filter(t => t.isPinned && t.status !== 'Completed').length > 0 && (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {userTasks.filter(t => t.isPinned && t.status === 'Pending').map(task => (
-                  <div key={task.id} className="relative group p-6 bg-amber-50 border-2 border-amber-200 rounded-3xl shadow-sm transform hover:-rotate-1 transition-all duration-300">
-                    <div className="absolute top-4 right-4 text-amber-500"><Pin size={18} fill="currentColor" /></div>
-                    <h3 className="text-amber-900 font-black text-lg mb-2 mr-6">{task.title}</h3>
-                    <p className="text-amber-700/80 text-sm font-bold leading-relaxed mb-4">{task.description}</p>
-                    <div className="flex justify-between items-center">
-                      <div className="flex flex-col">
-                        <span className="text-[10px] font-black text-amber-600 uppercase">Input: {task.createdBy}</span>
-                        {task.status === 'Completed' && <span className="text-[10px] font-black text-emerald-600 uppercase">Selesai: {task.completedBy}</span>}
+                {userTasks.filter(t => t.isPinned && t.status !== 'Completed').map(task => (
+                  <div key={task.id} className={`relative group p-6 border-2 rounded-3xl shadow-sm transform hover:-rotate-1 transition-all duration-300 ${task.status === 'In Progress' ? 'bg-indigo-50 border-indigo-200' : 'bg-amber-50 border-amber-200'}`}>
+                    <div className={`absolute top-4 right-4 ${task.status === 'In Progress' ? 'text-indigo-500' : 'text-amber-500'}`}><Pin size={18} fill="currentColor" /></div>
+                    <h3 className={`${task.status === 'In Progress' ? 'text-indigo-900' : 'text-amber-900'} font-black text-lg mb-2 mr-6`}>{task.title}</h3>
+                    <p className={`${task.status === 'In Progress' ? 'text-indigo-700/80' : 'text-amber-700/80'} text-sm font-bold leading-relaxed mb-4`}>{task.description}</p>
+                    {task.status === 'In Progress' && (
+                      <div className="mb-4 px-3 py-1.5 bg-indigo-500/10 rounded-xl flex items-center gap-2">
+                        <Loader2 size={12} className="text-indigo-600 animate-spin" />
+                        <span className="text-[10px] font-black text-indigo-600 uppercase italic">Sedang dikerjakan oleh {task.inProgressBy}</span>
                       </div>
-                      <button
-                        onClick={() => handleTaskAction('complete', task)}
-                        className="p-2 bg-amber-200 text-amber-800 rounded-xl hover:bg-amber-300 active:scale-95 transition-all shadow-sm flex items-center gap-2 font-black text-[10px]"
-                      >
-                        TANDAI SELESAI <CheckCircle2 size={14} />
-                      </button>
+                    )}
+                    <div className="flex justify-between items-center mt-auto">
+                      <div className="flex flex-col">
+                        <span className={`text-[10px] font-black ${task.status === 'In Progress' ? 'text-indigo-600' : 'text-amber-600'} uppercase`}>Input: {task.createdBy}</span>
+                      </div>
+                      <div className="flex gap-2">
+                        {task.status === 'Pending' ? (
+                          <button
+                            onClick={() => handleTaskAction('in_progress', task)}
+                            className="p-2 bg-indigo-500 text-white rounded-xl hover:bg-indigo-600 active:scale-95 transition-all shadow-sm flex items-center gap-2 font-black text-[10px]"
+                          >
+                            KERJAKAN <RefreshCcw size={14} />
+                          </button>
+                        ) : (
+                          task.inProgressBy === (currentUser?.fullName || currentUser?.username) && (
+                            <button
+                              onClick={() => handleTaskAction('complete', task)}
+                              className="p-2 bg-emerald-500 text-white rounded-xl hover:bg-emerald-600 active:scale-95 transition-all shadow-sm flex items-center gap-2 font-black text-[10px]"
+                            >
+                              SELESAI <CheckCircle2 size={14} />
+                            </button>
+                          )
+                        )}
+                      </div>
                     </div>
                   </div>
                 ))}
