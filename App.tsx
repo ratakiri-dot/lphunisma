@@ -46,6 +46,21 @@ const App: React.FC = () => {
     initUsers();
   }, []);
 
+  // Check for persisted login
+  useEffect(() => {
+    const storedUser = localStorage.getItem('currentUser');
+    if (storedUser) {
+      try {
+        const user = JSON.parse(storedUser);
+        setCurrentUser(user);
+        setIsAuthenticated(true);
+      } catch (err) {
+        console.error('Failed to parse stored user:', err);
+        localStorage.removeItem('currentUser');
+      }
+    }
+  }, []);
+
   // Fetch restricted data on authentication
   useEffect(() => {
     if (isAuthenticated) {
@@ -142,6 +157,7 @@ const App: React.FC = () => {
         setIsAuthenticated(true);
         setActiveTab('Dashboard');
         if (window.innerWidth < 1024) setIsSidebarOpen(false);
+        localStorage.setItem('currentUser', JSON.stringify(user));
         return true;
       }
       return false;
@@ -154,6 +170,7 @@ const App: React.FC = () => {
   const handleGuestAccess = () => {
     setCurrentUser({ id: 'guest', username: 'Guest', role: UserRole.PUBLIC, password: '' });
     setIsAuthenticated(true);
+    localStorage.setItem('currentUser', JSON.stringify({ id: 'guest', username: 'Guest', role: UserRole.PUBLIC, password: '' }));
     setActiveTab('Dashboard');
     if (window.innerWidth < 1024) setIsSidebarOpen(false);
   };
@@ -164,6 +181,7 @@ const App: React.FC = () => {
       e.stopPropagation();
     }
     setCurrentUser(null);
+    localStorage.removeItem('currentUser');
     setActiveTab('Dashboard');
     setIsModalOpen(false);
     setEditingItem(null);
