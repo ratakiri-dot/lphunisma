@@ -163,6 +163,9 @@ CREATE TABLE credentials (
   username TEXT NOT NULL,
   password TEXT NOT NULL,
   notes TEXT,
+  created_by TEXT,
+  updated_by TEXT,
+  updated_at TIMESTAMP WITH TIME ZONE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
