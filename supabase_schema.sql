@@ -155,5 +155,17 @@ CREATE TABLE letters (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
+-- 13. Credentials
+CREATE TABLE credentials (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  service_name TEXT NOT NULL,
+  address TEXT NOT NULL,
+  username TEXT NOT NULL,
+  password TEXT NOT NULL,
+  notes TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
 -- RLS (Row Level Security) - Basic Setup
 -- You can enable RLS and add policies later via Supabase Dashboard
+

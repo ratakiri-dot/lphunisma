@@ -26,6 +26,7 @@ export type NavItem =
   | 'Assets'
   | 'Schedule'
   | 'Finance'
+  | 'Credentials'
   | 'Settings'
   | 'Tasks';
 
@@ -187,4 +188,16 @@ export interface UserTask {
   completedBy?: string;
   completedAt?: string;
   createdAt?: string;
+}
+
+export interface Credential {
+  id: string;
+  serviceName: string;
+  address: string;
+  username: string;
+  password: string;
+  notes?: string;
+  createdBy?: string;
+  updatedBy?: string;
+  updatedAt?: string;
 }

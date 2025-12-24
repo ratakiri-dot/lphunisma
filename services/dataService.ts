@@ -1,6 +1,6 @@
 
 import { supabase } from './supabaseClient';
-import { PUCertified, PUOnProcess, PUProspect, FinanceRecord, Activity, Asset, Documentation, Letter, InternalMember, Auditor, Partner, AppUser, UserTask } from '../types';
+import { PUCertified, PUOnProcess, PUProspect, FinanceRecord, Activity, Asset, Documentation, Letter, InternalMember, Auditor, Partner, AppUser, UserTask, Credential } from '../types';
 
 const mapToSnake = (obj: any) => {
     if (!obj) return obj;
@@ -251,6 +251,23 @@ export const dataService = {
     },
     async deleteTask(id: string) {
         const { error } = await supabase.from('user_tasks').delete().eq('id', id);
+        if (error) throw error;
+    },
+
+    // Credentials API
+    async getCredentials() {
+        const { data, error } = await supabase.from('credentials').select('*').order('created_at', { ascending: false });
+        if (error) throw error;
+        return data.map(mapToCamel);
+    },
+    async upsertCredential(item: Partial<Credential>) {
+        const snakeItem = mapToSnake(item);
+        const { data, error } = await supabase.from('credentials').upsert(snakeItem).select().single();
+        if (error) throw error;
+        return mapToCamel(data);
+    },
+    async deleteCredential(id: string) {
+        const { error } = await supabase.from('credentials').delete().eq('id', id);
         if (error) throw error;
     }
 };

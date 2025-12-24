@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { NavItem, UserRole, PUCertified, PUOnProcess, PUProspect, FinanceRecord, Activity, AppUser, Asset, Documentation, Letter, InternalMember, Auditor, Partner, UserTask } from './types';
+import { NavItem, UserRole, PUCertified, PUOnProcess, PUProspect, FinanceRecord, Activity, AppUser, Asset, Documentation, Letter, InternalMember, Auditor, Partner, UserTask, Credential } from './types';
 import { MENU_ITEMS, MOCK_PU_CERTIFIED, MOCK_PU_ON_PROCESS, MOCK_PU_PROSPECT, MOCK_FINANCE, MOCK_SCHEDULE, MOCK_ASSETS, MOCK_DOCS, MOCK_LETTERS, MOCK_INTERNAL, MOCK_AUDITORS, MOCK_PARTNERS } from './constants';
 import NeumorphicCard from './components/NeumorphicCard';
 import Dashboard from './components/Dashboard';
@@ -30,6 +30,7 @@ const App: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [users, setUsers] = useState<AppUser[]>([]);
   const [userTasks, setUserTasks] = useState<UserTask[]>([]);
+  const [credentials, setCredentials] = useState<Credential[]>([]);
   const [isTaskPanelOpen, setIsTaskPanelOpen] = useState(false);
 
   // Fetch users for login on mount
@@ -67,7 +68,7 @@ const App: React.FC = () => {
       const auth = await dataService.getUsers();
       setUsers(auth);
 
-      const [certified, onProcess, prospect, financeData, scheduleData, assetsData, members, auditorsData, partnersData, docsData, lettersData] = await Promise.all([
+      const [certified, onProcess, prospect, financeData, scheduleData, assetsData, members, auditorsData, partnersData, docsData, lettersData, credentialsData] = await Promise.all([
         dataService.getPUCertified(),
         dataService.getPUOnProcess(),
         dataService.getPUProspect(),
@@ -78,7 +79,8 @@ const App: React.FC = () => {
         dataService.getAuditors(),
         dataService.getPartners(),
         dataService.getDocs(),
-        dataService.getLetters()
+        dataService.getLetters(),
+        dataService.getCredentials()
       ]);
       setPuCertified(certified);
       setPuOnProcess(onProcess);
@@ -91,6 +93,7 @@ const App: React.FC = () => {
       setPartners(partnersData);
       setDocs(docsData);
       setLetters(lettersData);
+      setCredentials(credentialsData);
       fetchTasks(); // Fetch tasks separately
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -276,6 +279,10 @@ const App: React.FC = () => {
           await dataService.deleteTask(item.id);
           setUserTasks(prev => prev.filter(i => i.id !== item.id));
         }
+        if (activeTab === 'Credentials') {
+          await dataService.deleteCredential(item.id);
+          setCredentials(prev => prev.filter(i => i.id !== item.id));
+        }
         if (activeTab === 'Settings') {
           await dataService.deleteUser(item.id);
           setUsers(prev => prev.filter(i => i.id !== item.id));
@@ -366,6 +373,11 @@ const App: React.FC = () => {
       }
       if (activeTab === ('Tasks' as any)) {
         await handleTaskAction('add', data);
+      }
+      if (activeTab === 'Credentials') {
+        const item = { ...data, ...auditData, id: editingItem?.id } as Credential;
+        const saved = await dataService.upsertCredential(item);
+        setCredentials(prev => editingItem ? prev.map(i => i.id === saved.id ? saved : i) : [...prev, saved]);
       }
       if (activeTab === 'Settings') {
         const updatedUser = { ...data, id: editingItem?.id } as AppUser;
@@ -550,6 +562,26 @@ const App: React.FC = () => {
             ]}
           />
         );
+      case 'Credentials':
+        return (
+          <DataTable<Credential>
+            title="Credential & Account MIS"
+            data={credentials}
+            role={role}
+            onAdd={handleAdd}
+            onEdit={handleEdit}
+            onDelete={role === UserRole.ADMIN ? handleDelete : undefined}
+            accentColor="indigo"
+            columns={[
+              { key: 'serviceName', label: 'Layanan/Situs', isPublic: false },
+              { key: 'address', label: 'Link/Alamat', isPublic: false },
+              { key: 'username', label: 'Username', isPublic: false },
+              { key: 'password', label: 'Password', isPublic: false },
+              { key: 'notes', label: 'Catatan', isPublic: false },
+              { key: 'createdBy', label: 'Penginput' },
+            ]}
+          />
+        );
       case 'Settings':
         return <DataTable<AppUser> title="User Management" data={users} role={role} onAdd={handleAdd} onEdit={handleEdit} onDelete={handleDelete} accentColor="slate" columns={[{ key: 'username', label: 'User' }, { key: 'fullName', label: 'Nama Lengkap' }, { key: 'role', label: 'Role' }]} />;
       default: return <div className="p-10 text-center font-bold text-slate-300 uppercase">Modul Tersedia Segera</div>;
@@ -681,6 +713,17 @@ const App: React.FC = () => {
             <option value="Outgoing">Surat Keluar</option>
           </select>
           <input name="link" defaultValue={editingItem?.link} placeholder="Link/URL" className="w-full p-4 neu-inset rounded-xl outline-none" />
+        </>
+      );
+    }
+    if (activeTab === 'Credentials') {
+      return (
+        <>
+          <input name="serviceName" defaultValue={editingItem?.serviceName} placeholder="Nama Layanan (mis: Email, Portal BPJPH)" className="w-full p-4 neu-inset rounded-xl outline-none" required />
+          <input name="address" defaultValue={editingItem?.address} placeholder="Alamat/Link (URL)" className="w-full p-4 neu-inset rounded-xl outline-none" required />
+          <input name="username" defaultValue={editingItem?.username} placeholder="Username/ID" className="w-full p-4 neu-inset rounded-xl outline-none" required />
+          <input name="password" defaultValue={editingItem?.password} placeholder="Password" className="w-full p-4 neu-inset rounded-xl outline-none" required />
+          <textarea name="notes" defaultValue={editingItem?.notes} placeholder="Catatan Tambahan" className="w-full p-4 neu-inset rounded-xl outline-none min-h-[100px]" />
         </>
       );
     }

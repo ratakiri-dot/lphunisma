@@ -14,9 +14,10 @@ import {
   Calendar,
   Wallet,
   Settings,
-  ListTodo
+  ListTodo,
+  KeyRound
 } from 'lucide-react';
-import { NavItem, PUCertified, PUOnProcess, PUProspect, InternalMember, Auditor, Partner, Documentation, Letter, Asset, Activity, FinanceRecord } from './types';
+import { NavItem, PUCertified, PUOnProcess, PUProspect, InternalMember, Auditor, Partner, Documentation, Letter, Asset, Activity, FinanceRecord, Credential } from './types';
 
 export const MENU_ITEMS: { name: NavItem; icon: React.ReactNode; category: string }[] = [
   { name: 'Dashboard', icon: <LayoutDashboard size={20} />, category: 'Main' },
@@ -31,6 +32,7 @@ export const MENU_ITEMS: { name: NavItem; icon: React.ReactNode; category: strin
   { name: 'Assets', icon: <Package size={20} />, category: 'Office' },
   { name: 'Schedule', icon: <Calendar size={20} />, category: 'Admin' },
   { name: 'Finance', icon: <Wallet size={20} />, category: 'Admin' },
+  { name: 'Credentials', icon: <KeyRound size={20} />, category: 'System' },
   { name: 'Tasks', icon: <ListTodo size={20} />, category: 'System' },
   { name: 'Settings', icon: <Settings size={20} />, category: 'System' },
 ];
@@ -96,4 +98,10 @@ export const MOCK_AUDITORS: Auditor[] = [
 export const MOCK_PARTNERS: Partner[] = [
   { id: '1', fullName: 'PT. Halal Solution Indonesia', position: 'Business Partner', cert: 'Kemitraan Strategis', address: 'Jakarta', waNumber: '021-998877', email: 'info@halalsolution.com' },
   { id: '2', fullName: 'Asosiasi Pengusaha Muslim', position: 'community Partner', cert: 'MoU 2023', address: 'Bandung', waNumber: '0812233445', email: 'contact@apm.id' },
+];
+
+export const MOCK_CREDENTIALS: Credential[] = [
+  { id: '1', serviceName: 'Supabase Dashboard', address: 'https://supabase.com/dashboard', username: 'admin@lphunisma.ac.id', password: 'secure123', notes: 'Database management' },
+  { id: '2', serviceName: 'BPJPH Portal', address: 'https://portal.bpjph.go.id', username: 'lph_unisma', password: 'halal2024', notes: 'Portal sertifikasi halal' },
+  { id: '3', serviceName: 'Email LPH', address: 'https://mail.google.com', username: 'lph@unisma.ac.id', password: 'emailpass', notes: 'Email resmi LPH UNISMA' },
 ];
