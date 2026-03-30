@@ -23,6 +23,7 @@ Run the `supabase_schema.sql` script in your Supabase SQL Editor to create the n
 ### 3. Environment Variables
 Create a `.env.local` file and add:
 ```env
+# Supabase Account Email: ratakiri.dot@gmail.com
 VITE_SUPABASE_URL=your_supabase_url
 VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
 ```
