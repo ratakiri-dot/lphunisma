@@ -559,7 +559,7 @@ const App: React.FC = () => {
       case 'Letters':
         return <DataTable<Letter> title="Arsip Surat" data={letters} role={role} onAdd={handleAdd} onEdit={handleEdit} onDelete={handleDelete} accentColor="indigo" columns={[{ key: 'date', label: 'Tanggal', isPublic: true }, { key: 'letterNumber', label: 'No Surat', isPublic: true }, { key: 'title', label: 'Perihal', isPublic: true }, { key: 'type', label: 'Jenis', isPublic: true }, { key: 'link', label: 'File', isPublic: true }, { key: 'createdBy', label: 'Nama Penginput' }]} />;
       case 'Assets':
-        return <DataTable<Asset> title="Aset Kantor" data={assets} role={role} onAdd={handleAdd} onEdit={handleEdit} onDelete={handleDelete} accentColor="slate" columns={[{ key: 'assetNo', label: 'No Aset' }, { key: 'name', label: 'Nama Aset' }, { key: 'condition', label: 'Kondisi' }, { key: 'createdBy', label: 'Nama Penginput' }]} />;
+        return <DataTable<Asset> title="Aset Kantor" data={assets} role={role} onAdd={handleAdd} onEdit={handleEdit} onDelete={handleDelete} accentColor="slate" columns={[{ key: 'assetNo', label: 'No Aset' }, { key: 'name', label: 'Nama Aset' }, { key: 'receivedDate', label: 'Tgl Terima' }, { key: 'estimatedValue', label: 'Nilai Estimasi' }, { key: 'condition', label: 'Kondisi' }, { key: 'createdBy', label: 'Nama Penginput' }]} />;
       case 'Tasks' as any:
         return (
           <DataTable<UserTask>
@@ -702,6 +702,8 @@ const App: React.FC = () => {
         <>
           <input name="assetNo" defaultValue={editingItem?.assetNo} placeholder="Nomor Aset" className="w-full p-4 neu-inset rounded-xl outline-none" />
           <input name="name" defaultValue={editingItem?.name} placeholder="Nama Aset" className="w-full p-4 neu-inset rounded-xl outline-none" required />
+          <input name="receivedDate" type="date" defaultValue={editingItem?.receivedDate} className="w-full p-4 neu-inset rounded-xl outline-none" required />
+          <input name="estimatedValue" type="number" defaultValue={editingItem?.estimatedValue} placeholder="Nilai Estimasi (Rp)" className="w-full p-4 neu-inset rounded-xl outline-none" />
           <select name="condition" defaultValue={editingItem?.condition || 'Good'} className="w-full p-4 neu-inset rounded-xl outline-none bg-[#E0E5EC] cursor-pointer">
             <option value="Good">Bagus</option>
             <option value="Maintenance">Pemeliharaan</option>

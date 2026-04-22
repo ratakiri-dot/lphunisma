@@ -115,6 +115,7 @@ CREATE TABLE finance_records (
 -- 9. Assets
 CREATE TABLE assets (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  asset_no TEXT,
   name TEXT NOT NULL,
   received_date DATE,
   estimated_value NUMERIC,
