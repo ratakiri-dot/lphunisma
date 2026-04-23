@@ -185,7 +185,7 @@ const DataTable = <T extends { id: string },>({
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3 no-print">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
             <input
@@ -225,7 +225,7 @@ const DataTable = <T extends { id: string },>({
                 </th>
               ))}
               {!isPublic && (canModify || canDelete) && (
-                <th className="text-right py-4 px-6 border-b border-white font-black text-slate-400 uppercase text-[9px] tracking-[0.15em] sticky top-0 right-0 bg-[#E0E5EC]/90 backdrop-blur-md z-30">
+                <th className="text-right py-4 px-6 border-b border-white font-black text-slate-400 uppercase text-[9px] tracking-[0.15em] sticky top-0 right-0 bg-[#E0E5EC]/90 backdrop-blur-md z-30 no-print">
                   Aksi
                 </th>
               )}
@@ -246,7 +246,7 @@ const DataTable = <T extends { id: string },>({
                   </td>
                 ))}
                 {!isPublic && (canModify || canDelete) && (
-                  <td className="py-4 px-6 text-right sticky right-0 z-10 bg-inherit backdrop-blur-md border-l border-white/20">
+                  <td className="py-4 px-6 text-right sticky right-0 z-10 bg-inherit backdrop-blur-md border-l border-white/20 no-print">
                     <div className="flex justify-end gap-1.5 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0">
                       {canModify && onEdit && (
                         <button onClick={() => onEdit(item)} className="p-1.5 bg-white/50 rounded-lg text-blue-500 hover:bg-white shadow-sm transition-colors border border-white/40">

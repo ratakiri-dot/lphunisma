@@ -886,7 +886,7 @@ const App: React.FC = () => {
         onClick={() => setIsSidebarOpen(false)}
       />
 
-      <aside className={`fixed lg:relative z-[70] h-full transition-all duration-300 bg-[#E0E5EC] border-r border-white/20 shadow-2xl lg:shadow-none ${isSidebarOpen ? 'translate-x-0 w-72' : '-translate-x-full lg:translate-x-0 lg:w-20'} overflow-hidden`}>
+      <aside className={`fixed lg:relative z-[70] h-full transition-all duration-300 bg-[#E0E5EC] border-r border-white/20 shadow-2xl lg:shadow-none no-print ${isSidebarOpen ? 'translate-x-0 w-72' : '-translate-x-full lg:translate-x-0 lg:w-20'} overflow-hidden`}>
         <div className="w-72 h-full p-6 flex flex-col">
           <div className="flex items-center justify-between mb-8 shrink-0">
             <div className="flex items-center gap-4">
@@ -930,7 +930,7 @@ const App: React.FC = () => {
       <main className="flex-1 flex flex-col h-screen overflow-hidden relative">
         {role === UserRole.PUBLIC && <div className="absolute inset-0 anti-screenshot-overlay z-[35] pointer-events-none opacity-50" />}
 
-        <header className="h-20 flex items-center justify-between px-6 lg:px-8 bg-[#E0E5EC]/80 backdrop-blur-md sticky top-0 z-[50] border-b border-white/20 shrink-0">
+        <header className="h-20 flex items-center justify-between px-6 lg:px-8 bg-[#E0E5EC]/80 backdrop-blur-md sticky top-0 z-[50] border-b border-white/20 shrink-0 no-print">
           <div className="flex items-center gap-4">
             <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="p-3 neu-button rounded-xl text-slate-500 transition-transform active:scale-90"><Menu size={20} /></button>
             <h2 className="hidden sm:block text-sm font-black text-slate-700 uppercase tracking-widest">{activeTab}</h2>
@@ -972,7 +972,7 @@ const App: React.FC = () => {
 
             {/* Pinned Tasks - Sticky Notes */}
             {userTasks.filter(t => t.isPinned && t.status !== 'Completed').length > 0 && (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 no-print">
                 {userTasks.filter(t => t.isPinned && t.status !== 'Completed').map(task => (
                   <div key={task.id} className={`relative group p-6 border-2 rounded-3xl shadow-sm transform hover:-rotate-1 transition-all duration-300 ${task.status === 'In Progress' ? 'bg-indigo-50 border-indigo-200' : 'bg-amber-50 border-amber-200'}`}>
                     <div className={`absolute top-4 right-4 ${task.status === 'In Progress' ? 'text-indigo-500' : 'text-amber-500'}`}><Pin size={18} fill="currentColor" /></div>
@@ -1019,7 +1019,7 @@ const App: React.FC = () => {
               </div>
             ) : renderContent()}
 
-            <footer className="pt-8 pb-4 text-center border-t border-white/20 mt-8">
+            <footer className="pt-8 pb-4 text-center border-t border-white/20 mt-8 no-print">
               <a
                 href="https://lph.unisma.ac.id"
                 target="_blank"
