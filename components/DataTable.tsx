@@ -2,8 +2,10 @@
 import React, { useState } from 'react';
 import {
   Search, Plus, Download, Printer, Edit, Trash2,
-  ExternalLink, Phone, Mail, MapPin, User, Building2, Tag
+  ExternalLink, Phone, Mail, MapPin, User, Building2, Tag,
+  FileSpreadsheet
 } from 'lucide-react';
+import * as XLSX from 'xlsx';
 import NeumorphicCard from './NeumorphicCard';
 import { UserRole } from '../types';
 
@@ -172,6 +174,28 @@ const DataTable = <T extends { id: string },>({
     return <span className="text-slate-600 font-medium">{valStr}</span>;
   };
 
+  const handleExportExcel = () => {
+    // Only export columns that are relevant
+    const exportData = data.map(item => {
+      const row: any = {};
+      columns.forEach(col => {
+        const val = (item as any)[col.key];
+        // Basic formatting for arrays (like delegates)
+        if (Array.isArray(val)) {
+          row[col.label] = val.join(', ');
+        } else {
+          row[col.label] = val;
+        }
+      });
+      return row;
+    });
+
+    const worksheet = XLSX.utils.json_to_sheet(exportData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, title.substring(0, 31)); // Excel sheet name limit is 31 chars
+    XLSX.writeFile(workbook, `${title}.xlsx`);
+  };
+
   return (
     <NeumorphicCard className={`w-full overflow-hidden animate-in slide-in-from-bottom-4 duration-500 border-t-8 ${currentTheme.border}`}>
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8 no-print">
@@ -199,6 +223,13 @@ const DataTable = <T extends { id: string },>({
 
           {!isPublic && (
             <div className="flex gap-2">
+              <button 
+                onClick={handleExportExcel} 
+                className="neu-button p-2 rounded-xl text-emerald-600 hover:scale-110 transition-transform"
+                title="Export Excel"
+              >
+                <FileSpreadsheet size={18} />
+              </button>
               {onAdd && (
                 <button onClick={onAdd} className="neu-button p-2 rounded-xl text-emerald-500 hover:scale-110 active:scale-95 transition-transform">
                   <Plus size={18} />
