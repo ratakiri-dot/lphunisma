@@ -44,33 +44,73 @@
     }
     
     @media print {
-      .no-print { display: none !important; }
-      body { background-color: white !important; color: black !important; padding: 0 !important; }
-      .max-w-7xl { max-width: 100% !important; margin: 0 !important; padding: 0 !important; }
-      
-      /* Force backgrounds & colors */
-      * { 
-        -webkit-print-color-adjust: exact !important; 
-        print-color-adjust: exact !important;
+      .no-print, header, aside, footer, .anti-screenshot-overlay, .neu-button, button { 
+        display: none !important; 
       }
       
-      /* Expand scrollable areas for full content visibility */
+      body { 
+        background-color: white !important; 
+        color: black !important; 
+        padding: 0 !important;
+        margin: 0 !important;
+      }
+
+      /* Hide greetings and non-table headings */
+      h1, .max-w-7xl > div:first-child { 
+        display: none !important; 
+      }
+
+      .max-w-7xl { 
+        max-width: 100% !important; 
+        margin: 0 !important; 
+        padding: 0 !important; 
+      }
+      
+      /* Expand scrollable areas */
       .overflow-x-auto, .overflow-y-auto, .max-h-\[70vh\] {
         overflow: visible !important;
         max-height: none !important;
         border: none !important;
         box-shadow: none !important;
+        padding: 0 !important;
       }
 
-      /* Clean table for print */
-      table { border-collapse: collapse !important; width: 100% !important; }
-      th, td { border: 1px solid #eee !important; }
+      /* Maximum Table Clarity */
+      table { 
+        border-collapse: collapse !important; 
+        width: 100% !important; 
+        margin: 0 !important;
+        table-layout: auto !important;
+      }
       
-      /* Hide shadows in print for cleaner look */
-      .neu-flat, .neu-inset, .neu-button, .shadow-2xl, .shadow-lg, .shadow-md, .shadow-sm {
+      th, td { 
+        border: 1px solid #333 !important; 
+        padding: 8px 12px !important;
+        color: black !important;
+        background: white !important;
+        font-size: 10pt !important;
+      }
+
+      th { 
+        background-color: #f0f0f0 !important; 
+        font-weight: bold !important;
+        text-transform: uppercase !important;
+      }
+
+      /* Hide Aksi Column if not already handled */
+      .no-print { display: none !important; }
+
+      /* Remove all neumorphic effects */
+      .neu-flat, .neu-inset, .neu-button {
         box-shadow: none !important;
-        background: transparent !important;
-        border: 1px solid #f0f0f0 !important;
+        background: white !important;
+        border: 1px solid #ccc !important;
+      }
+
+      /* Force background printing */
+      * { 
+        -webkit-print-color-adjust: exact !important; 
+        print-color-adjust: exact !important;
       }
     }
 

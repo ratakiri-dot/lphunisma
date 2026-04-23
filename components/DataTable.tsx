@@ -174,7 +174,7 @@ const DataTable = <T extends { id: string },>({
 
   return (
     <NeumorphicCard className={`w-full overflow-hidden animate-in slide-in-from-bottom-4 duration-500 border-t-8 ${currentTheme.border}`}>
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8 no-print">
         <div className="flex items-center gap-4">
           <div className={`p-3 rounded-2xl neu-button ${currentTheme.text}`}>
             <Building2 size={24} />
