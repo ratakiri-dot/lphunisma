@@ -221,25 +221,23 @@ const DataTable = <T extends { id: string },>({
             />
           </div>
 
-          {!isPublic && (
-            <div className="flex gap-2">
-              <button 
-                onClick={handleExportExcel} 
-                className="neu-button p-2 rounded-xl text-emerald-600 hover:scale-110 transition-transform"
-                title="Export Excel"
-              >
-                <FileSpreadsheet size={18} />
+          <div className="flex gap-2">
+            <button 
+              onClick={handleExportExcel} 
+              className="neu-button p-2 rounded-xl text-emerald-600 hover:scale-110 transition-transform"
+              title="Export Excel"
+            >
+              <FileSpreadsheet size={18} />
+            </button>
+            {!isPublic && onAdd && (
+              <button onClick={onAdd} className="neu-button p-2 rounded-xl text-emerald-500 hover:scale-110 active:scale-95 transition-transform">
+                <Plus size={18} />
               </button>
-              {onAdd && (
-                <button onClick={onAdd} className="neu-button p-2 rounded-xl text-emerald-500 hover:scale-110 active:scale-95 transition-transform">
-                  <Plus size={18} />
-                </button>
-              )}
-              <button onClick={() => window.print()} className="neu-button p-2 rounded-xl text-slate-400 hover:scale-110 transition-transform">
-                <Printer size={18} />
-              </button>
-            </div>
-          )}
+            )}
+            <button onClick={() => window.print()} className="neu-button p-2 rounded-xl text-slate-400 hover:scale-110 transition-transform" title="Cetak PDF">
+              <Printer size={18} />
+            </button>
+          </div>
         </div>
       </div>
 
