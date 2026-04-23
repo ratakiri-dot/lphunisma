@@ -44,34 +44,39 @@
     }
     
     @media print {
-      .no-print, header, aside, footer, .anti-screenshot-overlay, .neu-button, button { 
-        display: none !important; 
-      }
-      
-      body { 
-        background-color: white !important; 
+      /* Global Reset for Print */
+      * { 
+        background: transparent !important; 
+        background-color: transparent !important; 
         color: black !important; 
-        padding: 0 !important;
-        margin: 0 !important;
-      }
-
-      /* Hide greetings and non-table headings */
-      h1, .max-w-7xl > div:first-child { 
-        display: none !important; 
-      }
-
-      .max-w-7xl { 
-        max-width: 100% !important; 
-        margin: 0 !important; 
-        padding: 0 !important; 
+        box-shadow: none !important; 
+        text-shadow: none !important;
+        filter: none !important;
+        -webkit-filter: none !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
       }
       
-      /* Expand scrollable areas */
-      .overflow-x-auto, .overflow-y-auto, .max-h-\[70vh\] {
-        overflow: visible !important;
-        max-height: none !important;
-        border: none !important;
-        box-shadow: none !important;
+      html, body { 
+        background: white !important; 
+        background-color: white !important; 
+        width: 100% !important;
+        height: auto !important;
+        margin: 0 !important;
+        padding: 0 !important;
+      }
+
+      /* Hide All UI Except Table */
+      .no-print, header, aside, footer, .anti-screenshot-overlay, .neu-button, button, .shrink-0 { 
+        display: none !important; 
+      }
+      
+      /* Ensure Main and Section have no backgrounds */
+      main, section, div, #root {
+        background: transparent !important;
+        background-color: transparent !important;
+        width: 100% !important;
+        margin: 0 !important;
         padding: 0 !important;
       }
 
@@ -81,10 +86,11 @@
         width: 100% !important; 
         margin: 0 !important;
         table-layout: auto !important;
+        background-color: white !important;
       }
       
       th, td { 
-        border: 1px solid #333 !important; 
+        border: 1px solid #000 !important; 
         padding: 8px 12px !important;
         color: black !important;
         background: white !important;
@@ -92,26 +98,18 @@
       }
 
       th { 
-        background-color: #f0f0f0 !important; 
+        background-color: #f2f2f2 !important; 
         font-weight: bold !important;
         text-transform: uppercase !important;
       }
 
-      /* Hide Aksi Column if not already handled */
-      .no-print { display: none !important; }
+      /* Force background printing for headers */
+      th { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
 
-      /* Remove all neumorphic effects */
-      .neu-flat, .neu-inset, .neu-button {
-        box-shadow: none !important;
-        background: white !important;
-        border: 1px solid #ccc !important;
-      }
-
-      /* Force background printing */
-      * { 
-        -webkit-print-color-adjust: exact !important; 
-        print-color-adjust: exact !important;
-      }
+      /* Remove all padding/margins from wrappers */
+      .max-w-7xl { max-width: 100% !important; width: 100% !important; }
+      .p-4, .p-6, .p-8, .md\:p-6, .lg\:p-8 { padding: 0 !important; }
+      .space-y-8 > * + * { margin-top: 0 !important; }
     }
 
     /* Markdown Specific Styles */
