@@ -66,10 +66,10 @@ export const MOCK_SCHEDULE: Activity[] = [
 ];
 
 export const MOCK_ASSETS: Asset[] = [
-  { id: '1', name: 'MacBook Pro 14 M2', receivedDate: '2023-05-10', estimatedValue: 25000000, condition: 'Good' },
-  { id: '2', name: 'Printer Epson L3210', receivedDate: '2022-11-15', estimatedValue: 2500000, condition: 'Good' },
-  { id: '3', name: 'Projector Sony VPL-DX221', receivedDate: '2021-08-20', estimatedValue: 4500000, condition: 'Maintenance' },
-  { id: '4', name: 'Office Desk A1', receivedDate: '2020-01-05', estimatedValue: 1200000, condition: 'Good' },
+  { id: '1', name: 'MacBook Pro 14 M2', room: 'Ruang Kepala', quantity: 1, receivedDate: '2023-05-10', estimatedValue: 25000000, condition: 'Good' },
+  { id: '2', name: 'Printer Epson L3210', room: 'Admin', quantity: 2, receivedDate: '2022-11-15', estimatedValue: 2500000, condition: 'Good' },
+  { id: '3', name: 'Projector Sony VPL-DX221', room: 'Meeting Room', quantity: 1, receivedDate: '2021-08-20', estimatedValue: 4500000, condition: 'Maintenance' },
+  { id: '4', name: 'Office Desk A1', room: 'Staff', quantity: 10, receivedDate: '2020-01-05', estimatedValue: 1200000, condition: 'Good' },
 ];
 
 export const MOCK_DOCS: Documentation[] = [

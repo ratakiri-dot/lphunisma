@@ -143,6 +143,8 @@ export interface Asset {
   id: string;
   assetNo?: string;
   name: string;
+  room?: string;
+  quantity?: number;
   receivedDate: string;
   estimatedValue: number;
   condition: 'Good' | 'Broken' | 'Maintenance';

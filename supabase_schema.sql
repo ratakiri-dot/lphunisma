@@ -117,6 +117,8 @@ CREATE TABLE assets (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   asset_no TEXT,
   name TEXT NOT NULL,
+  room TEXT,
+  quantity NUMERIC DEFAULT 1,
   received_date DATE,
   estimated_value NUMERIC,
   condition TEXT,
