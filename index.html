@@ -54,6 +54,24 @@
     .prose-custom table { width: 100%; border-collapse: collapse; margin-top: 0.75rem; font-size: 0.75rem; }
     .prose-custom th, .prose-custom td { padding: 0.5rem; border: 1px solid rgba(0,0,0,0.1); text-align: left; }
     .prose-custom th { background: rgba(0,0,0,0.05); font-weight: 800; }
+
+    /* Custom Scrollbar */
+    .custom-scrollbar::-webkit-scrollbar {
+      height: 10px;
+      width: 8px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #b8bec5;
+      border-radius: 10px;
+      border: 2px solid #E0E5EC;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: #31456A;
+    }
   </style>
 <script type="importmap">
 {

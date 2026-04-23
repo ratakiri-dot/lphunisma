@@ -212,16 +212,23 @@ const DataTable = <T extends { id: string },>({
         </div>
       </div>
 
-      <div className="overflow-x-auto rounded-2xl border border-white/60 shadow-inner">
-        <table className="w-full border-collapse">
+      <div className="overflow-x-auto max-h-[70vh] rounded-2xl border border-white/60 shadow-inner custom-scrollbar relative">
+        <table className="w-full border-separate border-spacing-0">
           <thead>
             <tr className="bg-white/40 backdrop-blur-md">
-              {displayedColumns.map((col) => (
-                <th key={String(col.key)} className="text-left py-4 px-6 font-black text-slate-400 uppercase text-[9px] tracking-[0.15em] border-b border-white">
+              {displayedColumns.map((col, colIdx) => (
+                <th 
+                  key={String(col.key)} 
+                  className={`text-left py-4 px-6 font-black text-slate-400 uppercase text-[9px] tracking-[0.15em] border-b border-white sticky top-0 bg-[#E0E5EC]/90 backdrop-blur-md z-30 ${colIdx === 0 ? 'left-0 z-40' : ''}`}
+                >
                   {col.label}
                 </th>
               ))}
-              {!isPublic && (canModify || canDelete) && <th className="text-right py-4 px-6 border-b border-white font-black text-slate-400 uppercase text-[9px] tracking-[0.15em]">Aksi</th>}
+              {!isPublic && (canModify || canDelete) && (
+                <th className="text-right py-4 px-6 border-b border-white font-black text-slate-400 uppercase text-[9px] tracking-[0.15em] sticky top-0 right-0 bg-[#E0E5EC]/90 backdrop-blur-md z-30">
+                  Aksi
+                </th>
+              )}
             </tr>
           </thead>
           <tbody className="divide-y divide-white/20">
@@ -231,12 +238,15 @@ const DataTable = <T extends { id: string },>({
                 className={`group transition-all duration-300 border-l-4 ${getRowStyle(item, rowIdx)}`}
               >
                 {displayedColumns.map((col, colIdx) => (
-                  <td key={String(col.key)} className={`py-4 px-6 text-sm ${colIdx === 0 ? 'min-w-[150px]' : 'whitespace-nowrap'}`}>
+                  <td 
+                    key={String(col.key)} 
+                    className={`py-4 px-6 text-sm ${colIdx === 0 ? 'min-w-[150px] sticky left-0 z-10 bg-inherit backdrop-blur-md border-r border-white/20' : 'whitespace-nowrap'}`}
+                  >
                     {renderCell(item, col)}
                   </td>
                 ))}
                 {!isPublic && (canModify || canDelete) && (
-                  <td className="py-4 px-6 text-right">
+                  <td className="py-4 px-6 text-right sticky right-0 z-10 bg-inherit backdrop-blur-md border-l border-white/20">
                     <div className="flex justify-end gap-1.5 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0">
                       {canModify && onEdit && (
                         <button onClick={() => onEdit(item)} className="p-1.5 bg-white/50 rounded-lg text-blue-500 hover:bg-white shadow-sm transition-colors border border-white/40">
