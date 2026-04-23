@@ -212,7 +212,7 @@ const DataTable = <T extends { id: string },>({
         </div>
       </div>
 
-      <div className="overflow-x-auto max-h-[70vh] rounded-2xl border border-white/60 shadow-inner custom-scrollbar relative">
+      <div className="overflow-x-auto max-h-[70vh] rounded-2xl border border-white/60 shadow-inner custom-scrollbar relative print:hidden">
         <table className="w-full border-separate border-spacing-0">
           <thead>
             <tr className="bg-white/40 backdrop-blur-md">
@@ -271,6 +271,32 @@ const DataTable = <T extends { id: string },>({
             <p className="text-sm font-black text-slate-300 uppercase tracking-widest">Tidak ada data</p>
           </div>
         )}
+      </div>
+
+      {/* Print-only table containing ALL data, visible only during printing */}
+      <div className="hidden print:block w-full">
+        <table className="w-full border-collapse">
+          <thead>
+            <tr>
+              {displayedColumns.map((col) => (
+                <th key={String(col.key)} className="text-left border border-black p-2 font-bold uppercase text-[10pt] bg-gray-100">
+                  {col.label}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {data.map((item) => (
+              <tr key={item.id}>
+                {displayedColumns.map((col) => (
+                  <td key={String(col.key)} className="border border-black p-2 text-[9pt]">
+                    {renderCell(item, col)}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     </NeumorphicCard>
   );
