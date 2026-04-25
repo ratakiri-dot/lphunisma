@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import {
   Search, Plus, Download, Printer, Edit, Trash2,
   ExternalLink, Phone, Mail, MapPin, User, Building2, Tag,
-  FileSpreadsheet
+  FileSpreadsheet, ArrowRightCircle
 } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import NeumorphicCard from './NeumorphicCard';
@@ -17,6 +17,7 @@ interface DataTableProps<T,> {
   onAdd?: () => void;
   onEdit?: (item: T) => void;
   onDelete?: (item: T) => void;
+  onNext?: (item: T) => void;
   accentColor?: string;
 }
 
@@ -28,6 +29,7 @@ const DataTable = <T extends { id: string },>({
   onAdd,
   onEdit,
   onDelete,
+  onNext,
   accentColor = 'indigo'
 }: DataTableProps<T>) => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -285,6 +287,11 @@ const DataTable = <T extends { id: string },>({
                       {canDelete && onDelete && (
                         <button onClick={() => onDelete(item)} className="p-1.5 bg-white/50 rounded-lg text-rose-500 hover:bg-white shadow-sm transition-colors border border-white/40">
                           <Trash2 size={14} />
+                        </button>
+                      )}
+                      {onNext && (
+                        <button onClick={() => onNext(item)} className="p-1.5 bg-white/50 rounded-lg text-emerald-600 hover:bg-white shadow-sm transition-colors border border-white/40" title="Lanjut ke tahap berikutnya">
+                          <ArrowRightCircle size={14} />
                         </button>
                       )}
                     </div>

@@ -32,6 +32,8 @@ const App: React.FC = () => {
   const [userTasks, setUserTasks] = useState<UserTask[]>([]);
   const [credentials, setCredentials] = useState<Credential[]>([]);
   const [isTaskPanelOpen, setIsTaskPanelOpen] = useState(false);
+  const [isPromoting, setIsPromoting] = useState(false);
+  const [promoteSourceTab, setPromoteSourceTab] = useState<NavItem | null>(null);
 
   // Fetch users for login on mount
   useEffect(() => {
@@ -313,11 +315,20 @@ const App: React.FC = () => {
 
   const handleEdit = (item: any) => {
     setEditingItem(item);
+    setIsPromoting(false);
+    setIsModalOpen(true);
+  };
+
+  const handleNext = (item: any) => {
+    setEditingItem(item);
+    setIsPromoting(true);
+    setPromoteSourceTab(activeTab);
     setIsModalOpen(true);
   };
 
   const handleAdd = () => {
     setEditingItem(null);
+    setIsPromoting(false);
     setIsModalOpen(true);
   };
 
@@ -329,17 +340,25 @@ const App: React.FC = () => {
     const auditData = editingItem ? { updatedBy: username } : { createdBy: username, updatedBy: username };
 
     try {
-      if (activeTab === 'PU Certified') {
-        const item = { ...data, ...auditData, id: editingItem?.id } as PUCertified;
+      if (activeTab === 'PU Certified' || (isPromoting && promoteSourceTab === 'PU On Process')) {
+        const item = { ...data, ...auditData, id: isPromoting ? undefined : editingItem?.id } as PUCertified;
         const saved = await dataService.upsertPUCertified(item);
-        setPuCertified(prev => editingItem ? prev.map(i => i.id === saved.id ? saved : i) : [...prev, saved]);
+        if (isPromoting) {
+          setPuCertified(prev => [...prev, saved]);
+        } else {
+          setPuCertified(prev => editingItem ? prev.map(i => i.id === saved.id ? saved : i) : [...prev, saved]);
+        }
       }
-      if (activeTab === 'PU On Process') {
-        const item = { ...data, ...auditData, id: editingItem?.id } as PUOnProcess;
+      else if (activeTab === 'PU On Process' || (isPromoting && promoteSourceTab === 'PU Prospect')) {
+        const item = { ...data, ...auditData, id: isPromoting ? undefined : editingItem?.id } as PUOnProcess;
         const saved = await dataService.upsertPUOnProcess(item);
-        setPuOnProcess(prev => editingItem ? prev.map(i => i.id === saved.id ? saved : i) : [...prev, saved]);
+        if (isPromoting) {
+          setPuOnProcess(prev => [...prev, saved]);
+        } else {
+          setPuOnProcess(prev => editingItem ? prev.map(i => i.id === saved.id ? saved : i) : [...prev, saved]);
+        }
       }
-      if (activeTab === 'PU Prospect') {
+      else if (activeTab === 'PU Prospect') {
         const item = { ...data, ...auditData, id: editingItem?.id } as PUProspect;
         const saved = await dataService.upsertPUProspect(item);
         setPuProspect(prev => editingItem ? prev.map(i => i.id === saved.id ? saved : i) : [...prev, saved]);
@@ -408,6 +427,18 @@ const App: React.FC = () => {
         }
       }
 
+      if (isPromoting) {
+        if (promoteSourceTab === 'PU Prospect') {
+          await dataService.deletePUProspect(editingItem.id);
+          setPuProspect(prev => prev.filter(i => i.id !== editingItem.id));
+        } else if (promoteSourceTab === 'PU On Process') {
+          await dataService.deletePUOnProcess(editingItem.id);
+          setPuOnProcess(prev => prev.filter(i => i.id !== editingItem.id));
+        }
+      }
+
+      setIsPromoting(false);
+      setPromoteSourceTab(null);
       setIsModalOpen(false);
     } catch (err) {
       alert('Gagal menyimpan data');
@@ -447,6 +478,7 @@ const App: React.FC = () => {
             onAdd={handleAdd}
             onEdit={handleEdit}
             onDelete={handleDelete}
+            onNext={handleNext}
             accentColor="blue"
             columns={[
               { key: 'regNo', label: 'No Reg', isPublic: true },
@@ -466,6 +498,7 @@ const App: React.FC = () => {
             onAdd={handleAdd}
             onEdit={handleEdit}
             onDelete={handleDelete}
+            onNext={handleNext}
             accentColor="amber"
             columns={[
               { key: 'businessName', label: 'Nama Usaha', isPublic: true },
@@ -607,7 +640,7 @@ const App: React.FC = () => {
   };
 
   const renderFormFields = () => {
-    if (activeTab === 'PU Certified') {
+    if (activeTab === 'PU Certified' || (isPromoting && promoteSourceTab === 'PU On Process')) {
       return (
         <>
           <input name="regNo" defaultValue={editingItem?.regNo} placeholder="No Pendaftaran" className="w-full p-4 neu-inset rounded-xl outline-none" required />
@@ -616,10 +649,14 @@ const App: React.FC = () => {
           <input name="halalId" defaultValue={editingItem?.halalId} placeholder="ID Halal" className="w-full p-4 neu-inset rounded-xl outline-none" required />
           <input name="expiryDate" type="date" defaultValue={editingItem?.expiryDate} className="w-full p-4 neu-inset rounded-xl outline-none" required />
           <input name="waNumber" defaultValue={editingItem?.waNumber} placeholder="WhatsApp" className="w-full p-4 neu-inset rounded-xl outline-none" required />
+          <input name="email" defaultValue={editingItem?.email} placeholder="Email" className="w-full p-4 neu-inset rounded-xl outline-none" />
+          <input name="businessAddress" defaultValue={editingItem?.businessAddress} placeholder="Alamat Usaha" className="w-full p-4 neu-inset rounded-xl outline-none" />
+          <input name="productionAddress" defaultValue={editingItem?.productionAddress} placeholder="Alamat Produksi" className="w-full p-4 neu-inset rounded-xl outline-none" />
+          <input name="nib" defaultValue={editingItem?.nib} placeholder="NIB" className="w-full p-4 neu-inset rounded-xl outline-none" />
         </>
       );
     }
-    if (activeTab === 'PU On Process') {
+    if (activeTab === 'PU On Process' || (isPromoting && promoteSourceTab === 'PU Prospect')) {
       return (
         <>
           <input name="regNo" defaultValue={editingItem?.regNo} placeholder="No Reg" className="w-full p-4 neu-inset rounded-xl outline-none" required />
@@ -1040,8 +1077,12 @@ const App: React.FC = () => {
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
           <NeumorphicCard className="w-full max-w-lg">
             <div className="flex justify-between items-center mb-6">
-              <h3 className="text-xl font-bold">{editingItem ? 'Edit' : 'Tambah'} {activeTab}</h3>
-              <button onClick={() => setIsModalOpen(false)} className="p-2 neu-button rounded-xl text-rose-500"><X size={20} /></button>
+              <h3 className="text-xl font-bold">
+                {isPromoting 
+                  ? `Lanjut ke ${promoteSourceTab === 'PU Prospect' ? 'PU on Process' : 'PU Certified'}` 
+                  : (editingItem ? 'Edit' : 'Tambah') + ' ' + activeTab}
+              </h3>
+              <button onClick={() => { setIsModalOpen(false); setIsPromoting(false); }} className="p-2 neu-button rounded-xl text-rose-500"><X size={20} /></button>
             </div>
             <form onSubmit={handleSave} className="space-y-4">
               {renderFormFields()}
