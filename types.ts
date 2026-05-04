@@ -42,6 +42,9 @@ export interface PUCertified {
   nib: string;
   halalId: string; // public
   expiryDate: string; // public
+  lphId?: string; // keeping just in case
+  lphProcessDate?: string;
+  sla?: string;
   createdBy?: string;
   updatedBy?: string;
   updatedAt?: string;

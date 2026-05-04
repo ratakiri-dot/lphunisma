@@ -448,11 +448,22 @@ const App: React.FC = () => {
   const renderContent = () => {
     switch (activeTab) {
       case 'Dashboard': return <Dashboard role={role} data={{ puCertified, puOnProcess, puProspect, internal, auditors, partners, finance }} />;
-      case 'PU Certified':
+      case 'PU Certified': {
+        const enrichedData = puCertified.map(item => {
+          let sla = '-';
+          if (item.lphProcessDate && item.expiryDate) {
+            const processDate = new Date(item.lphProcessDate);
+            const expiryDate = new Date(item.expiryDate);
+            const diffTime = expiryDate.getTime() - processDate.getTime();
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            sla = `${diffDays} Hari`;
+          }
+          return { ...item, sla };
+        });
         return (
-          <DataTable<PUCertified>
+          <DataTable<PUCertified & { sla?: string }>
             title="Pelaku Usaha Tersertifikasi"
-            data={puCertified}
+            data={enrichedData}
             role={role}
             onAdd={handleAdd}
             onEdit={handleEdit}
@@ -463,12 +474,15 @@ const App: React.FC = () => {
               { key: 'businessName', label: 'Nama Usaha', isPublic: true },
               { key: 'ownerName', label: 'Nama Pemilik' },
               { key: 'halalId', label: 'ID Halal', isPublic: true },
+              { key: 'lphProcessDate', label: 'Proses di LPH', isPublic: true },
               { key: 'expiryDate', label: 'Tanggal Terbit', isPublic: true },
+              { key: 'sla', label: 'SLA', isPublic: true },
               { key: 'waNumber', label: 'WhatsApp' },
               { key: 'createdBy', label: 'Nama Penginput' },
             ]}
           />
         );
+      }
       case 'PU On Process':
         return (
           <DataTable<PUOnProcess>
@@ -647,7 +661,14 @@ const App: React.FC = () => {
           <input name="businessName" defaultValue={editingItem?.businessName} placeholder="Nama Usaha" className="w-full p-4 neu-inset rounded-xl outline-none" required />
           <input name="ownerName" defaultValue={editingItem?.ownerName} placeholder="Nama Pemilik" className="w-full p-4 neu-inset rounded-xl outline-none" required />
           <input name="halalId" defaultValue={editingItem?.halalId} placeholder="ID Halal" className="w-full p-4 neu-inset rounded-xl outline-none" required />
-          <input name="expiryDate" type="date" defaultValue={editingItem?.expiryDate} className="w-full p-4 neu-inset rounded-xl outline-none" required />
+          <div className="flex flex-col gap-1 w-full">
+            <span className="text-[10px] font-bold text-slate-500 uppercase pl-2">Tanggal Proses di LPH</span>
+            <input name="lphProcessDate" type="date" defaultValue={editingItem?.lphProcessDate} className="w-full p-4 neu-inset rounded-xl outline-none" required />
+          </div>
+          <div className="flex flex-col gap-1 w-full">
+            <span className="text-[10px] font-bold text-slate-500 uppercase pl-2">Tanggal Terbit Sertifikat</span>
+            <input name="expiryDate" type="date" defaultValue={editingItem?.expiryDate} className="w-full p-4 neu-inset rounded-xl outline-none" required />
+          </div>
           <input name="waNumber" defaultValue={editingItem?.waNumber} placeholder="WhatsApp" className="w-full p-4 neu-inset rounded-xl outline-none" required />
           <input name="email" defaultValue={editingItem?.email} placeholder="Email" className="w-full p-4 neu-inset rounded-xl outline-none" />
           <input name="businessAddress" defaultValue={editingItem?.businessAddress} placeholder="Alamat Usaha" className="w-full p-4 neu-inset rounded-xl outline-none" />

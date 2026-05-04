@@ -33,6 +33,7 @@ CREATE TABLE pu_certified (
   production_address TEXT,
   nib TEXT,
   halal_id TEXT,
+  lph_process_date DATE,
   expiry_date DATE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
