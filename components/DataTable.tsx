@@ -33,6 +33,7 @@ const DataTable = <T extends { id: string },>({
   accentColor = 'indigo'
 }: DataTableProps<T>) => {
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedRowId, setSelectedRowId] = useState<string | null>(null);
 
   const isPublic = role === UserRole.PUBLIC;
   const canModify = role === UserRole.ADMIN || role === UserRole.USER;
@@ -61,6 +62,10 @@ const DataTable = <T extends { id: string },>({
 
   // Logic to determine row color based on content (Semantic Coloring)
   const getRowStyle = (item: T, index: number) => {
+    if (item.id === selectedRowId) {
+      return 'bg-amber-100/90 border-l-amber-500 ring-2 ring-amber-300 z-20 relative';
+    }
+
     const itemStr = JSON.stringify(item);
 
     // Status-based coloring (Semantic)
@@ -266,7 +271,8 @@ const DataTable = <T extends { id: string },>({
             {filteredData.map((item, rowIdx) => (
               <tr
                 key={item.id}
-                className={`group transition-all duration-300 border-l-4 ${getRowStyle(item, rowIdx)}`}
+                onClick={() => setSelectedRowId(item.id === selectedRowId ? null : item.id)}
+                className={`group transition-all duration-300 border-l-4 cursor-pointer ${getRowStyle(item, rowIdx)}`}
               >
                 {displayedColumns.map((col, colIdx) => (
                   <td 
