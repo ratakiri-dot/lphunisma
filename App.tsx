@@ -539,7 +539,7 @@ const App: React.FC = () => {
             onDelete={handleDelete}
             accentColor="indigo"
             columns={[
-              { key: 'displayOrder', label: 'Urutan', isPublic: true },
+              { key: 'displayOrder', label: 'No.', isPublic: true },
               { key: 'fullName', label: 'Nama Lengkap', isPublic: true },
               { key: 'position', label: 'Jabatan', isPublic: true },
               { key: 'waNumber', label: 'WhatsApp' },
