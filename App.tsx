@@ -1111,8 +1111,10 @@ const App: React.FC = () => {
               <button onClick={() => { setIsModalOpen(false); setIsPromoting(false); }} className="p-2 neu-button rounded-xl text-rose-500"><X size={20} /></button>
             </div>
             <form onSubmit={handleSave} className="space-y-4">
-              {renderFormFields()}
-              <div className="flex gap-4 pt-4">
+              <div className="max-h-[60vh] overflow-y-auto px-2 pb-2 space-y-4 custom-scrollbar">
+                {renderFormFields()}
+              </div>
+              <div className="flex gap-4 pt-4 border-t border-slate-200">
                 <button type="button" onClick={() => setIsModalOpen(false)} className="flex-1 py-4 neu-button rounded-xl font-black text-slate-400 uppercase">Batal</button>
                 <button type="submit" className="flex-1 py-4 bg-indigo-500 text-white rounded-xl font-black neu-button uppercase shadow-lg">Simpan</button>
               </div>
