@@ -1,9 +1,9 @@
 
 import React, { useState, useEffect } from 'react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, AreaChart, Area } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, AreaChart, Area, LineChart, Line } from 'recharts';
 import NeumorphicCard from './NeumorphicCard';
 import { getDashboardInsight } from '../services/geminiService';
-import { Bot, TrendingUp, Users, CheckCircle } from 'lucide-react';
+import { Bot, TrendingUp, Users, CheckCircle, Zap } from 'lucide-react';
 import { PUCertified, PUOnProcess, PUProspect, InternalMember, Auditor, Partner, FinanceRecord, UserRole } from '../types';
 
 interface DashboardProps {
@@ -55,13 +55,57 @@ const Dashboard: React.FC<DashboardProps> = ({ role, data }) => {
       { month: 'Mar', balance: 0 },
     ];
 
+  // SLA Calculation
+  const slaDataByMonth = puCertified.reduce((acc: any, curr) => {
+    if (curr.lphProcessDate && curr.lphFinishedDate) {
+      const processDate = new Date(curr.lphProcessDate);
+      const finishedDate = new Date(curr.lphFinishedDate);
+      const month = processDate.toLocaleDateString('id-ID', { month: 'short' });
+      const diffTime = finishedDate.getTime() - processDate.getTime();
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      
+      if (!acc[month]) acc[month] = { totalSla: 0, count: 0 };
+      acc[month].totalSla += diffDays;
+      acc[month].count += 1;
+    }
+    return acc;
+  }, {});
+
+  const slaData = Object.keys(slaDataByMonth).length > 0 
+    ? Object.entries(slaDataByMonth).map(([month, data]: any) => ({
+        month,
+        avgSla: Math.round(data.totalSla / data.count)
+      }))
+    : [
+        { month: 'Jan', avgSla: 0 },
+        { month: 'Feb', avgSla: 0 },
+        { month: 'Mar', avgSla: 0 },
+      ];
+
   useEffect(() => {
     const fetchInsight = async () => {
-      const summary = await getDashboardInsight({ puData, peopleData, financeData });
+      const summary = await getDashboardInsight({ puData, peopleData, financeData, slaData });
       setInsight(summary || "Data siap dianalisis.");
     };
     fetchInsight();
   }, []);
+
+  const CustomSLATooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="bg-white/80 backdrop-blur-md p-3 rounded-xl shadow-lg border border-white/40">
+          <p className="text-xs font-black text-slate-700 mb-1">{label}</p>
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 rounded-full bg-yellow-500"></div>
+            <p className="text-xs font-bold text-yellow-600">
+              Rata-rata SLA: {payload[0].value} Hari
+            </p>
+          </div>
+        </div>
+      );
+    }
+    return null;
+  };
 
   // Custom Tooltip to hide numbers for Guest Mode
   const CustomTooltip = ({ active, payload, label }: any) => {
@@ -85,9 +129,9 @@ const Dashboard: React.FC<DashboardProps> = ({ role, data }) => {
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 animate-in fade-in duration-700">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-8 animate-in fade-in duration-700">
       {/* AI Insight Section */}
-      <NeumorphicCard className="col-span-1 md:col-span-2 lg:col-span-3 border-l-4 border-indigo-400 bg-indigo-50/30">
+      <NeumorphicCard className="col-span-1 md:col-span-2 lg:col-span-2 xl:col-span-4 border-l-4 border-indigo-400 bg-indigo-50/30">
         <div className="flex items-start gap-4">
           <div className="p-3 neu-button rounded-xl text-indigo-600">
             <Bot size={24} />
@@ -198,6 +242,28 @@ const Dashboard: React.FC<DashboardProps> = ({ role, data }) => {
             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Visualisasi Tren Terproteksi</p>
           </div>
         )}
+      </NeumorphicCard>
+
+      {/* Chart 4: SLA Performance */}
+      <NeumorphicCard className="h-96 flex flex-col">
+        <div className="flex items-center gap-2 mb-6">
+          <Zap className="text-yellow-500" size={20} />
+          <h3 className="font-bold text-lg">Performa SLA LPH</h3>
+        </div>
+        <div className="flex-grow">
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={slaData}>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#CBD5E1" />
+              <XAxis dataKey="month" axisLine={false} tickLine={false} />
+              <YAxis axisLine={false} tickLine={false} />
+              <Tooltip cursor={{ fill: '#F1F5F9', opacity: 0.4 }} content={<CustomSLATooltip />} />
+              <Line type="monotone" dataKey="avgSla" stroke="#F59E0B" strokeWidth={3} dot={{ r: 4, fill: '#F59E0B' }} activeDot={{ r: 6 }} />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+        <div className="mt-4 text-center text-xs text-slate-500 italic font-medium">
+          *Rata-rata SLA (Hari) - Semakin cepat semakin baik
+        </div>
       </NeumorphicCard>
     </div>
   );
