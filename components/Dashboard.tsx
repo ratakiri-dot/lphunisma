@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, AreaChart, Area, LineChart, Line } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, AreaChart, Area, LineChart, Line, Legend } from 'recharts';
 import NeumorphicCard from './NeumorphicCard';
 import { getDashboardInsight } from '../services/geminiService';
 import { Bot, TrendingUp, Users, CheckCircle, Zap, MapPin } from 'lucide-react';
@@ -56,31 +56,46 @@ const Dashboard: React.FC<DashboardProps> = ({ role, data }) => {
     ];
 
   // SLA Calculation
-  const slaDataByMonth = puCertified.reduce((acc: any, curr) => {
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+  
+  // Initialize data array with all months
+  const initialSlaData = months.map(month => ({ 
+    month, 
+    "2024": null, 
+    "2025": null, 
+    "2026": null, 
+    counts: { "2024": 0, "2025": 0, "2026": 0 }, 
+    totals: { "2024": 0, "2025": 0, "2026": 0 } 
+  }));
+
+  const slaDataByMonth = puCertified.reduce((acc: any[], curr) => {
     if (curr.lphProcessDate && curr.lphFinishedDate) {
       const processDate = new Date(curr.lphProcessDate);
       const finishedDate = new Date(curr.lphFinishedDate);
-      const month = processDate.toLocaleDateString('id-ID', { month: 'short' });
+      
+      const monthIndex = processDate.getMonth();
+      const year = processDate.getFullYear().toString();
+      
       const diffTime = finishedDate.getTime() - processDate.getTime();
       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
       
-      if (!acc[month]) acc[month] = { totalSla: 0, count: 0 };
-      acc[month].totalSla += diffDays;
-      acc[month].count += 1;
+      if (['2024', '2025', '2026'].includes(year)) {
+        acc[monthIndex].totals[year] += diffDays;
+        acc[monthIndex].counts[year] += 1;
+      }
     }
     return acc;
-  }, {});
+  }, initialSlaData);
 
-  const slaData = Object.keys(slaDataByMonth).length > 0 
-    ? Object.entries(slaDataByMonth).map(([month, data]: any) => ({
-        month,
-        avgSla: Math.round(data.totalSla / data.count)
-      }))
-    : [
-        { month: 'Jan', avgSla: 0 },
-        { month: 'Feb', avgSla: 0 },
-        { month: 'Mar', avgSla: 0 },
-      ];
+  const slaData = slaDataByMonth.map(item => {
+    const result: any = { month: item.month };
+    ['2024', '2025', '2026'].forEach(year => {
+      if (item.counts[year] > 0) {
+        result[year] = Math.round(item.totals[year] / item.counts[year]);
+      }
+    });
+    return result;
+  });
 
   useEffect(() => {
     const fetchInsight = async () => {
@@ -94,13 +109,18 @@ const Dashboard: React.FC<DashboardProps> = ({ role, data }) => {
     if (active && payload && payload.length) {
       return (
         <div className="bg-white/80 backdrop-blur-md p-3 rounded-xl shadow-lg border border-white/40">
-          <p className="text-xs font-black text-slate-700 mb-1">{label}</p>
-          <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-yellow-500"></div>
-            <p className="text-xs font-bold text-yellow-600">
-              Rata-rata SLA: {payload[0].value} Hari
-            </p>
-          </div>
+          <p className="text-xs font-black text-slate-700 mb-2 border-b border-slate-200 pb-1">{label}</p>
+          {payload.map((entry: any, index: number) => (
+            <div key={index} className="flex items-center justify-between gap-4 mb-1">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full" style={{ backgroundColor: entry.color }}></div>
+                <p className="text-xs font-bold text-slate-600">{entry.name}</p>
+              </div>
+              <p className="text-xs font-black" style={{ color: entry.color }}>
+                {entry.value} Hari
+              </p>
+            </div>
+          ))}
         </div>
       );
     }
@@ -257,7 +277,10 @@ const Dashboard: React.FC<DashboardProps> = ({ role, data }) => {
               <XAxis dataKey="month" axisLine={false} tickLine={false} />
               <YAxis axisLine={false} tickLine={false} />
               <Tooltip cursor={{ fill: '#F1F5F9', opacity: 0.4 }} content={<CustomSLATooltip />} />
-              <Line type="monotone" dataKey="avgSla" stroke="#F59E0B" strokeWidth={3} dot={{ r: 4, fill: '#F59E0B' }} activeDot={{ r: 6 }} />
+              <Legend verticalAlign="top" height={36} iconType="circle" />
+              <Line type="monotone" dataKey="2024" name="2024" stroke="#EF4444" strokeWidth={3} dot={{ r: 4, fill: '#EF4444' }} activeDot={{ r: 6 }} connectNulls />
+              <Line type="monotone" dataKey="2025" name="2025" stroke="#EAB308" strokeWidth={3} dot={{ r: 4, fill: '#EAB308' }} activeDot={{ r: 6 }} connectNulls />
+              <Line type="monotone" dataKey="2026" name="2026" stroke="#22C55E" strokeWidth={3} dot={{ r: 4, fill: '#22C55E' }} activeDot={{ r: 6 }} connectNulls />
             </LineChart>
           </ResponsiveContainer>
         </div>
