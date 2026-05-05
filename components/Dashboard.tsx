@@ -149,9 +149,9 @@ const Dashboard: React.FC<DashboardProps> = ({ role, data }) => {
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-8 animate-in fade-in duration-700">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 animate-in fade-in duration-700">
       {/* AI Insight Section */}
-      <NeumorphicCard className="col-span-1 md:col-span-2 lg:col-span-2 xl:col-span-4 border-l-4 border-indigo-400 bg-indigo-50/30">
+      <NeumorphicCard className="col-span-1 md:col-span-2 lg:col-span-3 border-l-4 border-indigo-400 bg-indigo-50/30">
         <div className="flex items-start gap-4">
           <div className="p-3 neu-button rounded-xl text-indigo-600">
             <Bot size={24} />
@@ -265,7 +265,7 @@ const Dashboard: React.FC<DashboardProps> = ({ role, data }) => {
       </NeumorphicCard>
 
       {/* Chart 4: SLA Performance */}
-      <NeumorphicCard className="col-span-1 md:col-span-2 lg:col-span-2 xl:col-span-4 h-96 flex flex-col">
+      <NeumorphicCard className="col-span-1 md:col-span-2 lg:col-span-3 h-96 flex flex-col">
         <div className="flex items-center gap-2 mb-6">
           <Zap className="text-yellow-500" size={20} />
           <h3 className="font-bold text-lg">Performa SLA LPH</h3>
@@ -290,7 +290,7 @@ const Dashboard: React.FC<DashboardProps> = ({ role, data }) => {
       </NeumorphicCard>
 
       {/* Map Section */}
-      <NeumorphicCard className="col-span-1 md:col-span-2 lg:col-span-2 xl:col-span-4 flex flex-col">
+      <NeumorphicCard className="col-span-1 md:col-span-2 lg:col-span-3 flex flex-col">
         <div className="flex items-center gap-2 mb-6">
           <MapPin className="text-red-500" size={20} />
           <h3 className="font-bold text-lg">Peta Persebaran Mitra Halal LPH UNISMA</h3>
