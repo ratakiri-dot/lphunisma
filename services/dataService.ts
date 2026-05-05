@@ -127,7 +127,7 @@ export const dataService = {
 
     // Internal
     async getInternal() {
-        const { data, error } = await supabase.from('internal_members').select('*').order('created_at', { ascending: false });
+        const { data, error } = await supabase.from('internal_members').select('*').order('display_order', { ascending: true }).order('created_at', { ascending: true });
         if (error) throw error;
         return data.map(mapToCamel);
     },

@@ -89,6 +89,7 @@ export interface InternalMember {
   address: string;
   waNumber: string;
   email: string;
+  displayOrder?: number;
   createdBy?: string;
   updatedBy?: string;
   updatedAt?: string;

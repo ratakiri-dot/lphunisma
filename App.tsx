@@ -364,9 +364,12 @@ const App: React.FC = () => {
         setPuProspect(prev => editingItem ? prev.map(i => i.id === saved.id ? saved : i) : [...prev, saved]);
       }
       if (activeTab === 'Internal') {
-        const item = { ...data, ...auditData, id: editingItem?.id } as InternalMember;
+        const item = { ...data, ...auditData, displayOrder: Number(data.displayOrder) || 0, id: editingItem?.id } as InternalMember;
         const saved = await dataService.upsertInternal(item);
-        setInternal(prev => editingItem ? prev.map(i => i.id === saved.id ? saved : i) : [...prev, saved]);
+        setInternal(prev => {
+          const newList = editingItem ? prev.map(i => i.id === saved.id ? saved : i) : [...prev, saved];
+          return newList.sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
+        });
       }
       if (activeTab === 'Auditor') {
         const item = { ...data, ...auditData, id: editingItem?.id } as Auditor;
@@ -536,6 +539,7 @@ const App: React.FC = () => {
             onDelete={handleDelete}
             accentColor="indigo"
             columns={[
+              { key: 'displayOrder', label: 'Urutan', isPublic: true },
               { key: 'fullName', label: 'Nama Lengkap', isPublic: true },
               { key: 'position', label: 'Jabatan', isPublic: true },
               { key: 'waNumber', label: 'WhatsApp' },
@@ -712,6 +716,7 @@ const App: React.FC = () => {
     if (activeTab === 'Internal') {
       return (
         <>
+          <input name="displayOrder" type="number" defaultValue={editingItem?.displayOrder ?? 0} placeholder="Urutan Tampil (Angka kecil tampil duluan)" className="w-full p-4 neu-inset rounded-xl outline-none" required />
           <input name="fullName" defaultValue={editingItem?.fullName} placeholder="Nama Lengkap" className="w-full p-4 neu-inset rounded-xl outline-none" required />
           <input name="position" defaultValue={editingItem?.position} placeholder="Jabatan" className="w-full p-4 neu-inset rounded-xl outline-none" required />
           <input name="waNumber" defaultValue={editingItem?.waNumber} placeholder="WhatsApp" className="w-full p-4 neu-inset rounded-xl outline-none" required />

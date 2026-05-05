@@ -76,6 +76,7 @@ CREATE TABLE internal_members (
   address TEXT,
   wa_number TEXT,
   email TEXT,
+  display_order INTEGER DEFAULT 0,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
