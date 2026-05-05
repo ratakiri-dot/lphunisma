@@ -451,10 +451,10 @@ const App: React.FC = () => {
       case 'PU Certified': {
         const enrichedData = puCertified.map(item => {
           let sla = '-';
-          if (item.lphProcessDate && item.expiryDate) {
+          if (item.lphProcessDate && item.lphFinishedDate) {
             const processDate = new Date(item.lphProcessDate);
-            const expiryDate = new Date(item.expiryDate);
-            const diffTime = expiryDate.getTime() - processDate.getTime();
+            const finishedDate = new Date(item.lphFinishedDate);
+            const diffTime = finishedDate.getTime() - processDate.getTime();
             const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
             sla = `${diffDays} Hari`;
           }
@@ -474,7 +474,8 @@ const App: React.FC = () => {
               { key: 'businessName', label: 'Nama Usaha', isPublic: true },
               { key: 'ownerName', label: 'Nama Pemilik' },
               { key: 'halalId', label: 'ID Halal', isPublic: true },
-              { key: 'lphProcessDate', label: 'Proses di LPH', isPublic: true },
+              { key: 'lphProcessDate', label: 'Mulai Proses di LPH', isPublic: true },
+              { key: 'lphFinishedDate', label: 'Selesai di LPH', isPublic: true },
               { key: 'expiryDate', label: 'Tanggal Terbit', isPublic: true },
               { key: 'sla', label: 'SLA', isPublic: true },
               { key: 'waNumber', label: 'WhatsApp' },
@@ -662,8 +663,12 @@ const App: React.FC = () => {
           <input name="ownerName" defaultValue={editingItem?.ownerName} placeholder="Nama Pemilik" className="w-full p-4 neu-inset rounded-xl outline-none" required />
           <input name="halalId" defaultValue={editingItem?.halalId} placeholder="ID Halal" className="w-full p-4 neu-inset rounded-xl outline-none" required />
           <div className="flex flex-col gap-1 w-full">
-            <span className="text-[10px] font-bold text-slate-500 uppercase pl-2">Tanggal Proses di LPH</span>
+            <span className="text-[10px] font-bold text-slate-500 uppercase pl-2">Mulai Proses di LPH</span>
             <input name="lphProcessDate" type="date" defaultValue={editingItem?.lphProcessDate} className="w-full p-4 neu-inset rounded-xl outline-none" required />
+          </div>
+          <div className="flex flex-col gap-1 w-full">
+            <span className="text-[10px] font-bold text-slate-500 uppercase pl-2">Selesai di LPH</span>
+            <input name="lphFinishedDate" type="date" defaultValue={editingItem?.lphFinishedDate} className="w-full p-4 neu-inset rounded-xl outline-none" />
           </div>
           <div className="flex flex-col gap-1 w-full">
             <span className="text-[10px] font-bold text-slate-500 uppercase pl-2">Tanggal Terbit Sertifikat</span>

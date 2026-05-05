@@ -44,6 +44,7 @@ export interface PUCertified {
   expiryDate: string; // public
   lphId?: string; // keeping just in case
   lphProcessDate?: string;
+  lphFinishedDate?: string;
   sla?: string;
   createdBy?: string;
   updatedBy?: string;
