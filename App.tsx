@@ -530,22 +530,35 @@ const App: React.FC = () => {
         );
       case 'Internal':
         return (
-          <DataTable<InternalMember>
-            title="Struktur Internal"
-            data={internal}
-            role={role}
-            onAdd={handleAdd}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
-            accentColor="indigo"
-            columns={[
-              { key: 'displayOrder', label: 'No.', isPublic: true },
-              { key: 'fullName', label: 'Nama Lengkap', isPublic: true },
-              { key: 'position', label: 'Jabatan', isPublic: true },
-              { key: 'waNumber', label: 'WhatsApp' },
-              { key: 'createdBy', label: 'Nama Penginput' },
-            ]}
-          />
+          <div className="space-y-8 animate-in fade-in duration-700">
+              <NeumorphicCard className="flex flex-col items-center">
+                <h3 className="font-bold text-lg mb-6 text-center text-slate-700 uppercase tracking-widest">Bagan Struktur Organisasi</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-5xl">
+                  <div className="rounded-xl overflow-hidden shadow-inner bg-slate-100 p-2">
+                    <img src="/struktur-organisasi.png" alt="Struktur Organisasi" className="w-full h-auto rounded-lg mix-blend-multiply" />
+                  </div>
+                  <div className="rounded-xl overflow-hidden shadow-inner bg-slate-100 p-2">
+                    <img src="/struktur-personil.png" alt="Struktur Personil" className="w-full h-auto rounded-lg mix-blend-multiply" />
+                  </div>
+                </div>
+              </NeumorphicCard>
+            <DataTable<InternalMember>
+              title="Struktur Personal LPH UNISMA"
+              data={internal}
+              role={role}
+              onAdd={handleAdd}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+              accentColor="indigo"
+              columns={[
+                { key: 'displayOrder', label: 'No.', isPublic: true },
+                { key: 'fullName', label: 'Nama Lengkap', isPublic: true },
+                { key: 'position', label: 'Jabatan', isPublic: true },
+                { key: 'waNumber', label: 'WhatsApp' },
+                { key: 'createdBy', label: 'Nama Penginput' },
+              ]}
+            />
+          </div>
         );
       case 'Auditor':
         return (
