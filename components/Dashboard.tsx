@@ -245,7 +245,7 @@ const Dashboard: React.FC<DashboardProps> = ({ role, data }) => {
       </NeumorphicCard>
 
       {/* Chart 4: SLA Performance */}
-      <NeumorphicCard className="h-96 flex flex-col">
+      <NeumorphicCard className="col-span-1 md:col-span-2 lg:col-span-2 xl:col-span-4 h-96 flex flex-col">
         <div className="flex items-center gap-2 mb-6">
           <Zap className="text-yellow-500" size={20} />
           <h3 className="font-bold text-lg">Performa SLA LPH</h3>
