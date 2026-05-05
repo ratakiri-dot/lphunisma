@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, AreaChart, Area, LineChart, Line } from 'recharts';
 import NeumorphicCard from './NeumorphicCard';
 import { getDashboardInsight } from '../services/geminiService';
-import { Bot, TrendingUp, Users, CheckCircle, Zap } from 'lucide-react';
+import { Bot, TrendingUp, Users, CheckCircle, Zap, MapPin } from 'lucide-react';
 import { PUCertified, PUOnProcess, PUProspect, InternalMember, Auditor, Partner, FinanceRecord, UserRole } from '../types';
 
 interface DashboardProps {
@@ -263,6 +263,26 @@ const Dashboard: React.FC<DashboardProps> = ({ role, data }) => {
         </div>
         <div className="mt-4 text-center text-xs text-slate-500 italic font-medium">
           *Rata-rata SLA (Hari) - Semakin cepat semakin baik
+        </div>
+      </NeumorphicCard>
+
+      {/* Map Section */}
+      <NeumorphicCard className="col-span-1 md:col-span-2 lg:col-span-2 xl:col-span-4 flex flex-col">
+        <div className="flex items-center gap-2 mb-6">
+          <MapPin className="text-red-500" size={20} />
+          <h3 className="font-bold text-lg">Peta Persebaran Mitra Halal LPH UNISMA</h3>
+        </div>
+        <div className="w-full h-[480px] rounded-xl overflow-hidden shadow-inner bg-slate-100">
+          <iframe 
+            src="https://www.google.com/maps/d/u/0/embed?mid=1vGztQ3Y4d5WFmNEPfDA4POtQAf9z5wo&ehbc=2E312F" 
+            width="100%" 
+            height="100%" 
+            style={{ border: 0 }}
+            allowFullScreen={false}
+            loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
+            title="Mitra Halal LPH UNISMA"
+          />
         </div>
       </NeumorphicCard>
     </div>
