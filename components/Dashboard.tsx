@@ -212,7 +212,7 @@ const Dashboard: React.FC<DashboardProps> = ({ role, data }) => {
       <NeumorphicCard className="h-96 flex flex-col">
         <div className="flex items-center gap-2 mb-6">
           <TrendingUp className="text-indigo-500" size={20} />
-          <h3 className="font-bold text-lg">{isPublic ? 'Tren Pertumbuhan' : 'Pertumbuhan Saldo'}</h3>
+          <h3 className="font-bold text-lg">{isPublic ? 'Tren Pertumbuhan' : 'Performa Keuangan'}</h3>
         </div>
         <div className="flex-grow">
           <ResponsiveContainer width="100%" height="100%">
