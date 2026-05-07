@@ -504,11 +504,11 @@ const App: React.FC = () => {
           return isNaN(result) ? 0 : result;
         };
 
-        const debit = parseMoney(getVal(row, ['debit', 'pemasukan']));
-        const credit = parseMoney(getVal(row, ['kredit', 'pengeluaran']));
+        const debit = parseMoney(getVal(row, ['debit', 'pemasukan', 'mutasi debet', 'mutasi debit', 'uang masuk']));
+        const credit = parseMoney(getVal(row, ['kredit', 'pengeluaran', 'mutasi kredit', 'uang keluar']));
         currentBalance = currentBalance + debit - credit;
         
-        let dateValue = getVal(row, ['tgl', 'tanggal', 'date', 'waktu']);
+        let dateValue = getVal(row, ['tgl', 'tanggal', 'date', 'waktu', 'tanggal transaksi']);
         if (typeof dateValue === 'number') {
           const d = new Date(Math.round((dateValue - 25569) * 86400 * 1000));
           dateValue = d.toISOString().split('T')[0];

@@ -228,7 +228,29 @@ const DataTable = <T extends { id: string },>({
         const workbook = XLSX.read(bstr, { type: 'binary' });
         const wsname = workbook.SheetNames[0];
         const ws = workbook.Sheets[wsname];
-        const rawData = XLSX.utils.sheet_to_json(ws);
+        
+        // Auto-detect header row (useful for bank statements where first few rows are info)
+        const rawRows = XLSX.utils.sheet_to_json(ws, { header: 1 });
+        let headerRowIdx = 0;
+        let maxScore = 0;
+        
+        for (let i = 0; i < Math.min(rawRows.length, 20); i++) {
+          const row = rawRows[i];
+          if (!Array.isArray(row)) continue;
+          
+          let score = 0;
+          const rowStr = row.map(c => String(c).toLowerCase()).join(' ');
+          if (rowStr.includes('tgl') || rowStr.includes('tanggal') || rowStr.includes('date') || rowStr.includes('waktu')) score++;
+          if (rowStr.includes('ket') || rowStr.includes('keterangan') || rowStr.includes('desc') || rowStr.includes('uraian')) score++;
+          if (rowStr.includes('debit') || rowStr.includes('kredit') || rowStr.includes('mutasi') || rowStr.includes('masuk') || rowStr.includes('keluar') || rowStr.includes('saldo')) score++;
+          
+          if (score > maxScore) {
+            maxScore = score;
+            headerRowIdx = i;
+          }
+        }
+
+        const rawData = XLSX.utils.sheet_to_json(ws, { range: headerRowIdx });
         if (onImport) {
           onImport(rawData);
         }
