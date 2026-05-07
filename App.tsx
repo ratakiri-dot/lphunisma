@@ -504,8 +504,8 @@ const App: React.FC = () => {
           return isNaN(result) ? 0 : result;
         };
 
-        const rawDebit = getVal(row, ['debit', 'pemasukan', 'mutasi debet', 'mutasi debit', 'uang masuk', 'in', 'd']);
-        const rawCredit = getVal(row, ['kredit', 'pengeluaran', 'mutasi kredit', 'uang keluar', 'out', 'k', 'cr']);
+        const rawDebit = getVal(row, ['debit', 'debet', 'pemasukan', 'mutasi debet', 'mutasi debit', 'uang masuk', 'in', 'd']);
+        const rawCredit = getVal(row, ['credit', 'kredit', 'pengeluaran', 'mutasi kredit', 'uang keluar', 'out', 'k', 'cr']);
         const rawAmount = getVal(row, ['nominal', 'jumlah', 'mutasi', 'amount', 'total', 'nilai']);
         const rawType = getVal(row, ['tipe', 'type', 'db/cr', 'd/k', 'status', 'keterangan mutasi', 'jenis', 'ket']);
 
