@@ -508,27 +508,33 @@ const App: React.FC = () => {
         const credit = parseMoney(getVal(row, ['kredit', 'pengeluaran', 'mutasi kredit', 'uang keluar']));
         currentBalance = currentBalance + debit - credit;
         
+        let parsedDate = new Date().toISOString().split('T')[0]; // default to today
         let dateValue = getVal(row, ['tgl', 'tanggal', 'date', 'waktu', 'tanggal transaksi']);
-        if (typeof dateValue === 'number') {
-          const d = new Date(Math.round((dateValue - 25569) * 86400 * 1000));
-          dateValue = d.toISOString().split('T')[0];
-        } else if (dateValue) {
-          // Attempt to parse string date (e.g. DD/MM/YYYY or YYYY-MM-DD)
-          const parts = String(dateValue).split(/[-/]/);
-          if (parts.length === 3) {
-             // Basic heuristic for DD/MM/YYYY vs YYYY-MM-DD
-             if (parts[0].length === 4) {
-               dateValue = new Date(dateValue).toISOString().split('T')[0];
-             } else {
+        
+        try {
+          if (typeof dateValue === 'number') {
+            const d = new Date(Math.round((dateValue - 25569) * 86400 * 1000));
+            if (!isNaN(d.getTime())) parsedDate = d.toISOString().split('T')[0];
+          } else if (dateValue) {
+            const dateStr = String(dateValue).trim();
+            const parts = dateStr.split(/[-/]/);
+            let d = new Date(dateStr);
+            
+            if (parts.length === 3 && parts[0].length !== 4) {
                // Assuming DD/MM/YYYY
-               dateValue = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`).toISOString().split('T')[0];
-             }
-          } else {
-             dateValue = new Date(dateValue).toISOString().split('T')[0];
+               const temp = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
+               if (!isNaN(temp.getTime())) d = temp;
+            }
+            
+            if (!isNaN(d.getTime())) {
+               parsedDate = d.toISOString().split('T')[0];
+            }
           }
-        } else {
-          dateValue = new Date().toISOString().split('T')[0];
+        } catch (err) {
+          // Fallback to today if parsing completely fails
+          console.warn("Date parsing failed for", dateValue);
         }
+        dateValue = parsedDate;
 
         let descriptionValue = getVal(row, ['ket', 'keterangan', 'description', 'deskripsi', 'uraian']) || '-';
         if (debit === 0 && credit === 0 && !descriptionValue.includes('RAW:')) {
