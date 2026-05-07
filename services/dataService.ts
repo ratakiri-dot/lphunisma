@@ -76,7 +76,7 @@ export const dataService = {
 
     // Finance
     async getFinance() {
-        const { data, error } = await supabase.from('finance_records').select('*').order('date', { ascending: true });
+        const { data, error } = await supabase.from('finance_records').select('*').order('date', { ascending: false }).order('created_at', { ascending: false });
         if (error) throw error;
         return data.map(mapToCamel);
     },

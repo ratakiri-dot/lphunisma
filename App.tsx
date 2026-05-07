@@ -468,7 +468,8 @@ const App: React.FC = () => {
     try {
       // Bulk update in DB
       await dataService.bulkUpsertFinance(recalculated);
-      setFinance(recalculated);
+      // Update state in descending order for UI
+      setFinance([...recalculated].reverse());
     } catch (err) {
       console.error('Failed to recalculate balances:', err);
       alert('Gagal memperbarui saldo otomatis');
