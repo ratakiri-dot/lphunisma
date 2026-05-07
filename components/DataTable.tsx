@@ -232,9 +232,8 @@ const DataTable = <T extends { id: string },>({
         // Auto-detect header row (useful for bank statements where first few rows are info)
         const rawRows = XLSX.utils.sheet_to_json(ws, { header: 1 });
         let headerRowIdx = 0;
-        let maxScore = 0;
         
-        for (let i = 0; i < Math.min(rawRows.length, 20); i++) {
+        for (let i = 0; i < Math.min(rawRows.length, 15); i++) {
           const row = rawRows[i];
           if (!Array.isArray(row)) continue;
           
@@ -244,9 +243,9 @@ const DataTable = <T extends { id: string },>({
           if (rowStr.includes('ket') || rowStr.includes('keterangan') || rowStr.includes('desc') || rowStr.includes('uraian')) score++;
           if (rowStr.includes('debit') || rowStr.includes('kredit') || rowStr.includes('mutasi') || rowStr.includes('masuk') || rowStr.includes('keluar') || rowStr.includes('saldo')) score++;
           
-          if (score > maxScore) {
-            maxScore = score;
+          if (score >= 2) {
             headerRowIdx = i;
+            break; // Stop at the first row that looks like a header
           }
         }
 

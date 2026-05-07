@@ -530,9 +530,14 @@ const App: React.FC = () => {
           dateValue = new Date().toISOString().split('T')[0];
         }
 
+        let descriptionValue = getVal(row, ['ket', 'keterangan', 'description', 'deskripsi', 'uraian']) || '-';
+        if (debit === 0 && credit === 0 && !descriptionValue.includes('RAW:')) {
+          descriptionValue += ` [Gagal baca. Raw: ${JSON.stringify(row)}]`;
+        }
+
         const item = {
           date: dateValue,
-          description: getVal(row, ['ket', 'keterangan', 'description', 'deskripsi']) || '-',
+          description: descriptionValue,
           debit: debit,
           credit: credit,
           balance: currentBalance,
