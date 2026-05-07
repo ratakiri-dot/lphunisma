@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import {
   Search, Plus, Download, Printer, Edit, Trash2,
   ExternalLink, Phone, Mail, MapPin, User, Building2, Tag,
-  FileSpreadsheet, ArrowRightCircle
+  FileSpreadsheet, ArrowRightCircle, Upload
 } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import NeumorphicCard from './NeumorphicCard';
@@ -18,6 +18,7 @@ interface DataTableProps<T,> {
   onEdit?: (item: T) => void;
   onDelete?: (item: T) => void;
   onNext?: (item: T) => void;
+  onImport?: (data: any[]) => void;
   accentColor?: string;
 }
 
@@ -30,6 +31,7 @@ const DataTable = <T extends { id: string },>({
   onEdit,
   onDelete,
   onNext,
+  onImport,
   accentColor = 'indigo'
 }: DataTableProps<T>) => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -203,6 +205,30 @@ const DataTable = <T extends { id: string },>({
     XLSX.writeFile(workbook, `${title}.xlsx`);
   };
 
+  const handleImportExcel = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      try {
+        const bstr = evt.target?.result;
+        const workbook = XLSX.read(bstr, { type: 'binary' });
+        const wsname = workbook.SheetNames[0];
+        const ws = workbook.Sheets[wsname];
+        const rawData = XLSX.utils.sheet_to_json(ws);
+        if (onImport) {
+          onImport(rawData);
+        }
+      } catch (err) {
+        console.error('Error parsing Excel file:', err);
+        alert('Gagal membaca file Excel');
+      }
+    };
+    reader.readAsBinaryString(file);
+    e.target.value = ''; // Reset input
+  };
+
   return (
     <NeumorphicCard className={`w-full overflow-hidden animate-in slide-in-from-bottom-4 duration-500 border-t-8 ${currentTheme.border}`}>
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8 no-print">
@@ -229,6 +255,24 @@ const DataTable = <T extends { id: string },>({
           </div>
 
           <div className="flex gap-2">
+            {onImport && (
+              <>
+                <input
+                  type="file"
+                  id={`excel-import-${title.replace(/\s+/g, '-')}`}
+                  accept=".xlsx, .xls"
+                  className="hidden"
+                  onChange={handleImportExcel}
+                />
+                <label
+                  htmlFor={`excel-import-${title.replace(/\s+/g, '-')}`}
+                  className="neu-button p-2 rounded-xl text-blue-600 hover:scale-110 transition-transform cursor-pointer flex items-center justify-center"
+                  title="Import Excel"
+                >
+                  <Upload size={18} />
+                </label>
+              </>
+            )}
             <button 
               onClick={handleExportExcel} 
               className="neu-button p-2 rounded-xl text-emerald-600 hover:scale-110 transition-transform"

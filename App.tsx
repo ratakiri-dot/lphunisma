@@ -448,6 +448,75 @@ const App: React.FC = () => {
     }
   };
 
+  const handleFinanceImport = async (importedData: any[]) => {
+    if (!window.confirm(`Import ${importedData.length} baris data keuangan?`)) return;
+    
+    try {
+      setIsLoading(true);
+      const username = currentUser?.fullName || currentUser?.username || 'System';
+      let currentBalance = finance.length > 0 ? finance[finance.length - 1].balance : 0;
+      
+      let updatedFinance = [...finance];
+
+      for (const row of importedData) {
+        // Parse numbers, remove any 'Rp' or non-numeric chars if they are strings
+        const parseMoney = (val: any) => {
+          if (!val) return 0;
+          if (typeof val === 'number') return val;
+          const strVal = String(val).replace(/[^0-9.-]+/g, '');
+          return Number(strVal) || 0;
+        };
+
+        const debit = parseMoney(row['Debit'] || row['debit'] || 0);
+        const credit = parseMoney(row['Kredit'] || row['credit'] || 0);
+        currentBalance = currentBalance + debit - credit;
+        
+        let dateValue = row['Tgl'] || row['Tanggal'] || row['date'] || row['Date'];
+        if (typeof dateValue === 'number') {
+          const d = new Date(Math.round((dateValue - 25569) * 86400 * 1000));
+          dateValue = d.toISOString().split('T')[0];
+        } else if (dateValue) {
+          // Attempt to parse string date (e.g. DD/MM/YYYY or YYYY-MM-DD)
+          const parts = String(dateValue).split(/[-/]/);
+          if (parts.length === 3) {
+             // Basic heuristic for DD/MM/YYYY vs YYYY-MM-DD
+             if (parts[0].length === 4) {
+               dateValue = new Date(dateValue).toISOString().split('T')[0];
+             } else {
+               // Assuming DD/MM/YYYY
+               dateValue = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`).toISOString().split('T')[0];
+             }
+          } else {
+             dateValue = new Date(dateValue).toISOString().split('T')[0];
+          }
+        } else {
+          dateValue = new Date().toISOString().split('T')[0];
+        }
+
+        const item = {
+          date: dateValue,
+          description: row['Ket'] || row['Keterangan'] || row['description'] || row['Description'] || '-',
+          debit: debit,
+          credit: credit,
+          balance: currentBalance,
+          createdBy: username,
+          updatedBy: username,
+        } as FinanceRecord;
+
+        const saved = await dataService.upsertFinance(item);
+        updatedFinance.push(saved);
+      }
+      
+      setFinance(updatedFinance);
+      alert('Import berhasil!');
+    } catch (err) {
+      console.error('Import error:', err);
+      alert('Terjadi kesalahan saat import data');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const renderContent = () => {
     switch (activeTab) {
       case 'Dashboard': return <Dashboard role={role} data={{ puCertified, puOnProcess, puProspect, internal, auditors, partners, finance }} />;
@@ -618,7 +687,7 @@ const App: React.FC = () => {
           />
         );
       case 'Finance':
-        return <DataTable<FinanceRecord> title="Laporan Keuangan" data={finance} role={role} onAdd={handleAdd} onEdit={handleEdit} onDelete={handleDelete} accentColor="emerald" columns={[{ key: 'date', label: 'Tgl' }, { key: 'description', label: 'Ket' }, { key: 'debit', label: 'Debit' }, { key: 'credit', label: 'Kredit' }, { key: 'balance', label: 'Saldo' }, { key: 'createdBy', label: 'Nama Penginput' }]} />;
+        return <DataTable<FinanceRecord> title="Laporan Keuangan" data={finance} role={role} onAdd={handleAdd} onEdit={handleEdit} onDelete={handleDelete} onImport={role === UserRole.ADMIN ? handleFinanceImport : undefined} accentColor="emerald" columns={[{ key: 'date', label: 'Tgl' }, { key: 'description', label: 'Ket' }, { key: 'debit', label: 'Debit' }, { key: 'credit', label: 'Kredit' }, { key: 'balance', label: 'Saldo' }, { key: 'createdBy', label: 'Nama Penginput' }]} />;
       case 'Docs':
         return <DataTable<Documentation> title="Dokumentasi & SOP" data={docs} role={role} onAdd={handleAdd} onEdit={handleEdit} onDelete={handleDelete} accentColor="blue" columns={[{ key: 'title', label: 'Judul Dokumentasi', isPublic: true }, { key: 'category', label: 'Kategori', isPublic: true }, { key: 'uploadDate', label: 'Tgl Unggah', isPublic: true }, { key: 'link', label: 'File', isPublic: true }, { key: 'createdBy', label: 'Nama Penginput' }]} />;
       case 'Letters':
