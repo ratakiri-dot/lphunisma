@@ -504,8 +504,30 @@ const App: React.FC = () => {
           return isNaN(result) ? 0 : result;
         };
 
-        const debit = parseMoney(getVal(row, ['debit', 'pemasukan', 'mutasi debet', 'mutasi debit', 'uang masuk']));
-        const credit = parseMoney(getVal(row, ['kredit', 'pengeluaran', 'mutasi kredit', 'uang keluar']));
+        const rawDebit = getVal(row, ['debit', 'pemasukan', 'mutasi debet', 'mutasi debit', 'uang masuk', 'in', 'd']);
+        const rawCredit = getVal(row, ['kredit', 'pengeluaran', 'mutasi kredit', 'uang keluar', 'out', 'k', 'cr']);
+        const rawAmount = getVal(row, ['nominal', 'jumlah', 'mutasi', 'amount', 'total', 'nilai']);
+        const rawType = getVal(row, ['tipe', 'type', 'db/cr', 'd/k', 'status', 'keterangan mutasi', 'jenis', 'ket']);
+
+        let debit = parseMoney(rawDebit);
+        let credit = parseMoney(rawCredit);
+
+        // Fallback for single column mutation (common in bank statements)
+        if (debit === 0 && credit === 0 && rawAmount !== undefined) {
+          const amount = parseMoney(rawAmount);
+          const typeStr = String(rawType || '').toUpperCase();
+          
+          if (typeStr.includes('D') || typeStr.includes('MASUK') || typeStr.includes('IN') || typeStr.includes('DEBET') || typeStr.includes('DEBIT') || typeStr.includes('DB')) {
+            debit = Math.abs(amount);
+          } else if (typeStr.includes('K') || typeStr.includes('KELUAR') || typeStr.includes('OUT') || typeStr.includes('CREDIT') || typeStr.includes('CR')) {
+            credit = Math.abs(amount);
+          } else if (amount < 0) {
+            credit = Math.abs(amount);
+          } else {
+            debit = amount;
+          }
+        }
+
         currentBalance = currentBalance + debit - credit;
         
         let parsedDate = new Date().toISOString().split('T')[0]; // default to today
