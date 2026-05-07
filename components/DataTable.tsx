@@ -20,6 +20,7 @@ interface DataTableProps<T,> {
   onNext?: (item: T) => void;
   onImport?: (data: any[]) => void;
   accentColor?: string;
+  colorizeByMonth?: boolean;
 }
 
 const DataTable = <T extends { id: string },>({
@@ -32,7 +33,8 @@ const DataTable = <T extends { id: string },>({
   onDelete,
   onNext,
   onImport,
-  accentColor = 'indigo'
+  accentColor = 'indigo',
+  colorizeByMonth = false
 }: DataTableProps<T>) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedRowId, setSelectedRowId] = useState<string | null>(null);
@@ -78,6 +80,22 @@ const DataTable = <T extends { id: string },>({
   const getRowStyle = (item: T, index: number) => {
     if (item.id === selectedRowId) {
       return 'bg-amber-100/90 border-l-amber-500 ring-2 ring-amber-300 z-20 relative';
+    }
+
+    // Month-based coloring for Financial data
+    if (colorizeByMonth && (item as any).date) {
+      const dateVal = new Date((item as any).date);
+      if (!isNaN(dateVal.getTime())) {
+         const month = dateVal.getMonth();
+         const year = dateVal.getFullYear();
+         // Even/Odd month+year group for alternating
+         const group = (year * 12 + month);
+         if (group % 2 === 0) {
+            return `bg-white/60 hover:bg-white/90 border-l-slate-300`;
+         } else {
+            return `${currentTheme.row} hover:bg-white/80 border-l-slate-400`;
+         }
+      }
     }
 
     const itemStr = JSON.stringify(item);

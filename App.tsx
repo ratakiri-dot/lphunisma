@@ -809,7 +809,27 @@ const App: React.FC = () => {
           />
         );
       case 'Finance':
-        return <DataTable<FinanceRecord> title="Laporan Keuangan" data={finance} role={role} onAdd={handleAdd} onEdit={handleEdit} onDelete={handleDelete} onImport={role === UserRole.ADMIN ? handleFinanceImport : undefined} accentColor="emerald" columns={[{ key: 'date', label: 'Tgl' }, { key: 'description', label: 'Ket' }, { key: 'debit', label: 'Debit' }, { key: 'credit', label: 'Kredit' }, { key: 'balance', label: 'Saldo' }, { key: 'createdBy', label: 'Nama Penginput' }]} />;
+        return (
+          <DataTable<FinanceRecord> 
+            title="Laporan Keuangan" 
+            data={finance} 
+            role={role} 
+            onAdd={handleAdd} 
+            onEdit={handleEdit} 
+            onDelete={handleDelete} 
+            onImport={role === UserRole.ADMIN ? handleFinanceImport : undefined} 
+            accentColor="emerald" 
+            colorizeByMonth={true}
+            columns={[
+              { key: 'date', label: 'Tgl' }, 
+              { key: 'description', label: 'Ket' }, 
+              { key: 'debit', label: 'Debit' }, 
+              { key: 'credit', label: 'Kredit' }, 
+              { key: 'balance', label: 'Saldo' }, 
+              { key: 'createdBy', label: 'Nama Penginput' }
+            ]} 
+          />
+        );
       case 'Docs':
         return <DataTable<Documentation> title="Dokumentasi & SOP" data={docs} role={role} onAdd={handleAdd} onEdit={handleEdit} onDelete={handleDelete} accentColor="blue" columns={[{ key: 'title', label: 'Judul Dokumentasi', isPublic: true }, { key: 'category', label: 'Kategori', isPublic: true }, { key: 'uploadDate', label: 'Tgl Unggah', isPublic: true }, { key: 'link', label: 'File', isPublic: true }, { key: 'createdBy', label: 'Nama Penginput' }]} />;
       case 'Letters':
