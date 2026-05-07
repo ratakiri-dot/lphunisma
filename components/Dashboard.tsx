@@ -40,7 +40,11 @@ const Dashboard: React.FC<DashboardProps> = ({ role, data }) => {
   ];
 
   // Group finance by month-year to show the latest balance of each month
-  const financeSorted = [...finance].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  const financeSorted = [...finance].sort((a, b) => {
+    const dateDiff = new Date(a.date).getTime() - new Date(b.date).getTime();
+    if (dateDiff !== 0) return dateDiff;
+    return (a.id || '').localeCompare(b.id || '');
+  });
   
   const financeByMonthYear = financeSorted.reduce((acc: any, curr) => {
     const d = new Date(curr.date);

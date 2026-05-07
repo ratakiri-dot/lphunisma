@@ -456,8 +456,12 @@ const App: React.FC = () => {
   };
 
   const recalculateFinanceBalances = async (data: FinanceRecord[]) => {
-    // Sort by date then by ID/created_at to ensure consistent running total
-    const sorted = [...data].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    // Sort by date then by ID to ensure a stable, consistent running total for same-day items
+    const sorted = [...data].sort((a, b) => {
+      const dateDiff = new Date(a.date).getTime() - new Date(b.date).getTime();
+      if (dateDiff !== 0) return dateDiff;
+      return (a.id || '').localeCompare(b.id || '');
+    });
     
     let currentBalance = 0;
     const recalculated = sorted.map(item => {
