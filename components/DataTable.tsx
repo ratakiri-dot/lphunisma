@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import {
   Search, Plus, Download, Printer, Edit, Trash2,
   ExternalLink, Phone, Mail, MapPin, User, Building2, Tag,
-  FileSpreadsheet, ArrowRightCircle, Upload
+  FileSpreadsheet, ArrowRightCircle, Upload, ChevronLeft, ChevronRight
 } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import NeumorphicCard from './NeumorphicCard';
@@ -36,6 +36,8 @@ const DataTable = <T extends { id: string },>({
 }: DataTableProps<T>) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedRowId, setSelectedRowId] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 50;
 
   const isPublic = role === UserRole.PUBLIC;
   const canModify = role === UserRole.ADMIN || role === UserRole.USER;
@@ -46,6 +48,16 @@ const DataTable = <T extends { id: string },>({
       String(val).toLowerCase().includes(searchTerm.toLowerCase())
     )
   );
+
+  // Pagination logic
+  const totalPages = Math.max(1, Math.ceil(filteredData.length / itemsPerPage));
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedData = filteredData.slice(startIndex, startIndex + itemsPerPage);
+
+  // Reset page when search changes
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
 
   const displayedColumns = isPublic ? columns.filter(c => c.isPublic) : columns;
 
@@ -312,7 +324,7 @@ const DataTable = <T extends { id: string },>({
             </tr>
           </thead>
           <tbody className="divide-y divide-white/20">
-            {filteredData.map((item, rowIdx) => (
+            {paginatedData.map((item, rowIdx) => (
               <tr
                 key={item.id}
                 onClick={() => setSelectedRowId(item.id === selectedRowId ? null : item.id)}
@@ -358,6 +370,37 @@ const DataTable = <T extends { id: string },>({
           </div>
         )}
       </div>
+
+      {/* Pagination Controls */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between mt-6 px-4 no-print">
+          <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">
+            Menampilkan {startIndex + 1}-{Math.min(startIndex + itemsPerPage, filteredData.length)} dari {filteredData.length}
+          </p>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+              disabled={currentPage === 1}
+              className="neu-button p-2 rounded-xl text-slate-600 hover:text-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+            >
+              <ChevronLeft size={16} />
+            </button>
+            <div className="flex items-center gap-1">
+              <span className="text-xs font-black text-slate-700 bg-white/50 px-3 py-1.5 rounded-lg shadow-inner border border-white">
+                {currentPage}
+              </span>
+              <span className="text-[10px] font-bold text-slate-400">/ {totalPages}</span>
+            </div>
+            <button
+              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+              disabled={currentPage === totalPages}
+              className="neu-button p-2 rounded-xl text-slate-600 hover:text-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+            >
+              <ChevronRight size={16} />
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Print-only table containing ALL data, visible only during printing */}
       <div className="hidden print:block w-full">
