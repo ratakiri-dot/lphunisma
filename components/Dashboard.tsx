@@ -39,20 +39,26 @@ const Dashboard: React.FC<DashboardProps> = ({ role, data }) => {
     { name: 'Partners', count: partners.length, color: '#0EA5E9' },
   ];
 
-  // Group finance by month
-  const financeByMonth = finance.reduce((acc: any, curr) => {
-    const month = new Date(curr.date).toLocaleDateString('id-ID', { month: 'short' });
-    if (!acc[month]) acc[month] = 0;
-    acc[month] += Number(curr.balance);
+  // Group finance by month-year to show the latest balance of each month
+  const financeSorted = [...finance].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  
+  const financeByMonthYear = financeSorted.reduce((acc: any, curr) => {
+    const d = new Date(curr.date);
+    const monthLabel = d.toLocaleDateString('id-ID', { month: 'short' });
+    const yearLabel = d.getFullYear();
+    const fullLabel = `${monthLabel} ${yearLabel}`;
+    
+    // Pick the latest balance for this month-year
+    acc[fullLabel] = Number(curr.balance);
     return acc;
   }, {});
-
-  const financeData = Object.keys(financeByMonth).length > 0
-    ? Object.entries(financeByMonth).map(([month, balance]) => ({ month, balance }))
+  
+  const financeData = Object.keys(financeByMonthYear).length > 0
+    ? Object.entries(financeByMonthYear).map(([month, balance]) => ({ month, balance }))
     : [
-      { month: 'Jan', balance: 0 },
-      { month: 'Feb', balance: 0 },
-      { month: 'Mar', balance: 0 },
+      { month: 'Jan 2025', balance: 0 },
+      { month: 'Feb 2025', balance: 0 },
+      { month: 'Mar 2025', balance: 0 },
     ];
 
   // SLA Calculation
