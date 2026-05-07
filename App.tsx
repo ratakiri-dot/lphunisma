@@ -277,7 +277,8 @@ const App: React.FC = () => {
         }
         if (activeTab === 'Finance') {
           await dataService.deleteFinance(item.id);
-          setFinance(prev => prev.filter(i => i.id !== item.id));
+          const filtered = finance.filter(i => i.id !== item.id);
+          await recalculateFinanceBalances(filtered);
         }
         if (activeTab === 'Schedule') {
           await dataService.deleteActivity(item.id);
@@ -382,14 +383,20 @@ const App: React.FC = () => {
         setPartners(prev => editingItem ? prev.map(i => i.id === saved.id ? saved : i) : [...prev, saved]);
       }
       if (activeTab === 'Finance') {
-        const lastBalance = finance.length > 0 ? finance[finance.length - 1].balance : 0;
         const newDebit = Number(data.debit) || 0;
         const newCredit = Number(data.credit) || 0;
-        const calculatedBalance = lastBalance + newDebit - newCredit;
 
-        const item = { ...data, ...auditData, id: editingItem?.id, debit: newDebit, credit: newCredit, balance: calculatedBalance } as FinanceRecord;
+        const item = { ...data, ...auditData, id: editingItem?.id, debit: newDebit, credit: newCredit, balance: 0 } as FinanceRecord;
         const saved = await dataService.upsertFinance(item);
-        setFinance(prev => editingItem ? prev.map(i => i.id === saved.id ? saved : i) : [...prev, saved]);
+        
+        let newFinanceList: FinanceRecord[];
+        if (editingItem) {
+          newFinanceList = finance.map(i => i.id === saved.id ? saved : i);
+        } else {
+          newFinanceList = [...finance, saved];
+        }
+        
+        await recalculateFinanceBalances(newFinanceList);
       }
       if (activeTab === 'Schedule') {
         const item = { ...data, ...auditData, id: editingItem?.id, delegates: (data.delegates as string).split(',').map(s => s.trim()) } as Activity;
@@ -445,6 +452,26 @@ const App: React.FC = () => {
       setIsModalOpen(false);
     } catch (err) {
       alert('Gagal menyimpan data');
+    }
+  };
+
+  const recalculateFinanceBalances = async (data: FinanceRecord[]) => {
+    // Sort by date then by ID/created_at to ensure consistent running total
+    const sorted = [...data].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    
+    let currentBalance = 0;
+    const recalculated = sorted.map(item => {
+      currentBalance = currentBalance + (item.debit || 0) - (item.credit || 0);
+      return { ...item, balance: currentBalance };
+    });
+
+    try {
+      // Bulk update in DB
+      await dataService.bulkUpsertFinance(recalculated);
+      setFinance(recalculated);
+    } catch (err) {
+      console.error('Failed to recalculate balances:', err);
+      alert('Gagal memperbarui saldo otomatis');
     }
   };
 
@@ -568,16 +595,15 @@ const App: React.FC = () => {
           description: descriptionValue,
           debit: debit,
           credit: credit,
-          balance: currentBalance,
+          balance: 0, // Will be recalculated
           createdBy: username,
           updatedBy: username,
         } as FinanceRecord;
 
-        const saved = await dataService.upsertFinance(item);
-        updatedFinance.push(saved);
+        updatedFinance.push(item);
       }
       
-      setFinance(updatedFinance);
+      await recalculateFinanceBalances(updatedFinance);
       alert('Import berhasil!');
     } catch (err) {
       console.error('Import error:', err);

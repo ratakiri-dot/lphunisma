@@ -86,6 +86,12 @@ export const dataService = {
         if (error) throw error;
         return mapToCamel(data);
     },
+    async bulkUpsertFinance(items: Partial<FinanceRecord>[]) {
+        const snakeItems = items.map(mapToSnake);
+        const { data, error } = await supabase.from('finance_records').upsert(snakeItems).select();
+        if (error) throw error;
+        return data.map(mapToCamel);
+    },
     async deleteFinance(id: string) {
         const { error } = await supabase.from('finance_records').delete().eq('id', id);
         if (error) throw error;
