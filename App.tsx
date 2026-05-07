@@ -459,19 +459,56 @@ const App: React.FC = () => {
       let updatedFinance = [...finance];
 
       for (const row of importedData) {
-        // Parse numbers, remove any 'Rp' or non-numeric chars if they are strings
+        // Function to find value by case-insensitive key
+        const getVal = (rowObj: any, keys: string[]) => {
+          const lowerRow: any = {};
+          for (const k in rowObj) {
+            lowerRow[k.trim().toLowerCase()] = rowObj[k];
+          }
+          for (const k of keys) {
+            if (lowerRow[k] !== undefined) return lowerRow[k];
+          }
+          return undefined;
+        };
+
+        // Parse numbers, robustly handle Indonesian and English formats
         const parseMoney = (val: any) => {
           if (!val) return 0;
           if (typeof val === 'number') return val;
-          const strVal = String(val).replace(/[^0-9.-]+/g, '');
-          return Number(strVal) || 0;
+          let str = String(val).toLowerCase();
+          str = str.replace(/rp|idr|\s/g, '');
+
+          if (str.indexOf(',') !== -1 && str.indexOf('.') !== -1) {
+            if (str.lastIndexOf(',') > str.lastIndexOf('.')) {
+                str = str.replace(/\./g, '');
+                str = str.replace(/,/g, '.');
+            } else {
+                str = str.replace(/,/g, '');
+            }
+          } else if (str.includes(',')) {
+              const parts = str.split(',');
+              if (parts[parts.length - 1].length === 3) {
+                  str = str.replace(/,/g, '');
+              } else {
+                  str = str.replace(/,/g, '.');
+              }
+          } else if (str.includes('.')) {
+              const parts = str.split('.');
+              if (parts.length > 2 || parts[parts.length - 1].length === 3) {
+                  str = str.replace(/\./g, '');
+              }
+          }
+
+          str = str.replace(/[^0-9.-]/g, '');
+          const result = parseFloat(str);
+          return isNaN(result) ? 0 : result;
         };
 
-        const debit = parseMoney(row['Debit'] || row['debit'] || 0);
-        const credit = parseMoney(row['Kredit'] || row['credit'] || 0);
+        const debit = parseMoney(getVal(row, ['debit', 'pemasukan']));
+        const credit = parseMoney(getVal(row, ['kredit', 'pengeluaran']));
         currentBalance = currentBalance + debit - credit;
         
-        let dateValue = row['Tgl'] || row['Tanggal'] || row['date'] || row['Date'];
+        let dateValue = getVal(row, ['tgl', 'tanggal', 'date', 'waktu']);
         if (typeof dateValue === 'number') {
           const d = new Date(Math.round((dateValue - 25569) * 86400 * 1000));
           dateValue = d.toISOString().split('T')[0];
@@ -495,7 +532,7 @@ const App: React.FC = () => {
 
         const item = {
           date: dateValue,
-          description: row['Ket'] || row['Keterangan'] || row['description'] || row['Description'] || '-',
+          description: getVal(row, ['ket', 'keterangan', 'description', 'deskripsi']) || '-',
           debit: debit,
           credit: credit,
           balance: currentBalance,
