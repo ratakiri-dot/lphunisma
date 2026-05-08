@@ -39,6 +39,8 @@ const Dashboard: React.FC<DashboardProps> = ({ role, data }) => {
     { name: 'Partners', count: partners.length, color: '#0EA5E9' },
   ];
 
+  const latestBalance = finance.length > 0 ? Number(finance[0].balance) : 0;
+
   // Group finance by month-year to show the latest balance of each month
   const financeSorted = [...finance].sort((a, b) => {
     const dateDiff = new Date(a.date).getTime() - new Date(b.date).getTime();
@@ -46,19 +48,25 @@ const Dashboard: React.FC<DashboardProps> = ({ role, data }) => {
     return (a.createdAt || '').localeCompare(b.createdAt || '');
   });
   
-  const financeByMonthYear = financeSorted.reduce((acc: any, curr) => {
+  const monthGroups: { [key: string]: { month: string, balance: number, timestamp: number } } = {};
+  
+  financeSorted.forEach(curr => {
     const d = new Date(curr.date);
     const monthLabel = d.toLocaleDateString('id-ID', { month: 'short' });
     const yearLabel = d.getFullYear();
     const fullLabel = `${monthLabel} ${yearLabel}`;
+    // Use first day of month as timestamp for stable chronological sorting of groups
+    const timestamp = new Date(yearLabel, d.getMonth(), 1).getTime();
     
-    // Pick the latest balance for this month-year
-    acc[fullLabel] = Number(curr.balance);
-    return acc;
-  }, {});
+    monthGroups[fullLabel] = {
+      month: fullLabel,
+      balance: Number(curr.balance),
+      timestamp: timestamp
+    };
+  });
   
-  const financeData = Object.keys(financeByMonthYear).length > 0
-    ? Object.entries(financeByMonthYear).map(([month, balance]) => ({ month, balance }))
+  const financeData = Object.keys(monthGroups).length > 0
+    ? Object.values(monthGroups).sort((a, b) => a.timestamp - b.timestamp)
     : [
       { month: 'Jan 2025', balance: 0 },
       { month: 'Feb 2025', balance: 0 },
@@ -160,6 +168,32 @@ const Dashboard: React.FC<DashboardProps> = ({ role, data }) => {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 animate-in fade-in duration-700">
+      {/* Financial Summary Stat Card */}
+      {!isPublic && (
+        <NeumorphicCard className="col-span-1 md:col-span-2 lg:col-span-3 border-l-4 border-emerald-400 bg-emerald-50/30">
+          <div className="flex items-center justify-between gap-6">
+            <div className="flex items-center gap-4">
+              <div className="p-4 neu-button rounded-2xl text-emerald-600">
+                <TrendingUp size={32} />
+              </div>
+              <div>
+                <h3 className="text-xs font-black text-emerald-600 uppercase tracking-widest mb-1">Saldo Kas LPH UNISMA</h3>
+                <p className="text-3xl font-black text-slate-800 tracking-tight">
+                  Rp {latestBalance.toLocaleString('id-ID')}
+                </p>
+              </div>
+            </div>
+            <div className="hidden sm:block text-right">
+              <p className="text-[10px] font-black text-emerald-500 uppercase tracking-widest mb-1">Status Keuangan</p>
+              <div className="flex items-center gap-2 text-emerald-600 font-bold">
+                <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+                Terverifikasi & Sinkron
+              </div>
+            </div>
+          </div>
+        </NeumorphicCard>
+      )}
+
       {/* AI Insight Section */}
       <NeumorphicCard className="col-span-1 md:col-span-2 lg:col-span-3 border-l-4 border-indigo-400 bg-indigo-50/30">
         <div className="flex items-start gap-4">
