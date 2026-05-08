@@ -182,39 +182,6 @@ const Dashboard: React.FC<DashboardProps> = ({ role, data }) => {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 animate-in fade-in duration-700">
-      {/* Financial Summary Stat Card */}
-      {!isPublic && (
-        <NeumorphicCard className="col-span-1 md:col-span-2 lg:col-span-3 border-l-4 border-emerald-400 bg-emerald-50/30">
-          <div className="flex items-center justify-between gap-6">
-            <div className="flex items-center gap-4">
-              <div className="p-4 neu-button rounded-2xl text-emerald-600">
-                <TrendingUp size={32} />
-              </div>
-              <div>
-                <h3 className="text-xs font-black text-emerald-600 uppercase tracking-widest mb-1">Saldo Kas LPH UNISMA</h3>
-                <p className="text-3xl font-black text-slate-800 tracking-tight">
-                  Rp {latestBalance.toLocaleString('id-ID')}
-                </p>
-                {hasDiscrepancy && (
-                  <div className="mt-2 p-2 bg-rose-100 rounded-lg border border-rose-200">
-                    <p className="text-[9px] font-black text-rose-600 uppercase">Perhatian: Selisih Terdeteksi</p>
-                    <p className="text-[10px] text-rose-500 font-medium">
-                      Saldo Manual: Rp {manualBalance.toLocaleString('id-ID')} vs Saldo DB: Rp {dbBalance.toLocaleString('id-ID')}
-                    </p>
-                  </div>
-                )}
-              </div>
-            </div>
-            <div className="hidden sm:block text-right">
-              <p className="text-[10px] font-black text-emerald-500 uppercase tracking-widest mb-1">Status Keuangan</p>
-              <div className="flex items-center gap-2 text-emerald-600 font-bold">
-                <div className={`w-2 h-2 rounded-full animate-pulse ${hasDiscrepancy ? 'bg-rose-500' : 'bg-emerald-500'}`}></div>
-                {hasDiscrepancy ? 'Butuh Sinkronisasi Manual' : 'Terverifikasi & Sinkron'}
-              </div>
-            </div>
-          </div>
-        </NeumorphicCard>
-      )}
 
       {/* AI Insight Section */}
       <NeumorphicCard className="col-span-1 md:col-span-2 lg:col-span-3 border-l-4 border-indigo-400 bg-indigo-50/30">
@@ -354,6 +321,39 @@ const Dashboard: React.FC<DashboardProps> = ({ role, data }) => {
           *Rata-rata SLA (Hari) - Semakin cepat semakin baik
         </div>
       </NeumorphicCard>
+      {/* Financial Summary Stat Card */}
+      {!isPublic && (
+        <NeumorphicCard className="col-span-1 md:col-span-2 lg:col-span-3 border-l-4 border-emerald-400 bg-emerald-50/30">
+          <div className="flex items-center justify-between gap-6">
+            <div className="flex items-center gap-4">
+              <div className="p-4 neu-button rounded-2xl text-emerald-600">
+                <TrendingUp size={32} />
+              </div>
+              <div>
+                <h3 className="text-xs font-black text-emerald-600 uppercase tracking-widest mb-1">Saldo Kas LPH UNISMA</h3>
+                <p className="text-3xl font-black text-slate-800 tracking-tight">
+                  Rp {latestBalance.toLocaleString('id-ID')}
+                </p>
+                {hasDiscrepancy && (
+                  <div className="mt-2 p-2 bg-rose-100 rounded-lg border border-rose-200">
+                    <p className="text-[9px] font-black text-rose-600 uppercase">Perhatian: Selisih Terdeteksi</p>
+                    <p className="text-[10px] text-rose-500 font-medium">
+                      Saldo Manual: Rp {manualBalance.toLocaleString('id-ID')} vs Saldo DB: Rp {dbBalance.toLocaleString('id-ID')}
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+            <div className="hidden sm:block text-right">
+              <p className="text-[10px] font-black text-emerald-500 uppercase tracking-widest mb-1">Status Keuangan</p>
+              <div className="flex items-center gap-2 text-emerald-600 font-bold">
+                <div className={`w-2 h-2 rounded-full animate-pulse ${hasDiscrepancy ? 'bg-rose-500' : 'bg-emerald-500'}`}></div>
+                {hasDiscrepancy ? 'Butuh Sinkronisasi Manual' : 'Terverifikasi & Sinkron'}
+              </div>
+            </div>
+          </div>
+        </NeumorphicCard>
+      )}
 
       {/* Map Section */}
       <NeumorphicCard className={`col-span-1 md:col-span-2 ${isPublic ? 'lg:col-span-3' : 'lg:col-span-2'} flex flex-col`}>
