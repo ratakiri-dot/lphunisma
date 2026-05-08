@@ -178,6 +178,7 @@ export interface FinanceRecord {
   debit: number;
   credit: number;
   balance: number;
+  createdAt?: string;
   createdBy?: string;
   updatedBy?: string;
   updatedAt?: string;

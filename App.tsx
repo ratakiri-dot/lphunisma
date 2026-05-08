@@ -460,7 +460,7 @@ const App: React.FC = () => {
     const sorted = [...data].sort((a, b) => {
       const dateDiff = new Date(a.date).getTime() - new Date(b.date).getTime();
       if (dateDiff !== 0) return dateDiff;
-      return (a.id || '').localeCompare(b.id || '');
+      return (a.createdAt || '').localeCompare(b.createdAt || '');
     });
     
     let currentBalance = 0;

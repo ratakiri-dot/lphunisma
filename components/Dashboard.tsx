@@ -43,7 +43,7 @@ const Dashboard: React.FC<DashboardProps> = ({ role, data }) => {
   const financeSorted = [...finance].sort((a, b) => {
     const dateDiff = new Date(a.date).getTime() - new Date(b.date).getTime();
     if (dateDiff !== 0) return dateDiff;
-    return (a.id || '').localeCompare(b.id || '');
+    return (a.createdAt || '').localeCompare(b.createdAt || '');
   });
   
   const financeByMonthYear = financeSorted.reduce((acc: any, curr) => {
