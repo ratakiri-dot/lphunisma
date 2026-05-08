@@ -416,12 +416,37 @@ const Dashboard: React.FC<DashboardProps> = ({ role, data }) => {
             </div>
           </div>
 
-          <div className="mt-8 pt-4 border-t border-slate-200">
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2 text-center">Tech Stack</p>
-            <div className="flex justify-center gap-3 opacity-60 grayscale hover:grayscale-0 transition-all">
-              <span className="px-2 py-1 bg-slate-200 rounded-md text-[9px] font-black">REACT 19</span>
-              <span className="px-2 py-1 bg-slate-200 rounded-md text-[9px] font-black">VITE</span>
-              <span className="px-2 py-1 bg-slate-200 rounded-md text-[9px] font-black">TAILWIND</span>
+          <div className="space-y-4 mt-6 pt-6 border-t border-slate-200">
+            <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2 text-center">Development Stack</p>
+            
+            <div className="flex items-center gap-3 p-3 neu-inset rounded-xl">
+              <div className="p-2 bg-white rounded-lg shadow-sm">
+                <div className="w-[18px] h-[18px] flex items-center justify-center font-black text-[10px] text-blue-600 border-2 border-blue-600 rounded">TS</div>
+              </div>
+              <div>
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Language</p>
+                <p className="text-xs font-bold text-slate-700">TypeScript</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 p-3 neu-inset rounded-xl">
+              <div className="p-2 bg-white rounded-lg shadow-sm">
+                <Zap size={18} className="text-amber-500" />
+              </div>
+              <div>
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Framework</p>
+                <p className="text-xs font-bold text-slate-700">React 19 (Vite)</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 p-3 neu-inset rounded-xl">
+              <div className="p-2 bg-white rounded-lg shadow-sm">
+                <div className="w-[18px] h-[18px] flex items-center justify-center font-black text-[10px] text-sky-400 border-2 border-sky-400 rounded-full">~</div>
+              </div>
+              <div>
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Styling</p>
+                <p className="text-xs font-bold text-slate-700">Tailwind CSS</p>
+              </div>
             </div>
           </div>
         </NeumorphicCard>
