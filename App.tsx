@@ -34,6 +34,7 @@ const App: React.FC = () => {
   const [isTaskPanelOpen, setIsTaskPanelOpen] = useState(false);
   const [isPromoting, setIsPromoting] = useState(false);
   const [promoteSourceTab, setPromoteSourceTab] = useState<NavItem | null>(null);
+  const [selectedFinanceYear, setSelectedFinanceYear] = useState<string>('All');
 
   // Fetch users for login on mount
   useEffect(() => {
@@ -813,26 +814,67 @@ const App: React.FC = () => {
           />
         );
       case 'Finance':
+        const years = Array.from(new Set(finance.map(f => new Date(f.date).getFullYear().toString()))).sort((a, b) => b.localeCompare(a));
+        const filteredFinance = selectedFinanceYear === 'All' 
+          ? finance 
+          : finance.filter(f => new Date(f.date).getFullYear().toString() === selectedFinanceYear);
+
+        const yearSummary = filteredFinance.reduce((acc, curr) => ({
+          debit: acc.debit + (Number(curr.debit) || 0),
+          credit: acc.credit + (Number(curr.credit) || 0)
+        }), { debit: 0, credit: 0 });
+
         return (
-          <DataTable<FinanceRecord> 
-            title="Laporan Keuangan" 
-            data={finance} 
-            role={role} 
-            onAdd={handleAdd} 
-            onEdit={handleEdit} 
-            onDelete={handleDelete} 
-            onImport={role === UserRole.ADMIN ? handleFinanceImport : undefined} 
-            accentColor="emerald" 
-            colorizeByMonth={true}
-            columns={[
-              { key: 'date', label: 'Tgl' }, 
-              { key: 'description', label: 'Ket' }, 
-              { key: 'debit', label: 'Debit' }, 
-              { key: 'credit', label: 'Kredit' }, 
-              { key: 'balance', label: 'Saldo' }, 
-              { key: 'createdBy', label: 'Nama Penginput' }
-            ]} 
-          />
+          <div className="flex flex-col gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 no-print">
+              <NeumorphicCard className="flex flex-col gap-2">
+                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Filter Tahun</span>
+                <select 
+                  value={selectedFinanceYear}
+                  onChange={(e) => setSelectedFinanceYear(e.target.value)}
+                  className="neu-inset w-full p-2 rounded-xl text-sm font-bold outline-none bg-transparent"
+                >
+                  <option value="All">Semua Tahun</option>
+                  {years.map(y => <option key={y} value={y}>{y}</option>)}
+                </select>
+              </NeumorphicCard>
+              
+              <NeumorphicCard className="border-l-4 border-emerald-500">
+                <span className="text-[10px] font-black text-emerald-500 uppercase tracking-widest">Total Debit ({selectedFinanceYear})</span>
+                <p className="text-xl font-black text-slate-800 mt-1">Rp {yearSummary.debit.toLocaleString('id-ID')}</p>
+              </NeumorphicCard>
+
+              <NeumorphicCard className="border-l-4 border-rose-500">
+                <span className="text-[10px] font-black text-rose-500 uppercase tracking-widest">Total Kredit ({selectedFinanceYear})</span>
+                <p className="text-xl font-black text-slate-800 mt-1">Rp {yearSummary.credit.toLocaleString('id-ID')}</p>
+              </NeumorphicCard>
+
+              <NeumorphicCard className="border-l-4 border-indigo-500">
+                <span className="text-[10px] font-black text-indigo-500 uppercase tracking-widest">Net Mutasi ({selectedFinanceYear})</span>
+                <p className="text-xl font-black text-slate-800 mt-1">Rp {(yearSummary.debit - yearSummary.credit).toLocaleString('id-ID')}</p>
+              </NeumorphicCard>
+            </div>
+
+            <DataTable<FinanceRecord> 
+              title={selectedFinanceYear === 'All' ? "Laporan Keuangan Global" : `Laporan Keuangan Tahun ${selectedFinanceYear}`} 
+              data={filteredFinance} 
+              role={role} 
+              onAdd={handleAdd} 
+              onEdit={handleEdit} 
+              onDelete={handleDelete} 
+              onImport={role === UserRole.ADMIN ? handleFinanceImport : undefined} 
+              accentColor="emerald" 
+              colorizeByMonth={true}
+              columns={[
+                { key: 'date', label: 'Tgl' }, 
+                { key: 'debit', label: 'Debit' }, 
+                { key: 'credit', label: 'Kredit' }, 
+                { key: 'balance', label: 'Saldo' }, 
+                { key: 'createdBy', label: 'Nama Penginput' },
+                { key: 'description', label: 'Keterangan' }, 
+              ]} 
+            />
+          </div>
         );
       case 'Docs':
         return <DataTable<Documentation> title="Dokumentasi & SOP" data={docs} role={role} onAdd={handleAdd} onEdit={handleEdit} onDelete={handleDelete} accentColor="blue" columns={[{ key: 'title', label: 'Judul Dokumentasi', isPublic: true }, { key: 'category', label: 'Kategori', isPublic: true }, { key: 'uploadDate', label: 'Tgl Unggah', isPublic: true }, { key: 'link', label: 'File', isPublic: true }, { key: 'createdBy', label: 'Nama Penginput' }]} />;
