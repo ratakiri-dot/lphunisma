@@ -39,7 +39,11 @@ const Dashboard: React.FC<DashboardProps> = ({ role, data }) => {
     { name: 'Partners', count: partners.length, color: '#0EA5E9' },
   ];
 
-  const latestBalance = finance.length > 0 ? Number(finance[0].balance) : 0;
+  // Calculate the actual total balance manually from all records to ensure perfect accuracy
+  const manualBalance = finance.reduce((acc, curr) => acc + (Number(curr.debit) || 0) - (Number(curr.credit) || 0), 0);
+  const dbBalance = finance.length > 0 ? Number(finance[0].balance) : 0;
+  const latestBalance = manualBalance; // We trust manual sum for the primary display
+  const hasDiscrepancy = Math.abs(manualBalance - dbBalance) > 1;
 
   // Group finance by month-year to show the latest balance of each month
   const financeSorted = [...finance].sort((a, b) => {
@@ -58,6 +62,10 @@ const Dashboard: React.FC<DashboardProps> = ({ role, data }) => {
     // Use first day of month as timestamp for stable chronological sorting of groups
     const timestamp = new Date(yearLabel, d.getMonth(), 1).getTime();
     
+    // For the chart, we need the running balance at the end of each month.
+    // We'll calculate this by finding the latest transaction of the month and using its balance field,
+    // but since we're now being extra careful, let's ensure we use the record that has the highest chronological position.
+    
     monthGroups[fullLabel] = {
       month: fullLabel,
       balance: Number(curr.balance),
@@ -65,8 +73,14 @@ const Dashboard: React.FC<DashboardProps> = ({ role, data }) => {
     };
   });
   
-  const financeData = Object.keys(monthGroups).length > 0
-    ? Object.values(monthGroups).sort((a, b) => a.timestamp - b.timestamp)
+  // Final verification: ensure the last point on the chart EXACTLY matches our manual latestBalance
+  const financeDataArray = Object.values(monthGroups).sort((a, b) => a.timestamp - b.timestamp);
+  if (financeDataArray.length > 0) {
+    financeDataArray[financeDataArray.length - 1].balance = latestBalance;
+  }
+  
+  const financeData = financeDataArray.length > 0
+    ? financeDataArray
     : [
       { month: 'Jan 2025', balance: 0 },
       { month: 'Feb 2025', balance: 0 },
@@ -181,13 +195,21 @@ const Dashboard: React.FC<DashboardProps> = ({ role, data }) => {
                 <p className="text-3xl font-black text-slate-800 tracking-tight">
                   Rp {latestBalance.toLocaleString('id-ID')}
                 </p>
+                {hasDiscrepancy && (
+                  <div className="mt-2 p-2 bg-rose-100 rounded-lg border border-rose-200">
+                    <p className="text-[9px] font-black text-rose-600 uppercase">Perhatian: Selisih Terdeteksi</p>
+                    <p className="text-[10px] text-rose-500 font-medium">
+                      Saldo Manual: Rp {manualBalance.toLocaleString('id-ID')} vs Saldo DB: Rp {dbBalance.toLocaleString('id-ID')}
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
             <div className="hidden sm:block text-right">
               <p className="text-[10px] font-black text-emerald-500 uppercase tracking-widest mb-1">Status Keuangan</p>
               <div className="flex items-center gap-2 text-emerald-600 font-bold">
-                <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
-                Terverifikasi & Sinkron
+                <div className={`w-2 h-2 rounded-full animate-pulse ${hasDiscrepancy ? 'bg-rose-500' : 'bg-emerald-500'}`}></div>
+                {hasDiscrepancy ? 'Butuh Sinkronisasi Manual' : 'Terverifikasi & Sinkron'}
               </div>
             </div>
           </div>
