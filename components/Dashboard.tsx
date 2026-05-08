@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, AreaChart, Area, LineChart, Line, Legend } from 'recharts';
 import NeumorphicCard from './NeumorphicCard';
 import { getDashboardInsight } from '../services/geminiService';
-import { Bot, TrendingUp, Users, CheckCircle, Zap, MapPin } from 'lucide-react';
+import { Bot, TrendingUp, Users, CheckCircle, Zap, MapPin, Github, Globe, Database, Cpu } from 'lucide-react';
 import { PUCertified, PUOnProcess, PUProspect, InternalMember, Auditor, Partner, FinanceRecord, UserRole } from '../types';
 
 interface DashboardProps {
@@ -356,7 +356,7 @@ const Dashboard: React.FC<DashboardProps> = ({ role, data }) => {
       </NeumorphicCard>
 
       {/* Map Section */}
-      <NeumorphicCard className="col-span-1 md:col-span-2 lg:col-span-3 flex flex-col">
+      <NeumorphicCard className="col-span-1 md:col-span-2 lg:col-span-2 flex flex-col">
         <div className="flex items-center gap-2 mb-6">
           <MapPin className="text-red-500" size={20} />
           <h3 className="font-bold text-lg">Peta Persebaran Mitra Halal LPH UNISMA</h3>
@@ -372,6 +372,57 @@ const Dashboard: React.FC<DashboardProps> = ({ role, data }) => {
             referrerPolicy="no-referrer-when-downgrade"
             title="Mitra Halal LPH UNISMA"
           />
+        </div>
+      </NeumorphicCard>
+
+      {/* System Information Section */}
+      <NeumorphicCard className="col-span-1 md:col-span-2 lg:col-span-1 flex flex-col justify-between border-t-4 border-slate-800 bg-slate-50/50">
+        <div>
+          <div className="flex items-center gap-2 mb-6">
+            <Cpu className="text-slate-700" size={20} />
+            <h3 className="font-black text-lg tracking-tight">System & Infra</h3>
+          </div>
+          
+          <div className="space-y-4">
+            <div className="flex items-center gap-3 p-3 neu-inset rounded-xl">
+              <div className="p-2 bg-white rounded-lg shadow-sm">
+                <Github size={18} className="text-slate-800" />
+              </div>
+              <div>
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Repository</p>
+                <p className="text-xs font-bold text-slate-700">github.com/ratakiri-dot/lphunisma</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 p-3 neu-inset rounded-xl">
+              <div className="p-2 bg-white rounded-lg shadow-sm">
+                <Globe size={18} className="text-blue-500" />
+              </div>
+              <div>
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Deployment</p>
+                <p className="text-xs font-bold text-slate-700">Vercel: lphunisma.vercel.app</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 p-3 neu-inset rounded-xl">
+              <div className="p-2 bg-white rounded-lg shadow-sm">
+                <Database size={18} className="text-emerald-500" />
+              </div>
+              <div>
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Database Service</p>
+                <p className="text-xs font-bold text-slate-700">Supabase (ratakiri.dot@gmail.com)</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-8 pt-4 border-t border-slate-200">
+          <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2 text-center">Tech Stack</p>
+          <div className="flex justify-center gap-3 opacity-60 grayscale hover:grayscale-0 transition-all">
+            <span className="px-2 py-1 bg-slate-200 rounded-md text-[9px] font-black">REACT 19</span>
+            <span className="px-2 py-1 bg-slate-200 rounded-md text-[9px] font-black">VITE</span>
+            <span className="px-2 py-1 bg-slate-200 rounded-md text-[9px] font-black">TAILWIND</span>
+          </div>
         </div>
       </NeumorphicCard>
     </div>
