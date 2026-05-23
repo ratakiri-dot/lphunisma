@@ -158,6 +158,7 @@ const AIWorkspace: React.FC<AIWorkspaceProps> = ({
       const formattedVisitDate = formatIndonesianDate(loanVisitDate);
 
       // Build a self-contained off-screen F4 page — never touches the live preview
+      // Uses position:absolute for footer (html2canvas doesn't compute flexbox reliably)
       const pdfDiv = document.createElement('div');
       pdfDiv.style.cssText = `
         position:fixed;top:-99999px;left:-99999px;
@@ -166,17 +167,20 @@ const AIWorkspace: React.FC<AIWorkspaceProps> = ({
         font-family:'Times New Roman',Times,serif;
         font-size:14px;line-height:1.65;color:#000;
         box-sizing:border-box;
-        padding:${PAD_T}px ${PAD_H}px ${PAD_B}px ${PAD_H}px;
-        display:flex;flex-direction:column;
         overflow:hidden;
+        position:fixed;top:-99999px;left:-99999px;
       `;
 
       pdfDiv.innerHTML = `
+        <!-- Watermark centred -->
         <img src="${BASE}/assets/letter_images/watermark.png"
              style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
                     width:70%;opacity:0.15;pointer-events:none;z-index:0;" />
 
-        <div style="position:relative;z-index:1;display:flex;flex-direction:column;height:100%;">
+        <!-- Content area — normal flow, with bottom padding so it never overlaps footer -->
+        <div style="position:relative;z-index:1;
+                    padding:${PAD_T}px ${PAD_H}px 100px ${PAD_H}px;
+                    box-sizing:border-box;">
 
           <!-- KOP SURAT -->
           <div style="display:flex;align-items:center;justify-content:space-between;
@@ -245,22 +249,20 @@ const AIWorkspace: React.FC<AIWorkspaceProps> = ({
           <!-- SALAM PENUTUP -->
           <div style="font-style:italic;margin-bottom:18px;">Wassalamualaikum War. Wab.</div>
 
-          <!-- TANDA TANGAN -->
-          <div style="display:flex;justify-content:flex-end;margin-bottom:14px;">
-            <div style="width:290px;">
+          <!-- TANDA TANGAN — float right -->
+          <div style="text-align:right;margin-bottom:14px;">
+            <div style="display:inline-block;text-align:left;width:290px;">
               Kepala Lembaga Pemeriksa Halal UNISMA,<br/><br/><br/><br/><br/>
               <strong>Dr. Hj. Jeni Susyanti, SE, MM, BKP, C.B.V</strong><br/>
               <span style="font-size:10pt;">NPP 1950200019</span>
             </div>
           </div>
-
-          <!-- SPACER: dorong footer ke bawah -->
-          <div style="flex:1;"></div>
-
-          <!-- FOOTER IMAGE -->
-          <img src="${BASE}/assets/letter_images/footer.jpeg"
-               style="width:100%;display:block;margin-top:8px;" />
         </div>
+
+        <!-- FOOTER IMAGE — absolute positioned at bottom of the F4 page -->
+        <img src="${BASE}/assets/letter_images/footer.jpeg"
+             style="position:absolute;bottom:${PAD_B / 2}px;left:${PAD_H}px;
+                    width:${F4_W - PAD_H * 2}px;display:block;z-index:2;" />
       `;
 
       document.body.appendChild(pdfDiv);
