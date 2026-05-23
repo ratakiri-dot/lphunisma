@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Sparkles, Wallet, Copy, Loader2, Printer, Save, CheckCircle2, FileText, ChevronRight } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -23,6 +23,7 @@ const AIWorkspace: React.FC<AIWorkspaceProps> = ({
   currentUser,
   onLetterSaved
 }) => {
+  const letterRef = useRef<HTMLDivElement>(null);
   const [activeTask, setActiveTask] = useState<AITaskType>('finance');
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<string>('');
@@ -95,211 +96,151 @@ const AIWorkspace: React.FC<AIWorkspaceProps> = ({
   };
 
   const handlePrint = () => {
-    if (!result) return;
+    if (!result || activeTask !== 'finance') return;
     const printWindow = window.open('', '_blank');
     if (!printWindow) return;
 
-    if (activeTask === 'vehicle') {
-      const dayOfVisit = getIndonesianDay(loanVisitDate);
-      const formattedVisitDate = formatIndonesianDate(loanVisitDate);
-
-      printWindow.document.write(`<!DOCTYPE html>
-<html>
-  <head>
-    <title>Cetak Surat Peminjaman Kendaraan</title>
-            <style>
-              @page {
-                size: 210mm 330mm; /* F4 */
-                  margin: 1cm 2cm 2cm 2cm !important; /* enforce margins */
-              }
-              html, body {
-                margin: 0;
-                padding: 0;
-                font-family: 'Times New Roman', serif;
-              }
-              .letter-container {
-                max-width: 800px;
-                margin: 0;
-              }
-              .kop-surat {
-                text-align: center;
-                border-bottom: 3px double #000;
-                padding-bottom: 8px;
-                margin-bottom: 25px;
-              }
-              .kop-title-1 { font-size: 15pt; font-weight: bold; color: #0d5c3a; margin: 0; }
-              .kop-title-2 { font-size: 18pt; font-weight: bold; color: #0d5c3a; margin: 0; letter-spacing: 2px; }
-              .kop-title-3 { font-size: 13pt; font-weight: bold; color: #0d5c3a; margin: 0; }
-              .kop-address { font-size: 8pt; color: #0d5c3a; margin: 5px 0 0 0; font-style: italic; }
-              .meta-section { display: flex; justify-content: space-between; margin-bottom: 25px; }
-              .meta-left table { border-collapse: collapse; }
-              .meta-left td { padding: 2px 5px 2px 0; vertical-align: top; }
-              .meta-right { text-align: right; }
-              .address-section { margin-bottom: 25px; }
-              .salutation { margin-bottom: 15px; }
-              .content-paragraph { margin-bottom: 15px; text-align: justify; }
-              .details-table { margin: 15px 0 15px 40px; border-collapse: collapse; }
-              .details-table td { padding: 3px 10px 3px 0; vertical-align: top; }
-              .signature-section { display: flex; justify-content: flex-end; margin-top: 50px; }
-              .signature-block { width: 350px; text-align: left; }
-            </style>
-          </head>
-          <body>
-            <div class="letter-container" style="position: relative; z-index: 1;">
-              <img src="/assets/letter_images/watermark.png" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80%; opacity: 0.15; z-index: -1;" alt="" />
-              <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 3px double #000; padding-bottom: 8px; margin-bottom: 25px;">
-                <img src="/assets/letter_images/image2.jpeg" style="width: 80px; height: 80px; object-fit: contain;" alt="Logo Kiri" />
-                <div style="text-align: center; flex: 1; padding: 0 15px; font-family: 'Bookman Old Style', serif; color: #13894B;">
-                  <h2 style="font-size: 15pt; font-weight: bold; margin: 0; line-height: 1.2;">UNIVERSITAS ISLAM MALANG</h2>
-                  <h1 style="font-size: 18pt; font-weight: bold; margin: 0; letter-spacing: 2px; line-height: 1;">( U N I S M A )</h1>
-                  <h3 style="font-size: 13pt; font-weight: bold; margin: 0; line-height: 1.5;">LEMBAGA PEMERIKSA HALAL</h3>
-                  <p style="font-size: 8pt; margin: 5px 0 0 0; font-family: Arial, sans-serif;">Jalan Mayjend Haryono 193 Malang, Jawa Timur 65144 Indonesia Telp 0341 551932 Faks. 0341 552249 E-mail: lph@unisma.ac.id Website: unisma.ac.id</p>
-                </div>
-                <img src="/assets/letter_images/image3.jpeg" style="width: 80px; height: 80px; object-fit: contain;" alt="Logo Kanan" />
-              </div>
-              
-              <div class="meta-section">
-                <div class="meta-left">
-                  <table>
-                    <tbody>
-                      <tr><td style="width: 70px;">Nomor</td><td>: ${loanLetterNo}</td></tr>
-                      <tr><td>Lampiran</td><td>: -</td></tr>
-                      <tr><td>Hal</td><td>: <strong>Peminjaman Kendaraan</strong></td></tr>
-                    </tbody>
-                  </table>
-                </div>
-                <div class="meta-right">
-                  ${loanLetterDate}
-                </div>
-              </div>
-
-              <div class="address-section">
-                Yth. Bapak Wakil Rektor<br />
-                Bagian Administrasi Umum, Keuangan, dan Personalia<br />
-                Universitas Islam Malang
-              </div>
-
-              <div class="salutation">
-                <em>Assalamualaikum War. Wab.</em>
-              </div>
-
-              <div class="content-paragraph">
-                Salam silaturahmi semoga kita senantiasa dalam lindungan Allah Swt. dan dapat menyelesaikan tugas sehari-hari. Aamiin.
-              </div>
-
-              <div class="content-paragraph">
-                Sehubungan dengan adanya <strong>Audit Sertifikasi Halal Pelaku Usaha</strong> yang akan dilaksanakan pada:
-              </div>
-
-              <table class="details-table">
-                <tbody>
-                  <tr><td style="width: 80px; font-weight: bold;">Hari</td><td>: ${dayOfVisit}</td></tr>
-                  <tr><td style="font-weight: bold;">Tanggal</td><td>: ${formattedVisitDate}</td></tr>
-                  <tr><td style="font-weight: bold;">Waktu</td><td>: ${loanVisitTime}</td></tr>
-                  <tr><td style="font-weight: bold;">Tempat</td><td>: ${loanVisitPlace}</td></tr>
-                </tbody>
-              </table>
-
-              <div class="content-paragraph">
-                dengan ini kami mengajukan permohonan peminjaman kendaraan untuk kegiatan tersebut.
-              </div>
-
-              <div class="content-paragraph">
-                Demikian permohonan ini, atas perhatiannya disampaikan terimakasih.
-              </div>
-
-              <div class="salutation">
-                <em>Wassalamualaikum War. Wab.</em>
-              </div>
-
-              <div class="signature-section">
-                <div class="signature-block">
-                  Kepala Lembaga Pemeriksa Halal UNISMA,<br /><br /><br /><br /><br />
-                  <strong>Dr. Hj. Jeni Susyanti, SE, MM, BKP, C.B.V</strong><br />
-                  NPP 1950200019
-                </div>
-              </div>
-              <img src="/assets/letter_images/footer.jpeg" style="width: 100%; margin-top: 40px;" alt="Footer" />
-            </div>
-            <script>
-              window.onload = function() {
-                window.print();
-                window.close();
-              }
-            </script>
-          </body>
-        </html>
-      `);
-    } else {
-      // Standard printing for finance recap
-      printWindow.document.write(`
-        <html>
-          <head>
-            <title>Cetak Rekap Keuangan LPH UNISMA</title>
-            <style>
-              body {
-                font-family: 'Times New Roman', Times, serif;
-                line-height: 1.5;
-                padding: 40px;
-                color: #000;
-                background-color: #fff;
-              }
-              pre {
-                white-space: pre-wrap;
-                font-family: 'Times New Roman', Times, serif;
-                font-size: 12pt;
-              }
-              .prose-print {
-                max-width: 800px;
-                margin: 0 auto;
-              }
-            </style>
-          </head>
-          <body>
-            <div class="prose-print">
-              <div id="content"></div>
-            </div>
-            <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-            <script>
-              document.getElementById('content').innerHTML = marked.parse(\`${result.replace(/`/g, '\\`').replace(/\$/g, '\\$')}\`);
-              window.onload = function() {
-                window.print();
-                window.close();
-              }
-            </script>
-          </body>
-        </html>
-      `);
-    }
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Cetak Rekap Keuangan LPH UNISMA</title>
+          <style>
+            body {
+              font-family: 'Times New Roman', Times, serif;
+              line-height: 1.5;
+              padding: 40px;
+              color: #000;
+              background-color: #fff;
+            }
+            pre {
+              white-space: pre-wrap;
+              font-family: 'Times New Roman', Times, serif;
+              font-size: 12pt;
+            }
+            .prose-print {
+              max-width: 800px;
+              margin: 0 auto;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="prose-print">
+            <div id="content"></div>
+          </div>
+          <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+          <script>
+            document.getElementById('content').innerHTML = marked.parse(\`${result.replace(/`/g, '\\`').replace(/\$/g, '\\$')}\`);
+            window.onload = function() {
+              window.print();
+              window.close();
+            }
+          </script>
+        </body>
+      </html>
+    `);
     printWindow.document.close();
   };
 
   // Export the current result as a PDF matching the preview layout
   const handleExportPdf = async () => {
     if (!result) return;
-    // Create a temporary container with the rendered HTML
-    const tempDiv = document.createElement('div');
-    tempDiv.style.position = 'fixed';
-    tempDiv.style.top = '-9999px';
-    tempDiv.innerHTML = `<div class="prose-print" style="max-width:800px;margin:0 auto;">
-      <div id="content">${marked.parse(result)}</div>
-    </div>`;
-    document.body.appendChild(tempDiv);
-    try {
-      const canvas = await html2canvas(tempDiv, { scale: 2 });
-      const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF({ unit: 'mm', format: [210, 330] }); // F4 size
-      const marginTop = 10; // 1cm = 10mm
-      const marginSide = 20; // 2cm = 20mm
-      const pdfWidth = 210 - marginSide * 2; // 170mm usable width
-      const imgProps = pdf.getImageProperties(imgData);
-      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-      pdf.addImage(imgData, 'PNG', marginSide, marginTop, pdfWidth, pdfHeight);
-      pdf.save('lembar_kerja.pdf');
-    } catch (e) {
-      console.error('PDF export failed', e);
-    } finally {
-      document.body.removeChild(tempDiv);
+
+    if (activeTask === 'vehicle') {
+      const element = letterRef.current;
+      if (!element) return;
+
+      // Clone the element to style it for precise F4 page capture
+      const clone = element.cloneNode(true) as HTMLDivElement;
+      
+      // Override style for precise F4 sizing and margins
+      clone.style.position = 'fixed';
+      clone.style.top = '-9999px';
+      clone.style.left = '-9999px';
+      clone.style.width = '210mm'; // F4 width
+      clone.style.minHeight = '330mm'; // F4 height
+      clone.style.paddingTop = '10mm'; // 1cm top margin
+      clone.style.paddingBottom = '20mm'; // 2cm bottom margin
+      clone.style.paddingLeft = '20mm'; // 2cm left margin
+      clone.style.paddingRight = '20mm'; // 2cm right margin
+      clone.style.boxShadow = 'none';
+      clone.style.border = 'none';
+      clone.style.borderRadius = '0';
+      clone.style.backgroundColor = '#ffffff';
+
+      document.body.appendChild(clone);
+
+      try {
+        // Wait a brief moment for styles/images to settle
+        await new Promise((resolve) => setTimeout(resolve, 150));
+
+        const canvas = await html2canvas(clone, {
+          scale: 2, // High resolution
+          useCORS: true,
+          allowTaint: true,
+          backgroundColor: '#ffffff',
+          logging: false
+        });
+
+        const imgData = canvas.toDataURL('image/png');
+        const pdf = new jsPDF({
+          orientation: 'portrait',
+          unit: 'mm',
+          format: [210, 330] // F4 size: 210mm x 330mm
+        });
+
+        pdf.addImage(imgData, 'PNG', 0, 0, 210, 330);
+        pdf.save('Surat_Peminjaman_Kendaraan.pdf');
+      } catch (e) {
+        console.error('PDF export failed', e);
+        alert('Gagal mengekspor PDF.');
+      } finally {
+        document.body.removeChild(clone);
+      }
+    } else {
+      // For finance, we parse markdown and convert to PDF
+      const tempDiv = document.createElement('div');
+      tempDiv.style.position = 'fixed';
+      tempDiv.style.top = '-9999px';
+      tempDiv.style.left = '-9999px';
+      tempDiv.style.width = '210mm';
+      tempDiv.style.padding = '20mm'; // Standard margins
+      tempDiv.style.backgroundColor = '#ffffff';
+      tempDiv.style.color = '#000000';
+      tempDiv.style.fontFamily = 'Times New Roman, serif';
+      tempDiv.style.fontSize = '12pt';
+      tempDiv.style.lineHeight = '1.5';
+
+      tempDiv.innerHTML = `<div class="prose-print">${marked.parse(result)}</div>`;
+      document.body.appendChild(tempDiv);
+
+      try {
+        const canvas = await html2canvas(tempDiv, { scale: 2 });
+        const imgData = canvas.toDataURL('image/png');
+        const pdf = new jsPDF({ unit: 'mm', format: [210, 330] });
+        
+        const pdfWidth = 210;
+        const pdfHeight = 330;
+        const imgHeight = (canvas.height * pdfWidth) / canvas.width;
+
+        let heightLeft = imgHeight;
+        let position = 0;
+
+        pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeight);
+        heightLeft -= pdfHeight;
+
+        while (heightLeft > 0) {
+          position = heightLeft - imgHeight;
+          pdf.addPage([210, 330]);
+          pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeight);
+          heightLeft -= pdfHeight;
+        }
+
+        pdf.save('Rekap_Keuangan.pdf');
+      } catch (e) {
+        console.error('PDF export failed', e);
+      } finally {
+        document.body.removeChild(tempDiv);
+      }
     }
   };
 
@@ -623,14 +564,25 @@ NPP 1950200019
                   <Copy size={14} />
                   {isCopied ? 'Tersalin' : 'Salin'}
                 </button>
-                <button
-                  onClick={handlePrint}
-                  title="Cetak Surat"
-                  className="p-2 bg-indigo-500 hover:bg-indigo-600 rounded-lg transition-colors flex items-center gap-1.5 text-xs font-bold"
-                >
-                  <Printer size={14} />
-                  Cetak
-                </button>
+                {activeTask === 'finance' ? (
+                  <button
+                    onClick={handlePrint}
+                    title="Cetak Rekap"
+                    className="p-2 bg-indigo-500 hover:bg-indigo-600 rounded-lg transition-colors flex items-center gap-1.5 text-xs font-bold"
+                  >
+                    <Printer size={14} />
+                    Cetak
+                  </button>
+                ) : (
+                  <button
+                    onClick={handleExportPdf}
+                    title="Convert ke PDF"
+                    className="p-2 bg-indigo-500 hover:bg-indigo-600 rounded-lg transition-colors flex items-center gap-1.5 text-xs font-bold"
+                  >
+                    <FileText size={14} />
+                    Convert to PDF
+                  </button>
+                )}
                 {activeTask === 'vehicle' && (
                   <button
                     onClick={() => handleSaveToLetters(
@@ -658,7 +610,7 @@ NPP 1950200019
             ) : result ? (
               activeTask === 'vehicle' ? (
                 /* Premium Simulated Letter Paper sheet */
-                <div className="bg-white p-8 md:p-12 shadow-lg border border-slate-300 rounded-lg max-w-[700px] mx-auto text-black text-[11pt] leading-relaxed relative selection:bg-indigo-100 font-serif z-10 overflow-hidden" style={{ fontFamily: "'Times New Roman', Times, serif" }}>
+                <div ref={letterRef} className="bg-white p-8 md:p-12 shadow-lg border border-slate-300 rounded-lg max-w-[700px] mx-auto text-black text-[11pt] leading-relaxed relative selection:bg-indigo-100 font-serif z-10 overflow-hidden" style={{ fontFamily: "'Times New Roman', Times, serif" }}>
                   {/* Decorative green top bar */}
                   <div className="absolute top-0 left-0 right-0 h-1 bg-emerald-700 rounded-t-lg z-20"></div>
 
