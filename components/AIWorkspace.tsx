@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Sparkles, Wallet, Mail, Copy, Printer, Save, Loader2, CheckCircle2, FileText, ChevronRight } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -49,6 +49,13 @@ const AIWorkspace: React.FC<AIWorkspaceProps> = ({
   const availableYears = Array.from(
     new Set(finance.map((item) => new Date(item.date).getFullYear().toString()))
   ).sort((a, b) => b.localeCompare(a));
+
+  // Sync state if the default year isn't in availableYears
+  useEffect(() => {
+    if (availableYears.length > 0 && !availableYears.includes(financeYear)) {
+      setFinanceYear(availableYears[0]);
+    }
+  }, [availableYears, financeYear]);
 
   const ALL_MONTHS = [
     { value: '01', label: 'Januari' }, { value: '02', label: 'Februari' }, { value: '03', label: 'Maret' },
