@@ -203,11 +203,11 @@ const AIWorkspace: React.FC<AIWorkspaceProps> = ({
               <img src="/assets/letter_images/watermark.png" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80%; opacity: 0.15; z-index: -1;" alt="" />
               <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 3px double #000; padding-bottom: 8px; margin-bottom: 25px;">
                 <img src="/assets/letter_images/image2.jpeg" style="width: 80px; height: 80px; object-fit: contain;" alt="Logo Kiri" />
-                <div style="text-align: center; flex: 1; padding: 0 15px;">
-                  <h2 style="font-size: 13pt; font-weight: bold; color: #0d5c3a; margin: 0; line-height: 1.2;">UNIVERSITAS ISLAM MALANG</h2>
-                  <h1 style="font-size: 16pt; font-weight: bold; color: #0d5c3a; margin: 0; letter-spacing: 2px; line-height: 1;">( U N I S M A )</h1>
-                  <h3 style="font-size: 11pt; font-weight: bold; color: #0d5c3a; margin: 0; line-height: 1.5;">LEMBAGA PEMERIKSA HALAL</h3>
-                  <p style="font-size: 8pt; color: #0d5c3a; margin: 5px 0 0 0; font-style: italic; font-family: sans-serif;">Jalan Mayjend Haryono 193 Malang, Jawa Timur 65144 Indonesia Telp 0341 551932 Faks. 0341 552249 E-mail: lph@unisma.ac.id Website: unisma.ac.id</p>
+                <div style="text-align: center; flex: 1; padding: 0 15px; font-family: 'Bookman Old Style', serif; color: #13894B;">
+                  <h2 style="font-size: 15pt; font-weight: bold; margin: 0; line-height: 1.2;">UNIVERSITAS ISLAM MALANG</h2>
+                  <h1 style="font-size: 18pt; font-weight: bold; margin: 0; letter-spacing: 2px; line-height: 1;">( U N I S M A )</h1>
+                  <h3 style="font-size: 13pt; font-weight: bold; margin: 0; line-height: 1.5;">LEMBAGA PEMERIKSA HALAL</h3>
+                  <p style="font-size: 8pt; margin: 5px 0 0 0; font-family: Arial, sans-serif;">Jalan Mayjend Haryono 193 Malang, Jawa Timur 65144 Indonesia Telp 0341 551932 Faks. 0341 552249 E-mail: lph@unisma.ac.id Website: unisma.ac.id</p>
                 </div>
                 <img src="/assets/letter_images/image3.jpeg" style="width: 80px; height: 80px; object-fit: contain;" alt="Logo Kanan" />
               </div>
@@ -686,11 +686,11 @@ NPP 1950200019
                   <div className="relative z-10">
                     <div className="flex justify-between items-center border-b-[3px] border-double border-black pb-2 mb-6">
                       <img src="/assets/letter_images/image2.jpeg" alt="Logo Kiri" className="w-20 h-20 object-contain" />
-                      <div className="text-center flex-1 px-4">
-                        <h2 className="text-[13pt] font-bold text-emerald-800 m-0 leading-tight">UNIVERSITAS ISLAM MALANG</h2>
-                        <h1 className="text-[16pt] font-bold text-emerald-800 m-0 tracking-wider leading-none">( U N I S M A )</h1>
-                        <h3 className="text-[11pt] font-bold text-emerald-800 m-0 leading-normal">LEMBAGA PEMERIKSA HALAL</h3>
-                        <p className="text-[7.5pt] text-emerald-800 m-0 mt-1 italic font-sans">Jalan Mayjend Haryono 193 Malang, Jawa Timur 65144 Indonesia Telp 0341 551932 Faks. 0341 552249 E-mail: lph@unisma.ac.id Website: unisma.ac.id</p>
+                      <div className="text-center flex-1 px-4" style={{ fontFamily: "'Bookman Old Style', serif", color: '#13894B' }}>
+                        <h2 className="text-[14pt] font-bold m-0 leading-tight">UNIVERSITAS ISLAM MALANG</h2>
+                        <h1 className="text-[17pt] font-bold m-0 tracking-wider leading-none">( U N I S M A )</h1>
+                        <h3 className="text-[12pt] font-bold m-0 leading-normal">LEMBAGA PEMERIKSA HALAL</h3>
+                        <p className="text-[7.5pt] m-0 mt-1" style={{ fontFamily: "Arial, sans-serif" }}>Jalan Mayjend Haryono 193 Malang, Jawa Timur 65144 Indonesia Telp 0341 551932 Faks. 0341 552249 E-mail: lph@unisma.ac.id Website: unisma.ac.id</p>
                       </div>
                       <img src="/assets/letter_images/image3.jpeg" alt="Logo Kanan" className="w-20 h-20 object-contain" />
                     </div>
