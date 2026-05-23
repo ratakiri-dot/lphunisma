@@ -1,33 +1,81 @@
-
 import { GoogleGenAI } from "@google/genai";
 
-const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+const apiKey = import.meta.env.VITE_GEMINI_API_KEY || import.meta.env.VITE_OPENROUTER_API_KEY;
+const isOpenRouter = apiKey && typeof apiKey === 'string' && apiKey.startsWith('sk-or-');
 
 let ai: any = null;
-// Robust check for API Key
+
 if (apiKey && typeof apiKey === 'string' && apiKey.length > 10) {
-  try {
-    ai = new GoogleGenAI({ apiKey });
-    console.log("UNI AI: Client initialized successfully");
-  } catch (err) {
-    console.error("UNI AI: Initialization error:", err);
+  if (!isOpenRouter) {
+    try {
+      ai = new GoogleGenAI({ apiKey });
+      console.log("UNI AI: Client initialized successfully with Gemini API Key");
+    } catch (err) {
+      console.error("UNI AI: Initialization error:", err);
+    }
+  } else {
+    console.log("UNI AI: Running in OpenRouter Mode");
   }
 } else {
-  console.warn("UNI AI: API Key missing or invalid. Check VITE_GEMINI_API_KEY in Vercel Settings.");
+  console.warn("UNI AI: API Key missing or invalid.");
+}
+
+async function callOpenRouter(systemInstruction: string, prompt: string, model: string = 'google/gemini-2.0-flash') {
+  try {
+    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`,
+        'HTTP-Referer': window.location.origin || 'http://localhost:3000',
+        'X-Title': 'LPH UNISMA MIS'
+      },
+      body: JSON.stringify({
+        model: model,
+        messages: [
+          { role: 'system', content: systemInstruction },
+          { role: 'user', content: prompt }
+        ],
+        temperature: 0.2
+      })
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      console.error("OpenRouter error response:", errorData);
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data.choices?.[0]?.message?.content || 'Gagal menghasilkan konten dari OpenRouter.';
+  } catch (error) {
+    console.error("OpenRouter call failed:", error);
+    throw error;
+  }
+}
+
+function isAIReady(): boolean {
+  return !!ai || !!isOpenRouter;
 }
 
 export async function getDashboardInsight(data: any) {
   try {
-    if (!ai) return "Assalamualaikum... Sistem siap melayani. Wassalamualaikum.";
+    if (!isAIReady()) return "Assalamualaikum... Sistem siap melayani. Wassalamualaikum.";
 
     const prompt = `Analyze this LPH UNISMA Dashboard data and provide a brief professional summary (max 3 sentences) in Indonesian for the dashboard.
     Data: ${JSON.stringify(data)}`;
+
+    const systemInstruction = "Anda adalah 'UNI AI LPH UNISMA', asisten khusus Sistem Informasi Halal UNISMA. ATURAN KETAT: 1. MUDAH: Selalu mulai dengan 'Assalamualaikum...' dan akhiri dengan 'Wassalamualaikum.'. 2. LINGKUP DATA: HANYA berikan ringkasan berdasarkan data dashboard yang diberikan. JANGAN berikan informasi, saran, atau prediksi di luar data tersebut. 3. PERAN: Sesuaikan kedalaman informasi dengan data yang tersedia. Jika data kosong, katakan data belum tersedia. 4. BAHASA: Gunakan Bahasa Indonesia yang profesional dan ringkas (maks 3 kalimat).";
+
+    if (isOpenRouter) {
+      return await callOpenRouter(systemInstruction, prompt);
+    }
 
     const response = await ai.models.generateContent({
       model: 'gemini-1.5-flash',
       contents: prompt,
       config: {
-        systemInstruction: "Anda adalah 'UNI AI LPH UNISMA', asisten khusus Sistem Informasi Halal UNISMA. ATURAN KETAT: 1. MUDAH: Selalu mulai dengan 'Assalamualaikum...' dan akhiri dengan 'Wassalamualaikum.'. 2. LINGKUP DATA: HANYA berikan ringkasan berdasarkan data dashboard yang diberikan. JANGAN berikan informasi, saran, atau prediksi di luar data tersebut. 3. PERAN: Sesuaikan kedalaman informasi dengan data yang tersedia. Jika data kosong, katakan data belum tersedia. 4. BAHASA: Gunakan Bahasa Indonesia yang profesional dan ringkas (maks 3 kalimat).",
+        systemInstruction,
         temperature: 0.1,
       },
     });
@@ -41,7 +89,7 @@ export async function getDashboardInsight(data: any) {
 
 export async function chatWithAI(userMessage: string, contextData: any) {
   try {
-    if (!ai) return "Assalamualaikum... Layanan AI belum dikonfigurasi. Silakan hubungi admin. Wassalamualaikum.";
+    if (!isAIReady()) return "Assalamualaikum... Layanan AI belum dikonfigurasi. Silakan hubungi admin. Wassalamualaikum.";
 
     const prompt = `User Question: ${userMessage}
     
@@ -58,11 +106,17 @@ export async function chatWithAI(userMessage: string, contextData: any) {
     TONE: Professional, structured, and helpful. 
     MANDATORY: Start with 'Assalamualaikum...' and end with 'Wassalamualaikum.'.`;
 
+    const systemInstruction = "Anda adalah 'UNI AI Assistant' khusus LPH UNISMA. TUGAS: Menjawab pertanyaan terkait data Manajemen LPH UNISMA. ATURAN KETAT: 1. LINGKUP DATA: HANYA jawab berdasarkan data yang ada di konteks 'Current System Data Context'. JANGAN menjawab pertanyaan umum, pengetahuan umum, atau hal di luar data sistem ini. 2. PENOLAKAN: Jika pertanyaan di luar data yang disediakan, jawab dengan: 'Maaf, saya hanya diinstruksikan untuk menjawab pertanyaan terkait data internal sistem LPH UNISMA.' 3. PERAN (ROLE): Patuhi visibilitas data berdasarkan Role. Jika Role adalah GUEST/PUBLIC, JANGAN bocorkan data sensitif meskipun ada di konteks (kecuali yang ditandai public). 4. FORMAT: Gunakan Markdown (tabel/list) untuk kerapian. 5. SALAM: Wajib mulai dengan 'Assalamualaikum...' dan akhiri dengan 'Wassalamualaikum.'.";
+
+    if (isOpenRouter) {
+      return await callOpenRouter(systemInstruction, prompt);
+    }
+
     const response = await ai.models.generateContent({
       model: 'gemini-1.5-flash',
       contents: prompt,
       config: {
-        systemInstruction: "Anda adalah 'UNI AI Assistant' khusus LPH UNISMA. TUGAS: Menjawab pertanyaan terkait data Manajemen LPH UNISMA. ATURAN KETAT: 1. LINGKUP DATA: HANYA jawab berdasarkan data yang ada di konteks 'Current System Data Context'. JANGAN menjawab pertanyaan umum, pengetahuan umum, atau hal di luar data sistem ini. 2. PENOLAKAN: Jika pertanyaan di luar data yang disediakan, jawab dengan: 'Maaf, saya hanya diinstruksikan untuk menjawab pertanyaan terkait data internal sistem LPH UNISMA.' 3. PERAN (ROLE): Patuhi visibilitas data berdasarkan Role. Jika Role adalah GUEST/PUBLIC, JANGAN bocorkan data sensitif meskipun ada di konteks (kecuali yang ditandai public). 4. FORMAT: Gunakan Markdown (tabel/list) untuk kerapian. 5. SALAM: Wajib mulai dengan 'Assalamualaikum...' dan akhiri dengan 'Wassalamualaikum.'.",
+        systemInstruction,
         temperature: 0.1,
       },
     });
@@ -76,7 +130,7 @@ export async function chatWithAI(userMessage: string, contextData: any) {
 
 export async function generateFinancialRecap(year: string, financeData: any[]) {
   try {
-    if (!ai) return "Assalamualaikum... Layanan AI belum dikonfigurasi. Wassalamualaikum.";
+    if (!isAIReady()) return "Assalamualaikum... Layanan AI belum dikonfigurasi. Wassalamualaikum.";
 
     const yearData = financeData.filter((item: any) => {
       if (!item.date) return false;
@@ -103,11 +157,17 @@ export async function generateFinancialRecap(year: string, financeData: any[]) {
     - Format menggunakan Markdown yang rapi (gunakan bold, bullet points, dan tabel untuk data perbandingan).
     - Selalu mulai laporan dengan "Assalamualaikum..." dan akhiri dengan "Wassalamualaikum."`;
 
+    const systemInstruction = "Anda adalah 'UNI AI Financial Analyst' untuk LPH UNISMA. Tugas Anda menganalisis data transaksi mentah dan menghasilkan laporan keuangan yang sangat detail, profesional, dan akurat menggunakan format Markdown.";
+
+    if (isOpenRouter) {
+      return await callOpenRouter(systemInstruction, prompt);
+    }
+
     const response = await ai.models.generateContent({
       model: 'gemini-1.5-flash',
       contents: prompt,
       config: {
-        systemInstruction: "Anda adalah 'UNI AI Financial Analyst' untuk LPH UNISMA. Tugas Anda menganalisis data transaksi mentah dan menghasilkan laporan keuangan yang sangat detail, profesional, dan akurat menggunakan format Markdown.",
+        systemInstruction,
         temperature: 0.2,
       },
     });
@@ -121,7 +181,7 @@ export async function generateFinancialRecap(year: string, financeData: any[]) {
 
 export async function generateCooperationLetter(partnerName: string, scope: string, signer: string, date: string) {
   try {
-    if (!ai) return "Layanan AI belum dikonfigurasi.";
+    if (!isAIReady()) return "Layanan AI belum dikonfigurasi.";
 
     const formattedDate = date ? new Date(date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : 'Tanggal Surat';
 
@@ -166,11 +226,17 @@ export async function generateCooperationLetter(partnerName: string, scope: stri
     - Gunakan Bahasa Indonesia yang sangat formal, sopan, dan baku.
     - Format output sebagai Markdown murni agar rapi saat ditampilkan dan disalin.`;
 
+    const systemInstruction = "Anda adalah 'UNI AI Document Drafter' khusus LPH UNISMA. Tugas Anda menyusun draf surat resmi instansi/surat dinas Indonesia yang sangat rapi, formal, mengikuti kaidah bahasa baku, dan berstruktur standar.";
+
+    if (isOpenRouter) {
+      return await callOpenRouter(systemInstruction, prompt);
+    }
+
     const response = await ai.models.generateContent({
       model: 'gemini-1.5-flash',
       contents: prompt,
       config: {
-        systemInstruction: "Anda adalah 'UNI AI Document Drafter' khusus LPH UNISMA. Tugas Anda menyusun draf surat resmi instansi/surat dinas Indonesia yang sangat rapi, formal, mengikuti kaidah bahasa baku, dan berstruktur standar.",
+        systemInstruction,
         temperature: 0.2,
       },
     });
@@ -184,7 +250,7 @@ export async function generateCooperationLetter(partnerName: string, scope: stri
 
 export async function generateVehicleLoanLetter(auditorName: string, eventName: string, date: string, vehicleInfo: string, signer: string) {
   try {
-    if (!ai) return "Layanan AI belum dikonfigurasi.";
+    if (!isAIReady()) return "Layanan AI belum dikonfigurasi.";
 
     const formattedDate = date ? new Date(date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : 'Tanggal Surat';
 
@@ -215,7 +281,7 @@ export async function generateVehicleLoanLetter(auditorName: string, eventName: 
        - Menjelaskan bahwa sehubungan dengan adanya agenda kegiatan LPH UNISMA yaitu: "${eventName}" yang akan dilaksanakan pada tanggal ${formattedDate}.
        - Menyatakan bahwa untuk kelancaran transportasi auditor pelaksana yaitu Bapak/Ibu **${auditorName}**, maka LPH UNISMA bermaksud memohon peminjaman kendaraan operasional berupa **${vehicleInfo}**.
        - Menyebutkan komitmen untuk menjaga kebersihan dan keamanan kendaraan operasional tersebut selama digunakan.
-    6. Salam Penutup: Demikian permohonan ini kami sampaikan, atas perhatian dan kerja samanya kami ucapkan terima kasih. Wassalamualaikum Wr. Wb.
+    6. Salam Penutup: Demikian permohonan ini kami sampaikan, atas perhatian dan kerja samanya kami ucapan terima kasih. Wassalamualaikum Wr. Wb.
     7. Tanda Tangan (di bagian kanan bawah):
        Malang, ${new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
        Hormat kami,
@@ -230,11 +296,17 @@ export async function generateVehicleLoanLetter(auditorName: string, eventName: 
     - Gunakan Bahasa Indonesia yang sangat formal, sopan, dan baku.
     - Format output sebagai Markdown murni agar rapi saat ditampilkan dan disalin.`;
 
+    const systemInstruction = "Anda adalah 'UNI AI Document Drafter' khusus LPH UNISMA. Tugas Anda menyusun draf surat resmi instansi/surat dinas Indonesia yang sangat rapi, formal, mengikuti kaidah bahasa baku, dan berstruktur standar.";
+
+    if (isOpenRouter) {
+      return await callOpenRouter(systemInstruction, prompt);
+    }
+
     const response = await ai.models.generateContent({
       model: 'gemini-1.5-flash',
       contents: prompt,
       config: {
-        systemInstruction: "Anda adalah 'UNI AI Document Drafter' khusus LPH UNISMA. Tugas Anda menyusun draf surat resmi instansi/surat dinas Indonesia yang sangat rapi, formal, mengikuti kaidah bahasa baku, dan berstruktur standar.",
+        systemInstruction,
         temperature: 0.2,
       },
     });
