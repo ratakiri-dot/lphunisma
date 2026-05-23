@@ -108,7 +108,7 @@ const AIWorkspace: React.FC<AIWorkspaceProps> = ({
               @media print {
                 @page {
                   size: A4;
-                  margin: 25mm 20mm 20mm 20mm;
+                  margin: 50mm 20mm 20mm 20mm;
                 }
               }
               body {
