@@ -100,46 +100,45 @@ const AIWorkspace: React.FC<AIWorkspaceProps> = ({
       const dayOfVisit = getIndonesianDay(loanVisitDate);
       const formattedVisitDate = formatIndonesianDate(loanVisitDate);
 
-      printWindow.document.write(`
-        <html>
-          <head>
-            <title>Cetak Surat Peminjaman Kendaraan</title>
+      printWindow.document.write(`<!DOCTYPE html>
+<html>
+  <head>
+    <title>Cetak Surat Peminjaman Kendaraan</title>
             <style>
-              @media print {
-                @page {
-                  size: 210mm 330mm; /* F4 */
-                  margin: 1cm 2cm 2cm 2cm; /* top right bottom left */
-                }
-                html, body {
-                  margin: 0;
-                  padding: 0;
-                }
-                .letter-container {
-                  max-width: 800px;
-                  margin: 0;
-                }
-                .kop-surat {
-                  text-align: center;
-                  border-bottom: 3px double #000;
-                  padding-bottom: 8px;
-                  margin-bottom: 25px;
-                }
-                .kop-title-1 { font-size: 15pt; font-weight: bold; color: #0d5c3a; margin: 0; }
-                .kop-title-2 { font-size: 18pt; font-weight: bold; color: #0d5c3a; margin: 0; letter-spacing: 2px; }
-                .kop-title-3 { font-size: 13pt; font-weight: bold; color: #0d5c3a; margin: 0; }
-                .kop-address { font-size: 8pt; color: #0d5c3a; margin: 5px 0 0 0; font-style: italic; }
-                .meta-section { display: flex; justify-content: space-between; margin-bottom: 25px; }
-                .meta-left table { border-collapse: collapse; }
-                .meta-left td { padding: 2px 5px 2px 0; vertical-align: top; }
-                .meta-right { text-align: right; }
-                .address-section { margin-bottom: 25px; }
-                .salutation { margin-bottom: 15px; }
-                .content-paragraph { margin-bottom: 15px; text-align: justify; }
-                .details-table { margin: 15px 0 15px 40px; border-collapse: collapse; }
-                .details-table td { padding: 3px 10px 3px 0; vertical-align: top; }
-                .signature-section { display: flex; justify-content: flex-end; margin-top: 50px; }
-                .signature-block { width: 350px; text-align: left; }
+              @page {
+                size: 210mm 330mm; /* F4 */
+                  margin: 1cm 2cm 2cm 2cm !important; /* enforce margins */
               }
+              html, body {
+                margin: 0;
+                padding: 0;
+                font-family: 'Times New Roman', serif;
+              }
+              .letter-container {
+                max-width: 800px;
+                margin: 0;
+              }
+              .kop-surat {
+                text-align: center;
+                border-bottom: 3px double #000;
+                padding-bottom: 8px;
+                margin-bottom: 25px;
+              }
+              .kop-title-1 { font-size: 15pt; font-weight: bold; color: #0d5c3a; margin: 0; }
+              .kop-title-2 { font-size: 18pt; font-weight: bold; color: #0d5c3a; margin: 0; letter-spacing: 2px; }
+              .kop-title-3 { font-size: 13pt; font-weight: bold; color: #0d5c3a; margin: 0; }
+              .kop-address { font-size: 8pt; color: #0d5c3a; margin: 5px 0 0 0; font-style: italic; }
+              .meta-section { display: flex; justify-content: space-between; margin-bottom: 25px; }
+              .meta-left table { border-collapse: collapse; }
+              .meta-left td { padding: 2px 5px 2px 0; vertical-align: top; }
+              .meta-right { text-align: right; }
+              .address-section { margin-bottom: 25px; }
+              .salutation { margin-bottom: 15px; }
+              .content-paragraph { margin-bottom: 15px; text-align: justify; }
+              .details-table { margin: 15px 0 15px 40px; border-collapse: collapse; }
+              .details-table td { padding: 3px 10px 3px 0; vertical-align: top; }
+              .signature-section { display: flex; justify-content: flex-end; margin-top: 50px; }
+              .signature-block { width: 350px; text-align: left; }
             </style>
           </head>
           <body>
