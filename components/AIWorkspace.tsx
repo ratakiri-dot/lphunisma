@@ -1,49 +1,28 @@
 import React, { useState, useEffect } from 'react';
-import { Sparkles, Wallet, Mail, Copy, Printer, Save, Loader2, CheckCircle2, FileText, ChevronRight } from 'lucide-react';
+import { Sparkles, Wallet, Copy, Loader2 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import NeumorphicCard from './NeumorphicCard';
-import { generateFinancialRecap, generateCooperationLetter, generateVehicleLoanLetter } from '../services/geminiService';
-import { dataService } from '../services/dataService';
-import { FinanceRecord, Auditor, Activity, AppUser, Letter } from '../types';
+import { generateFinancialRecap } from '../services/geminiService';
+import { FinanceRecord, AppUser } from '../types';
 
 interface AIWorkspaceProps {
   finance: FinanceRecord[];
-  auditors: Auditor[];
-  activities: Activity[];
   currentUser: AppUser | null;
-  onLetterSaved?: () => void;
 }
-
-type AITaskType = 'finance' | 'cooperation' | 'vehicle';
 
 const AIWorkspace: React.FC<AIWorkspaceProps> = ({
   finance,
-  auditors,
-  activities,
-  currentUser,
-  onLetterSaved
+  currentUser
 }) => {
-  const [activeTask, setActiveTask] = useState<AITaskType>('finance');
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<string>('');
   const [isCopied, setIsCopied] = useState(false);
-  const [isSaved, setIsSaved] = useState(false);
 
   // Task-specific form states
   const [financeYear, setFinanceYear] = useState<string>(new Date().getFullYear().toString());
   const [financeStartMonth, setFinanceStartMonth] = useState<string>('01');
   const [financeEndMonth, setFinanceEndMonth] = useState<string>('12');
-  const [coopPartner, setCoopPartner] = useState<string>('');
-  const [coopScope, setCoopScope] = useState<string>('');
-  const [coopSigner, setCoopSigner] = useState<string>('Dr. Ahmad Fauzi, M.Si');
-  const [coopDate, setCoopDate] = useState<string>(new Date().toISOString().split('T')[0]);
-
-  const [loanAuditor, setLoanAuditor] = useState<string>('');
-  const [loanEvent, setLoanEvent] = useState<string>('');
-  const [loanVehicle, setLoanVehicle] = useState<string>('');
-  const [loanSigner, setLoanSigner] = useState<string>('Dr. Ahmad Fauzi, M.Si');
-  const [loanDate, setLoanDate] = useState<string>(new Date().toISOString().split('T')[0]);
 
   // Derived financial years list from real data
   const availableYears = Array.from(
@@ -71,124 +50,17 @@ const AIWorkspace: React.FC<AIWorkspaceProps> = ({
     setTimeout(() => setIsCopied(false), 2000);
   };
 
-  const handlePrint = () => {
-    if (!result) return;
-    const printWindow = window.open('', '_blank');
-    if (!printWindow) return;
-
-    printWindow.document.write(`
-      <html>
-        <head>
-          <title>Cetak Surat LPH UNISMA</title>
-          <style>
-            body {
-              font-family: 'Times New Roman', Times, serif;
-              line-height: 1.5;
-              padding: 40px;
-              color: #000;
-              background-color: #fff;
-            }
-            pre {
-              white-space: pre-wrap;
-              font-family: 'Times New Roman', Times, serif;
-              font-size: 12pt;
-            }
-            .prose-print {
-              max-width: 800px;
-              margin: 0 auto;
-            }
-            .kop-surat {
-              text-align: center;
-              border-bottom: 2px solid #000;
-              padding-bottom: 10px;
-              margin-bottom: 20px;
-            }
-            /* Menghilangkan format markdown agar tercetak seperti surat dinas murni */
-            h1, h2, h3, h4 {
-              margin-top: 10px;
-              margin-bottom: 5px;
-            }
-          </style>
-        </head>
-        <body>
-          <div class="prose-print">
-            <div id="content"></div>
-          </div>
-          <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-          <script>
-            document.getElementById('content').innerHTML = marked.parse(\`${result.replace(/`/g, '\\`').replace(/\$/g, '\\$')}\`);
-            window.onload = function() {
-              window.print();
-              window.close();
-            }
-          </script>
-        </body>
-      </html>
-    `);
-    printWindow.document.close();
-  };
-
-  const handleSaveToLetters = async (title: string, type: 'Incoming' | 'Outgoing') => {
-    if (!result || isSaved) return;
-    setIsLoading(true);
-    try {
-      const username = currentUser?.fullName || currentUser?.username || 'System';
-      const letterData: Partial<Letter> = {
-        title: title,
-        letterNumber: `[DRAF/${new Date().getFullYear()}]`,
-        date: new Date().toISOString().split('T')[0],
-        type: type,
-        link: '',
-        content: result,
-        createdBy: username,
-        updatedBy: username
-      };
-
-      await dataService.upsertLetter(letterData);
-      setIsSaved(true);
-      if (onLetterSaved) {
-        onLetterSaved();
-      }
-      alert('Surat berhasil disimpan ke Arsip Surat!');
-      setTimeout(() => setIsSaved(false), 3000);
-    } catch (err) {
-      console.error(err);
-      alert('Gagal menyimpan surat');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   const handleExecuteAI = async () => {
     setIsLoading(true);
     setResult('');
-    setIsSaved(false);
 
     try {
-      let aiOutput = '';
-      if (activeTask === 'finance') {
-        if (parseInt(financeStartMonth) > parseInt(financeEndMonth)) {
-          alert('Bulan Awal tidak boleh lebih besar dari Bulan Akhir.');
-          setIsLoading(false);
-          return;
-        }
-        aiOutput = await generateFinancialRecap(financeYear, finance, financeStartMonth, financeEndMonth);
-      } else if (activeTask === 'cooperation') {
-        if (!coopPartner.trim() || !coopScope.trim()) {
-          alert('Mohon lengkapi Nama Mitra dan Bidang Kerja Sama.');
-          setIsLoading(false);
-          return;
-        }
-        aiOutput = await generateCooperationLetter(coopPartner, coopScope, coopSigner, coopDate);
-      } else if (activeTask === 'vehicle') {
-        if (!loanAuditor || !loanEvent || !loanVehicle.trim()) {
-          alert('Mohon lengkapi data Auditor, Agenda Kegiatan, dan Detail Kendaraan.');
-          setIsLoading(false);
-          return;
-        }
-        aiOutput = await generateVehicleLoanLetter(loanAuditor, loanEvent, loanDate, loanVehicle, loanSigner);
+      if (parseInt(financeStartMonth) > parseInt(financeEndMonth)) {
+        alert('Bulan Awal tidak boleh lebih besar dari Bulan Akhir.');
+        setIsLoading(false);
+        return;
       }
-
+      const aiOutput = await generateFinancialRecap(financeYear, finance, financeStartMonth, financeEndMonth);
       setResult(aiOutput);
     } catch (error) {
       console.error(error);
@@ -208,50 +80,14 @@ const AIWorkspace: React.FC<AIWorkspaceProps> = ({
           </h3>
 
           <div className="flex flex-col gap-3">
-            <button
-              onClick={() => { setActiveTask('finance'); setResult(''); }}
-              className={`w-full flex items-center justify-between p-4 rounded-2xl transition-all ${
-                activeTask === 'finance'
-                  ? 'neu-inset text-indigo-600 font-black'
-                  : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50/50'
-              }`}
+            <div
+              className="w-full flex items-center justify-between p-4 rounded-2xl transition-all neu-inset text-indigo-600 font-black"
             >
               <div className="flex items-center gap-3">
                 <Wallet size={18} />
                 <span className="text-sm">Rekap Keuangan</span>
               </div>
-              <ChevronRight size={16} />
-            </button>
-
-            <button
-              onClick={() => { setActiveTask('cooperation'); setResult(''); }}
-              className={`w-full flex items-center justify-between p-4 rounded-2xl transition-all ${
-                activeTask === 'cooperation'
-                  ? 'neu-inset text-indigo-600 font-black'
-                  : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50/50'
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <Mail size={18} />
-                <span className="text-sm">Surat Kerja Sama</span>
-              </div>
-              <ChevronRight size={16} />
-            </button>
-
-            <button
-              onClick={() => { setActiveTask('vehicle'); setResult(''); }}
-              className={`w-full flex items-center justify-between p-4 rounded-2xl transition-all ${
-                activeTask === 'vehicle'
-                  ? 'neu-inset text-indigo-600 font-black'
-                  : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50/50'
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <FileText size={18} />
-                <span className="text-sm">Peminjaman Kendaraan</span>
-              </div>
-              <ChevronRight size={16} />
-            </button>
+            </div>
           </div>
         </NeumorphicCard>
 
@@ -263,167 +99,57 @@ const AIWorkspace: React.FC<AIWorkspaceProps> = ({
 
           <div className="space-y-4 text-xs font-bold text-slate-600">
             {/* Finance Recap Form */}
-            {activeTask === 'finance' && (
-              <div className="space-y-4">
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <label className="block pl-1 text-[10px] text-slate-400 uppercase">Pilih Tahun</label>
+                <select
+                  value={financeYear}
+                  onChange={(e) => { 
+                    setFinanceYear(e.target.value); 
+                    setFinanceStartMonth('01'); 
+                    setFinanceEndMonth('12'); 
+                  }}
+                  className="w-full p-4 neu-inset rounded-xl outline-none bg-transparent cursor-pointer"
+                >
+                  {availableYears.length > 0 ? (
+                    availableYears.map((y) => <option key={y} value={y}>{y}</option>)
+                  ) : (
+                    <option value={new Date().getFullYear().toString()}>{new Date().getFullYear()}</option>
+                  )}
+                </select>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <label className="block pl-1 text-[10px] text-slate-400 uppercase">Pilih Tahun</label>
+                  <label className="block pl-1 text-[10px] text-slate-400 uppercase">Bulan Awal</label>
                   <select
-                    value={financeYear}
-                    onChange={(e) => { 
-                      setFinanceYear(e.target.value); 
-                      setFinanceStartMonth('01'); 
-                      setFinanceEndMonth('12'); 
-                    }}
+                    value={financeStartMonth}
+                    onChange={(e) => setFinanceStartMonth(e.target.value)}
                     className="w-full p-4 neu-inset rounded-xl outline-none bg-transparent cursor-pointer"
                   >
-                    {availableYears.length > 0 ? (
-                      availableYears.map((y) => <option key={y} value={y}>{y}</option>)
-                    ) : (
-                      <option value={new Date().getFullYear().toString()}>{new Date().getFullYear()}</option>
-                    )}
-                  </select>
-                </div>
-                
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <label className="block pl-1 text-[10px] text-slate-400 uppercase">Bulan Awal</label>
-                    <select
-                      value={financeStartMonth}
-                      onChange={(e) => setFinanceStartMonth(e.target.value)}
-                      className="w-full p-4 neu-inset rounded-xl outline-none bg-transparent cursor-pointer"
-                    >
-                      {ALL_MONTHS.map((m) => (
-                        <option key={m.value} value={m.value}>{m.label}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="space-y-2">
-                    <label className="block pl-1 text-[10px] text-slate-400 uppercase">Bulan Akhir</label>
-                    <select
-                      value={financeEndMonth}
-                      onChange={(e) => setFinanceEndMonth(e.target.value)}
-                      className="w-full p-4 neu-inset rounded-xl outline-none bg-transparent cursor-pointer"
-                    >
-                      {ALL_MONTHS.map((m) => (
-                        <option key={m.value} value={m.value}>{m.label}</option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-                
-                <p className="text-[10px] text-slate-400 pl-1 leading-relaxed">
-                  Data diambil dari tab <span className="font-black text-indigo-500">Finance</span>. Tentukan rentang periode analisis rekap (misal: Januari s/d Maret).
-                </p>
-              </div>
-            )}
-
-            {/* Cooperation Letter Form */}
-            {activeTask === 'cooperation' && (
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <label className="block pl-1 text-[10px] text-slate-400 uppercase">Nama Instansi Mitra</label>
-                  <input
-                    value={coopPartner}
-                    onChange={(e) => setCoopPartner(e.target.value)}
-                    placeholder="e.g. Dinas Koperasi Malang"
-                    className="w-full p-4 neu-inset rounded-xl outline-none bg-transparent"
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="block pl-1 text-[10px] text-slate-400 uppercase">Ruang Lingkup Kerja Sama</label>
-                  <input
-                    value={coopScope}
-                    onChange={(e) => setCoopScope(e.target.value)}
-                    placeholder="e.g. Sertifikasi Halal 100 UMKM"
-                    className="w-full p-4 neu-inset rounded-xl outline-none bg-transparent"
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="block pl-1 text-[10px] text-slate-400 uppercase">Penandatangan Surat</label>
-                  <input
-                    value={coopSigner}
-                    onChange={(e) => setCoopSigner(e.target.value)}
-                    placeholder="Nama Lengkap & Gelar"
-                    className="w-full p-4 neu-inset rounded-xl outline-none bg-transparent"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="block pl-1 text-[10px] text-slate-400 uppercase">Tanggal Surat</label>
-                  <input
-                    type="date"
-                    value={coopDate}
-                    onChange={(e) => setCoopDate(e.target.value)}
-                    className="w-full p-4 neu-inset rounded-xl outline-none bg-transparent cursor-pointer"
-                  />
-                </div>
-              </div>
-            )}
-
-            {/* Vehicle Loan Form */}
-            {activeTask === 'vehicle' && (
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <label className="block pl-1 text-[10px] text-slate-400 uppercase">Pilih Auditor</label>
-                  <select
-                    value={loanAuditor}
-                    onChange={(e) => setLoanAuditor(e.target.value)}
-                    className="w-full p-4 neu-inset rounded-xl outline-none bg-transparent cursor-pointer"
-                    required
-                  >
-                    <option value="">-- Pilih Auditor --</option>
-                    {auditors.map((aud) => (
-                      <option key={aud.id} value={aud.fullName}>{aud.fullName}</option>
+                    {ALL_MONTHS.map((m) => (
+                      <option key={m.value} value={m.value}>{m.label}</option>
                     ))}
                   </select>
                 </div>
                 <div className="space-y-2">
-                  <label className="block pl-1 text-[10px] text-slate-400 uppercase">Pilih Agenda Audit</label>
+                  <label className="block pl-1 text-[10px] text-slate-400 uppercase">Bulan Akhir</label>
                   <select
-                    value={loanEvent}
-                    onChange={(e) => setLoanEvent(e.target.value)}
+                    value={financeEndMonth}
+                    onChange={(e) => setFinanceEndMonth(e.target.value)}
                     className="w-full p-4 neu-inset rounded-xl outline-none bg-transparent cursor-pointer"
-                    required
                   >
-                    <option value="">-- Pilih Agenda --</option>
-                    {activities.map((act) => (
-                      <option key={act.id} value={`${act.event} (${act.location})`}>
-                        {act.date} - {act.event}
-                      </option>
+                    {ALL_MONTHS.map((m) => (
+                      <option key={m.value} value={m.value}>{m.label}</option>
                     ))}
                   </select>
                 </div>
-                <div className="space-y-2">
-                  <label className="block pl-1 text-[10px] text-slate-400 uppercase">Detail Kendaraan Operasional</label>
-                  <input
-                    value={loanVehicle}
-                    onChange={(e) => setLoanVehicle(e.target.value)}
-                    placeholder="e.g. Avanza N 1234 XX / Mobil Dinas LPH"
-                    className="w-full p-4 neu-inset rounded-xl outline-none bg-transparent"
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="block pl-1 text-[10px] text-slate-400 uppercase">Penandatangan Surat</label>
-                  <input
-                    value={loanSigner}
-                    onChange={(e) => setLoanSigner(e.target.value)}
-                    placeholder="Nama Lengkap & Gelar"
-                    className="w-full p-4 neu-inset rounded-xl outline-none bg-transparent"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="block pl-1 text-[10px] text-slate-400 uppercase">Tanggal Kegiatan</label>
-                  <input
-                    type="date"
-                    value={loanDate}
-                    onChange={(e) => setLoanDate(e.target.value)}
-                    className="w-full p-4 neu-inset rounded-xl outline-none bg-transparent cursor-pointer"
-                  />
-                </div>
               </div>
-            )}
+              
+              <p className="text-[10px] text-slate-400 pl-1 leading-relaxed">
+                Data diambil dari tab <span className="font-black text-indigo-500">Finance</span>. Tentukan rentang periode analisis rekap (misal: Januari s/d Maret).
+              </p>
+            </div>
 
             <button
               onClick={handleExecuteAI}
@@ -467,31 +193,6 @@ const AIWorkspace: React.FC<AIWorkspaceProps> = ({
                   <Copy size={14} />
                   {isCopied ? 'Tersalin' : 'Salin'}
                 </button>
-                {activeTask !== 'finance' && (
-                  <>
-                    <button
-                      onClick={handlePrint}
-                      title="Cetak Surat"
-                      className="p-2 bg-indigo-500 hover:bg-indigo-600 rounded-lg transition-colors flex items-center gap-1.5 text-xs font-bold"
-                    >
-                      <Printer size={14} />
-                      Cetak
-                    </button>
-                    <button
-                      onClick={() => handleSaveToLetters(
-                        activeTask === 'cooperation' 
-                          ? `Penawaran Kerjasama ${coopPartner}` 
-                          : `Peminjaman Kendaraan ${loanAuditor}`,
-                        'Outgoing'
-                      )}
-                      disabled={isSaved}
-                      className="p-2 bg-emerald-500 hover:bg-emerald-600 disabled:bg-emerald-700 rounded-lg transition-colors flex items-center gap-1.5 text-xs font-bold"
-                    >
-                      {isSaved ? <CheckCircle2 size={14} /> : <Save size={14} />}
-                      {isSaved ? 'Tersimpan' : 'Simpan ke Arsip'}
-                    </button>
-                  </>
-                )}
               </div>
             )}
           </div>
@@ -513,7 +214,7 @@ const AIWorkspace: React.FC<AIWorkspaceProps> = ({
                 <div>
                   <h4 className="font-black text-sm uppercase tracking-widest text-slate-500">Lembar Kerja Kosong</h4>
                   <p className="text-xs font-medium text-slate-400 mt-1 max-w-xs">
-                    Pilih tugas, sesuaikan parameter di panel kiri, lalu klik tombol **"Kerjakan dengan AI"** untuk memulai.
+                    Tentukan rentang parameter di panel kiri, lalu klik tombol **"Kerjakan dengan AI"** untuk memulai.
                   </p>
                 </div>
               </div>

@@ -652,13 +652,7 @@ const App: React.FC = () => {
         return (
           <AIWorkspace
             finance={finance}
-            auditors={auditors}
-            activities={schedule}
             currentUser={currentUser}
-            onLetterSaved={async () => {
-              const updatedLetters = await dataService.getLetters();
-              setLetters(updatedLetters);
-            }}
           />
         );
       case 'PU Certified': {
