@@ -105,23 +105,25 @@ const AIWorkspace: React.FC<AIWorkspaceProps> = ({
           <head>
             <title>Cetak Surat Peminjaman Kendaraan</title>
             <style>
-              @media print {
                 @page {
                   size: A4;
-                  margin: 50mm 20mm 20mm 20mm;
+                  margin: 5cm 2cm 2cm 2cm !important; /* top right bottom left */
                 }
-              }
               body {
                 font-family: 'Times New Roman', Times, serif;
                 line-height: 1.6;
-                padding: 10px;
+                padding: 0;
                 color: #000;
                 background-color: #fff;
                 font-size: 12pt;
               }
+              html, body {
+                margin: 0;
+                padding: 0;
+              }
               .letter-container {
                 max-width: 800px;
-                margin: 0 auto;
+                margin: 5cm 2cm 2cm 2cm; /* top right bottom left */
               }
               .kop-surat {
                 text-align: center;
