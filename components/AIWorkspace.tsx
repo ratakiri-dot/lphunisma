@@ -149,9 +149,16 @@ const AIWorkspace: React.FC<AIWorkspaceProps> = ({
       const element = letterRef.current;
       if (!element) return;
 
+      const footerImg = element.querySelector('img[alt="Footer"]') as HTMLImageElement;
+      let originalFooterStyle = '';
+      if (footerImg) {
+        originalFooterStyle = footerImg.getAttribute('style') || '';
+      }
+
       // Apply print styles to the live visible element temporarily for precise F4 page capture
       element.style.width = '210mm';
       element.style.maxWidth = '210mm';
+      element.style.height = '330mm'; // Lock to F4 height
       element.style.minHeight = '330mm';
       element.style.paddingTop = '10mm'; // 1cm top margin
       element.style.paddingBottom = '20mm'; // 2cm bottom margin
@@ -161,6 +168,14 @@ const AIWorkspace: React.FC<AIWorkspaceProps> = ({
       element.style.border = 'none';
       element.style.borderRadius = '0';
       element.style.backgroundColor = '#ffffff';
+
+      // Position footer at the absolute bottom of the F4 page
+      if (footerImg) {
+        footerImg.style.position = 'absolute';
+        footerImg.style.bottom = '10mm'; // 1cm from bottom edge
+        footerImg.style.left = '20mm';
+        footerImg.style.width = '170mm'; // 210mm - 40mm margins
+      }
 
       try {
         // Wait a brief moment for layout recalculation to complete
@@ -190,6 +205,7 @@ const AIWorkspace: React.FC<AIWorkspaceProps> = ({
         // Restore original stylesheet values by resetting style properties
         element.style.width = '';
         element.style.maxWidth = '';
+        element.style.height = '';
         element.style.minHeight = '';
         element.style.paddingTop = '';
         element.style.paddingBottom = '';
@@ -199,6 +215,14 @@ const AIWorkspace: React.FC<AIWorkspaceProps> = ({
         element.style.border = '';
         element.style.borderRadius = '';
         element.style.backgroundColor = '';
+
+        if (footerImg) {
+          if (originalFooterStyle) {
+            footerImg.setAttribute('style', originalFooterStyle);
+          } else {
+            footerImg.removeAttribute('style');
+          }
+        }
       }
     } else {
       // For finance, we parse markdown and convert to PDF
@@ -613,10 +637,8 @@ NPP 1950200019
               </div>
             ) : result ? (
               activeTask === 'vehicle' ? (
-                /* Premium Simulated Letter Paper sheet */
-                <div ref={letterRef} className="bg-white p-8 md:p-12 shadow-lg border border-slate-300 rounded-lg max-w-[700px] mx-auto text-black text-[11pt] leading-relaxed relative selection:bg-indigo-100 font-serif z-10 overflow-hidden" style={{ fontFamily: "'Times New Roman', Times, serif" }}>
-                  {/* Decorative green top bar */}
-                  <div className="absolute top-0 left-0 right-0 h-1 bg-emerald-700 rounded-t-lg z-20"></div>
+                /* Premium Simulated Letter Paper sheet styled like F4 page */
+                <div ref={letterRef} className="bg-white p-8 md:p-12 shadow-lg border border-slate-300 rounded-lg max-w-[700px] min-h-[950px] pb-36 mx-auto text-black text-[11pt] leading-relaxed relative selection:bg-indigo-100 font-serif z-10 overflow-hidden" style={{ fontFamily: "'Times New Roman', Times, serif" }}>
 
                   {/* Watermark centered cleanly for html2canvas */}
                   <img src="/assets/letter_images/watermark.png" alt="" className="absolute top-0 left-0 right-0 bottom-0 m-auto w-[80%] opacity-15 pointer-events-none z-0 select-none" />
@@ -694,7 +716,8 @@ NPP 1950200019
                       <span className="text-[10pt]">NPP 1950200019</span>
                     </div>
                   </div>
-                  <img src="/assets/letter_images/footer.jpeg" alt="Footer" className="w-full mt-10" />
+                  {/* Footer image positioned absolute at bottom of simulated sheet */}
+                  <img src="/assets/letter_images/footer.jpeg" alt="Footer" className="absolute bottom-8 left-8 right-8 w-[calc(100%-4rem)] md:left-12 md:right-12 md:w-[calc(100%-6rem)]" />
                   </div>
                 </div>
               ) : (
