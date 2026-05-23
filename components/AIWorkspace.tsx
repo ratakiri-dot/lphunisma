@@ -106,8 +106,8 @@ const AIWorkspace: React.FC<AIWorkspaceProps> = ({
             <title>Cetak Surat Peminjaman Kendaraan</title>
             <style>
                 @page {
-                  size: A4;
-                  margin: 5cm 2cm 2cm 2cm !important; /* top right bottom left */
+                  size: 210mm 330mm;
+                  margin: 1cm 2cm 2cm 2cm !important; /* top right bottom left */
                 }
               body {
                 font-family: 'Times New Roman', Times, serif;
@@ -123,7 +123,7 @@ const AIWorkspace: React.FC<AIWorkspaceProps> = ({
               }
               .letter-container {
                 max-width: 800px;
-                margin: 5cm 2cm 2cm 2cm; /* top right bottom left */
+                margin: 0;
               }
               .kop-surat {
                 text-align: center;
