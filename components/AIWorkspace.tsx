@@ -32,7 +32,8 @@ const AIWorkspace: React.FC<AIWorkspaceProps> = ({
 
   // Task-specific form states
   const [financeYear, setFinanceYear] = useState<string>(new Date().getFullYear().toString());
-  const [financeMonth, setFinanceMonth] = useState<string>('all');
+  const [financeStartMonth, setFinanceStartMonth] = useState<string>('01');
+  const [financeEndMonth, setFinanceEndMonth] = useState<string>('12');
   const [coopPartner, setCoopPartner] = useState<string>('');
   const [coopScope, setCoopScope] = useState<string>('');
   const [coopSigner, setCoopSigner] = useState<string>('Dr. Ahmad Fauzi, M.Si');
@@ -49,20 +50,12 @@ const AIWorkspace: React.FC<AIWorkspaceProps> = ({
     new Set(finance.map((item) => new Date(item.date).getFullYear().toString()))
   ).sort((a, b) => b.localeCompare(a));
 
-  // Months that actually have data for the selected year
-  const availableMonths = Array.from(
-    new Set(
-      finance
-        .filter((item) => new Date(item.date).getFullYear().toString() === financeYear)
-        .map((item) => (new Date(item.date).getMonth() + 1).toString().padStart(2, '0'))
-    )
-  ).sort();
-
-  const MONTH_NAMES: Record<string, string> = {
-    '01': 'Januari', '02': 'Februari', '03': 'Maret', '04': 'April',
-    '05': 'Mei', '06': 'Juni', '07': 'Juli', '08': 'Agustus',
-    '09': 'September', '10': 'Oktober', '11': 'November', '12': 'Desember'
-  };
+  const ALL_MONTHS = [
+    { value: '01', label: 'Januari' }, { value: '02', label: 'Februari' }, { value: '03', label: 'Maret' },
+    { value: '04', label: 'April' }, { value: '05', label: 'Mei' }, { value: '06', label: 'Juni' },
+    { value: '07', label: 'Juli' }, { value: '08', label: 'Agustus' }, { value: '09', label: 'September' },
+    { value: '10', label: 'Oktober' }, { value: '11', label: 'November' }, { value: '12', label: 'Desember' }
+  ];
 
   const handleCopy = () => {
     if (!result) return;
@@ -167,7 +160,12 @@ const AIWorkspace: React.FC<AIWorkspaceProps> = ({
     try {
       let aiOutput = '';
       if (activeTask === 'finance') {
-        aiOutput = await generateFinancialRecap(financeYear, finance, financeMonth);
+        if (parseInt(financeStartMonth) > parseInt(financeEndMonth)) {
+          alert('Bulan Awal tidak boleh lebih besar dari Bulan Akhir.');
+          setIsLoading(false);
+          return;
+        }
+        aiOutput = await generateFinancialRecap(financeYear, finance, financeStartMonth, financeEndMonth);
       } else if (activeTask === 'cooperation') {
         if (!coopPartner.trim() || !coopScope.trim()) {
           alert('Mohon lengkapi Nama Mitra dan Bidang Kerja Sama.');
@@ -264,7 +262,11 @@ const AIWorkspace: React.FC<AIWorkspaceProps> = ({
                   <label className="block pl-1 text-[10px] text-slate-400 uppercase">Pilih Tahun</label>
                   <select
                     value={financeYear}
-                    onChange={(e) => { setFinanceYear(e.target.value); setFinanceMonth('all'); }}
+                    onChange={(e) => { 
+                      setFinanceYear(e.target.value); 
+                      setFinanceStartMonth('01'); 
+                      setFinanceEndMonth('12'); 
+                    }}
                     className="w-full p-4 neu-inset rounded-xl outline-none bg-transparent cursor-pointer"
                   >
                     {availableYears.length > 0 ? (
@@ -274,21 +276,36 @@ const AIWorkspace: React.FC<AIWorkspaceProps> = ({
                     )}
                   </select>
                 </div>
-                <div className="space-y-2">
-                  <label className="block pl-1 text-[10px] text-slate-400 uppercase">Filter Bulan <span className="text-indigo-400">(Opsional)</span></label>
-                  <select
-                    value={financeMonth}
-                    onChange={(e) => setFinanceMonth(e.target.value)}
-                    className="w-full p-4 neu-inset rounded-xl outline-none bg-transparent cursor-pointer"
-                  >
-                    <option value="all">— Semua Bulan —</option>
-                    {availableMonths.map((m) => (
-                      <option key={m} value={m}>{MONTH_NAMES[m]}</option>
-                    ))}
-                  </select>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="block pl-1 text-[10px] text-slate-400 uppercase">Bulan Awal</label>
+                    <select
+                      value={financeStartMonth}
+                      onChange={(e) => setFinanceStartMonth(e.target.value)}
+                      className="w-full p-4 neu-inset rounded-xl outline-none bg-transparent cursor-pointer"
+                    >
+                      {ALL_MONTHS.map((m) => (
+                        <option key={m.value} value={m.value}>{m.label}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="block pl-1 text-[10px] text-slate-400 uppercase">Bulan Akhir</label>
+                    <select
+                      value={financeEndMonth}
+                      onChange={(e) => setFinanceEndMonth(e.target.value)}
+                      className="w-full p-4 neu-inset rounded-xl outline-none bg-transparent cursor-pointer"
+                    >
+                      {ALL_MONTHS.map((m) => (
+                        <option key={m.value} value={m.value}>{m.label}</option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
+                
                 <p className="text-[10px] text-slate-400 pl-1 leading-relaxed">
-                  Data diambil dari tab <span className="font-black text-indigo-500">Finance</span>. Pilih tahun dan bulan untuk membatasi periode rekap.
+                  Data diambil dari tab <span className="font-black text-indigo-500">Finance</span>. Tentukan rentang periode analisis rekap (misal: Januari s/d Maret).
                 </p>
               </div>
             )}

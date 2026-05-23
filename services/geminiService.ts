@@ -128,7 +128,7 @@ export async function chatWithAI(userMessage: string, contextData: any) {
   }
 }
 
-export async function generateFinancialRecap(year: string, financeData: any[], month?: string) {
+export async function generateFinancialRecap(year: string, financeData: any[], startMonth?: string, endMonth?: string) {
   try {
     if (!isAIReady()) return "Assalamualaikum... Layanan AI belum dikonfigurasi. Wassalamualaikum.";
 
@@ -138,10 +138,11 @@ export async function generateFinancialRecap(year: string, financeData: any[], m
       return new Date(item.date).getFullYear().toString() === year;
     });
 
-    // Filter berdasarkan bulan jika dipilih
-    if (month && month !== 'all') {
+    // Filter berdasarkan rentang bulan
+    if (startMonth && endMonth) {
       filteredData = filteredData.filter((item: any) => {
-        return (new Date(item.date).getMonth() + 1).toString().padStart(2, '0') === month;
+        const itemMonth = new Date(item.date).getMonth() + 1;
+        return itemMonth >= parseInt(startMonth) && itemMonth <= parseInt(endMonth);
       });
     }
 
@@ -150,9 +151,17 @@ export async function generateFinancialRecap(year: string, financeData: any[], m
       '05': 'Mei', '06': 'Juni', '07': 'Juli', '08': 'Agustus',
       '09': 'September', '10': 'Oktober', '11': 'November', '12': 'Desember'
     };
-    const periodLabel = (month && month !== 'all')
-      ? `${MONTH_NAMES[month]} ${year}`
-      : `Tahun ${year} (Seluruh Bulan)`;
+    
+    let periodLabel = `Tahun ${year}`;
+    if (startMonth && endMonth) {
+      if (startMonth === endMonth) {
+        periodLabel = `Bulan ${MONTH_NAMES[startMonth]} ${year}`;
+      } else if (startMonth === '01' && endMonth === '12') {
+        periodLabel = `Tahun ${year} (Seluruh Bulan)`;
+      } else {
+        periodLabel = `Bulan ${MONTH_NAMES[startMonth]} - ${MONTH_NAMES[endMonth]} ${year}`;
+      }
+    }
 
     if (filteredData.length === 0) {
       return `Assalamualaikum... Tidak ditemukan data keuangan untuk periode ${periodLabel}. Wassalamualaikum.`;
@@ -197,6 +206,7 @@ export async function generateFinancialRecap(year: string, financeData: any[], m
     return "Assalamualaikum... Gagal menyusun rekap keuangan karena kendala teknis. Wassalamualaikum.";
   }
 }
+
 
 
 export async function generateCooperationLetter(partnerName: string, scope: string, signer: string, date: string) {
