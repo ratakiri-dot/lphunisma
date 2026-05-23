@@ -6,6 +6,9 @@ import NeumorphicCard from './NeumorphicCard';
 import { generateFinancialRecap } from '../services/geminiService';
 import { dataService } from '../services/dataService';
 import { FinanceRecord, AppUser, Letter } from '../types';
+import { marked } from 'marked';
+import html2canvas from 'html2canvas';
+import { jsPDF } from 'jspdf';
 
 interface AIWorkspaceProps {
   finance: FinanceRecord[];
@@ -269,6 +272,35 @@ const AIWorkspace: React.FC<AIWorkspaceProps> = ({
       `);
     }
     printWindow.document.close();
+  };
+
+  // Export the current result as a PDF matching the preview layout
+  const handleExportPdf = async () => {
+    if (!result) return;
+    // Create a temporary container with the rendered HTML
+    const tempDiv = document.createElement('div');
+    tempDiv.style.position = 'fixed';
+    tempDiv.style.top = '-9999px';
+    tempDiv.innerHTML = `<div class="prose-print" style="max-width:800px;margin:0 auto;">
+      <div id="content">${marked.parse(result)}</div>
+    </div>`;
+    document.body.appendChild(tempDiv);
+    try {
+      const canvas = await html2canvas(tempDiv, { scale: 2 });
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF({ unit: 'mm', format: [210, 330] }); // F4 size
+      const marginTop = 10; // 1cm = 10mm
+      const marginSide = 20; // 2cm = 20mm
+      const pdfWidth = 210 - marginSide * 2; // 170mm usable width
+      const imgProps = pdf.getImageProperties(imgData);
+      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+      pdf.addImage(imgData, 'PNG', marginSide, marginTop, pdfWidth, pdfHeight);
+      pdf.save('lembar_kerja.pdf');
+    } catch (e) {
+      console.error('PDF export failed', e);
+    } finally {
+      document.body.removeChild(tempDiv);
+    }
   };
 
   const handleSaveToLetters = async (title: string, type: 'Incoming' | 'Outgoing') => {
@@ -556,6 +588,13 @@ NPP 1950200019
                   <Sparkles size={16} /> KERJAKAN DENGAN AI
                 </>
               )}
+            </button>
+            <button
+              onClick={handleExportPdf}
+              disabled={!result}
+              className="w-full mt-2 py-4 bg-green-500 hover:bg-green-600 text-white rounded-2xl font-black neu-button shadow-lg flex items-center justify-center gap-2 active:scale-95 transition-transform disabled:opacity-50"
+            >
+              <FileText size={16} /> Convert to PDF
             </button>
           </div>
         </NeumorphicCard>
