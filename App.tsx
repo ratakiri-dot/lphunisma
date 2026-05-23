@@ -653,6 +653,10 @@ const App: React.FC = () => {
           <AIWorkspace
             finance={finance}
             currentUser={currentUser}
+            onLetterSaved={async () => {
+              const updatedLetters = await dataService.getLetters();
+              setLetters(updatedLetters);
+            }}
           />
         );
       case 'PU Certified': {
