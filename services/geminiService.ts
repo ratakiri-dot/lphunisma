@@ -128,36 +128,55 @@ export async function chatWithAI(userMessage: string, contextData: any) {
   }
 }
 
-export async function generateFinancialRecap(year: string, financeData: any[]) {
+export async function generateFinancialRecap(year: string, financeData: any[], month?: string) {
   try {
     if (!isAIReady()) return "Assalamualaikum... Layanan AI belum dikonfigurasi. Wassalamualaikum.";
 
-    const yearData = financeData.filter((item: any) => {
+    // Filter berdasarkan tahun
+    let filteredData = financeData.filter((item: any) => {
       if (!item.date) return false;
       return new Date(item.date).getFullYear().toString() === year;
     });
 
-    if (yearData.length === 0) {
-      return `Assalamualaikum... Tidak ditemukan data keuangan untuk tahun ${year}. Wassalamualaikum.`;
+    // Filter berdasarkan bulan jika dipilih
+    if (month && month !== 'all') {
+      filteredData = filteredData.filter((item: any) => {
+        return (new Date(item.date).getMonth() + 1).toString().padStart(2, '0') === month;
+      });
     }
 
-    const prompt = `Analisis data keuangan LPH UNISMA berikut untuk tahun ${year} dan susun laporan rekapitulasi keuangan yang komprehensif.
+    const MONTH_NAMES: Record<string, string> = {
+      '01': 'Januari', '02': 'Februari', '03': 'Maret', '04': 'April',
+      '05': 'Mei', '06': 'Juni', '07': 'Juli', '08': 'Agustus',
+      '09': 'September', '10': 'Oktober', '11': 'November', '12': 'Desember'
+    };
+    const periodLabel = (month && month !== 'all')
+      ? `${MONTH_NAMES[month]} ${year}`
+      : `Tahun ${year} (Seluruh Bulan)`;
+
+    if (filteredData.length === 0) {
+      return `Assalamualaikum... Tidak ditemukan data keuangan untuk periode ${periodLabel}. Wassalamualaikum.`;
+    }
+
+    const prompt = `Analisis data keuangan LPH UNISMA berikut untuk periode **${periodLabel}** dan susun laporan rekapitulasi keuangan yang komprehensif.
     
-    Data Transaksi Keuangan (${year}):
-    ${JSON.stringify(yearData)}
+    Data Transaksi Keuangan (${periodLabel}):
+    ${JSON.stringify(filteredData)}
     
     Format Laporan Harus Mengikuti Struktur:
-    1. **Ringkasan Keuangan Global**: Total Pemasukan (Debit), Total Pengeluaran (Kredit), dan Saldo Bersih (Net Mutasi) selama tahun tersebut.
-    2. **Kategorisasi Transaksi**: Kelompokkan transaksi ke dalam beberapa kategori logis (misalnya: Biaya Sertifikasi/Pemasukan Mitra, Biaya Perjalanan Audit, Operasional Kantor/ATK, Kegiatan/Sponsorship, Pajak/Lainnya) lengkap dengan persentase estimasi terhadap total anggaran.
-    3. **Analisis Transaksi Terbesar**: Sebutkan transaksi masuk terbesar dan transaksi keluar terbesar dengan rincian keterangannya.
-    4. **Evaluasi & Rekomendasi Anggaran**: Berikan opini singkat dan profesional mengenai efisiensi keuangan di tahun tersebut serta rekomendasi alokasi anggaran untuk tahun berikutnya.
+    1. **Periode Laporan**: Sebutkan periode rekap (${periodLabel}).
+    2. **Ringkasan Keuangan Global**: Total Pemasukan (Debit), Total Pengeluaran (Kredit), dan Saldo Bersih (Net Mutasi) selama periode tersebut.
+    3. **Kategorisasi Transaksi**: Kelompokkan transaksi ke dalam beberapa kategori logis (misalnya: Biaya Sertifikasi/Pemasukan Mitra, Biaya Perjalanan Audit, Operasional Kantor/ATK, Kegiatan/Sponsorship, Lainnya) lengkap dengan nominal dan persentase terhadap total.
+    4. **Analisis Transaksi Terbesar**: Sebutkan transaksi masuk terbesar dan transaksi keluar terbesar beserta keterangannya.
+    5. **Evaluasi & Rekomendasi**: Berikan opini singkat dan profesional mengenai kondisi keuangan di periode tersebut serta rekomendasi yang relevan.
     
     Aturan Penulisan:
     - Gunakan Bahasa Indonesia yang formal dan profesional.
     - Format menggunakan Markdown yang rapi (gunakan bold, bullet points, dan tabel untuk data perbandingan).
+    - Tampilkan nilai nominal dalam format Rupiah (Rp).
     - Selalu mulai laporan dengan "Assalamualaikum..." dan akhiri dengan "Wassalamualaikum."`;
 
-    const systemInstruction = "Anda adalah 'UNI AI Financial Analyst' untuk LPH UNISMA. Tugas Anda menganalisis data transaksi mentah dan menghasilkan laporan keuangan yang sangat detail, profesional, dan akurat menggunakan format Markdown.";
+    const systemInstruction = "Anda adalah 'UNI AI Financial Analyst' untuk LPH UNISMA. Tugas Anda menganalisis data transaksi keuangan dan menghasilkan laporan rekapitulasi yang detail, profesional, dan akurat menggunakan format Markdown.";
 
     if (isOpenRouter) {
       return await callOpenRouter(systemInstruction, prompt);
@@ -175,9 +194,10 @@ export async function generateFinancialRecap(year: string, financeData: any[]) {
     return response.text;
   } catch (error) {
     console.error("Error generating finance recap:", error);
-    return "Assalamualaikum... Gagal menyusun rekap keuangan tahunan karena kendala teknis. Wassalamualaikum.";
+    return "Assalamualaikum... Gagal menyusun rekap keuangan karena kendala teknis. Wassalamualaikum.";
   }
 }
+
 
 export async function generateCooperationLetter(partnerName: string, scope: string, signer: string, date: string) {
   try {
