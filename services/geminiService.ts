@@ -72,7 +72,7 @@ export async function getDashboardInsight(data: any) {
     }
 
     const response = await ai.models.generateContent({
-      model: 'gemini-1.5-flash',
+      model: 'gemini-2.5-flash',
       contents: prompt,
       config: {
         systemInstruction,
@@ -113,7 +113,7 @@ export async function chatWithAI(userMessage: string, contextData: any) {
     }
 
     const response = await ai.models.generateContent({
-      model: 'gemini-1.5-flash',
+      model: 'gemini-2.5-flash',
       contents: prompt,
       config: {
         systemInstruction,
@@ -164,7 +164,7 @@ export async function generateFinancialRecap(year: string, financeData: any[]) {
     }
 
     const response = await ai.models.generateContent({
-      model: 'gemini-1.5-flash',
+      model: 'gemini-2.5-flash',
       contents: prompt,
       config: {
         systemInstruction,
@@ -233,7 +233,7 @@ export async function generateCooperationLetter(partnerName: string, scope: stri
     }
 
     const response = await ai.models.generateContent({
-      model: 'gemini-1.5-flash',
+      model: 'gemini-2.5-flash',
       contents: prompt,
       config: {
         systemInstruction,
