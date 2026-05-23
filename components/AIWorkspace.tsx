@@ -146,126 +146,202 @@ const AIWorkspace: React.FC<AIWorkspaceProps> = ({
     if (!result) return;
 
     if (activeTask === 'vehicle') {
-      const element = letterRef.current;
-      if (!element) return;
+      // F4 page: 210mm × 330mm at 96dpi (1mm = 3.7795px)
+      const F4_W = 794;   // 210mm
+      const F4_H = 1247;  // 330mm
+      const PAD_H = 76;   // ~20mm side margins
+      const PAD_T = 57;   // ~15mm top margin
+      const PAD_B = 76;   // ~20mm bottom margin
 
-      const footerImg = element.querySelector('img[alt="Footer"]') as HTMLImageElement;
-      let originalFooterStyle = '';
-      if (footerImg) {
-        originalFooterStyle = footerImg.getAttribute('style') || '';
-      }
+      const BASE = window.location.origin;
+      const dayOfVisit = getIndonesianDay(loanVisitDate);
+      const formattedVisitDate = formatIndonesianDate(loanVisitDate);
 
-      // Apply print styles to the live visible element temporarily for precise F4 page capture
-      element.style.width = '210mm';
-      element.style.maxWidth = '210mm';
-      element.style.height = '330mm'; // Lock to F4 height
-      element.style.minHeight = '330mm';
-      element.style.paddingTop = '10mm'; // 1cm top margin
-      element.style.paddingBottom = '20mm'; // 2cm bottom margin
-      element.style.paddingLeft = '20mm'; // 2cm left margin
-      element.style.paddingRight = '20mm'; // 2cm right margin
-      element.style.boxShadow = 'none';
-      element.style.border = 'none';
-      element.style.borderRadius = '0';
-      element.style.backgroundColor = '#ffffff';
+      // Build a self-contained off-screen F4 page — never touches the live preview
+      const pdfDiv = document.createElement('div');
+      pdfDiv.style.cssText = `
+        position:fixed;top:-99999px;left:-99999px;
+        width:${F4_W}px;height:${F4_H}px;
+        background:#fff;
+        font-family:'Times New Roman',Times,serif;
+        font-size:14px;line-height:1.65;color:#000;
+        box-sizing:border-box;
+        padding:${PAD_T}px ${PAD_H}px ${PAD_B}px ${PAD_H}px;
+        display:flex;flex-direction:column;
+        overflow:hidden;
+      `;
 
-      // Position footer at the absolute bottom of the F4 page
-      if (footerImg) {
-        footerImg.style.position = 'absolute';
-        footerImg.style.bottom = '10mm'; // 1cm from bottom edge
-        footerImg.style.left = '20mm';
-        footerImg.style.width = '170mm'; // 210mm - 40mm margins
-      }
+      pdfDiv.innerHTML = `
+        <img src="${BASE}/assets/letter_images/watermark.png"
+             style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+                    width:70%;opacity:0.15;pointer-events:none;z-index:0;" />
+
+        <div style="position:relative;z-index:1;display:flex;flex-direction:column;height:100%;">
+
+          <!-- KOP SURAT -->
+          <div style="display:flex;align-items:center;justify-content:space-between;
+                      border-bottom:3px double #000;padding-bottom:8px;margin-bottom:18px;">
+            <img src="${BASE}/assets/letter_images/image2.jpeg"
+                 style="width:72px;height:72px;object-fit:contain;" />
+            <div style="text-align:center;flex:1;padding:0 14px;
+                        font-family:'Bookman Old Style',serif;color:#13894B;">
+              <div style="font-size:14pt;font-weight:bold;line-height:1.2;">UNIVERSITAS ISLAM MALANG</div>
+              <div style="font-size:17pt;font-weight:bold;letter-spacing:3px;line-height:1.1;">( U N I S M A )</div>
+              <div style="font-size:12pt;font-weight:bold;line-height:1.3;">LEMBAGA PEMERIKSA HALAL</div>
+              <div style="font-size:7.5pt;margin-top:4px;font-family:Arial,sans-serif;color:#13894B;">
+                Jalan Mayjend Haryono 193 Malang, Jawa Timur 65144 Indonesia
+                Telp 0341 551932 Faks. 0341 552249 E-mail: lph@unisma.ac.id Website: unisma.ac.id
+              </div>
+            </div>
+            <img src="${BASE}/assets/letter_images/image3.jpeg"
+                 style="width:72px;height:72px;object-fit:contain;" />
+          </div>
+
+          <!-- NOMOR / TANGGAL -->
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px;">
+            <table style="border-collapse:collapse;font-size:14px;">
+              <tr><td style="width:78px;vertical-align:top;">Nomor</td><td style="vertical-align:top;">: ${loanLetterNo}</td></tr>
+              <tr><td style="vertical-align:top;">Lampiran</td><td style="vertical-align:top;">: -</td></tr>
+              <tr><td style="vertical-align:top;">Hal</td><td style="vertical-align:top;">: <strong>Peminjaman Kendaraan</strong></td></tr>
+            </table>
+            <div style="text-align:right;">${loanLetterDate}</div>
+          </div>
+
+          <!-- PENERIMA -->
+          <div style="margin-bottom:18px;line-height:1.8;">
+            Yth. Bapak Wakil Rektor<br/>
+            Bagian Administrasi Umum, Keuangan, dan Personalia<br/>
+            Universitas Islam Malang
+          </div>
+
+          <!-- SALAM PEMBUKA -->
+          <div style="font-style:italic;margin-bottom:14px;">Assalamualaikum War. Wab.</div>
+
+          <!-- PARAGRAF -->
+          <div style="margin-bottom:14px;text-align:justify;">
+            Salam silaturahmi semoga kita senantiasa dalam lindungan Allah Swt. dan dapat
+            menyelesaikan tugas sehari-hari. Aamiin.
+          </div>
+          <div style="margin-bottom:12px;text-align:justify;">
+            Sehubungan dengan adanya <strong>Audit Sertifikasi Halal Pelaku Usaha</strong>
+            yang akan dilaksanakan pada:
+          </div>
+
+          <!-- TABEL KEGIATAN -->
+          <table style="border-collapse:collapse;margin-left:42px;margin-bottom:14px;font-size:14px;">
+            <tr><td style="width:68px;font-weight:bold;">Hari</td><td>: ${dayOfVisit}</td></tr>
+            <tr><td style="font-weight:bold;">Tanggal</td><td>: ${formattedVisitDate}</td></tr>
+            <tr><td style="font-weight:bold;">Waktu</td><td>: ${loanVisitTime}</td></tr>
+            <tr><td style="font-weight:bold;">Tempat</td><td>: ${loanVisitPlace}</td></tr>
+          </table>
+
+          <div style="margin-bottom:14px;text-align:justify;">
+            dengan ini kami mengajukan permohonan peminjaman kendaraan untuk kegiatan tersebut.
+          </div>
+          <div style="margin-bottom:14px;text-align:justify;">
+            Demikian permohonan ini, atas perhatiannya disampaikan terimakasih.
+          </div>
+
+          <!-- SALAM PENUTUP -->
+          <div style="font-style:italic;margin-bottom:18px;">Wassalamualaikum War. Wab.</div>
+
+          <!-- TANDA TANGAN -->
+          <div style="display:flex;justify-content:flex-end;margin-bottom:14px;">
+            <div style="width:290px;">
+              Kepala Lembaga Pemeriksa Halal UNISMA,<br/><br/><br/><br/><br/>
+              <strong>Dr. Hj. Jeni Susyanti, SE, MM, BKP, C.B.V</strong><br/>
+              <span style="font-size:10pt;">NPP 1950200019</span>
+            </div>
+          </div>
+
+          <!-- SPACER: dorong footer ke bawah -->
+          <div style="flex:1;"></div>
+
+          <!-- FOOTER IMAGE -->
+          <img src="${BASE}/assets/letter_images/footer.jpeg"
+               style="width:100%;display:block;margin-top:8px;" />
+        </div>
+      `;
+
+      document.body.appendChild(pdfDiv);
+
+      // Tunggu semua gambar selesai dimuat
+      await Promise.all(
+        Array.from(pdfDiv.querySelectorAll('img')).map(
+          (img) =>
+            new Promise<void>((resolve) => {
+              const el = img as HTMLImageElement;
+              if (el.complete && el.naturalWidth > 0) resolve();
+              else { el.onload = () => resolve(); el.onerror = () => resolve(); }
+            })
+        )
+      );
+      await new Promise((resolve) => setTimeout(resolve, 300));
 
       try {
-        // Wait a brief moment for layout recalculation to complete
-        await new Promise((resolve) => setTimeout(resolve, 200));
-
-        const canvas = await html2canvas(element, {
-          scale: 2.5, // High resolution print-ready scale
+        const canvas = await html2canvas(pdfDiv, {
+          scale: 2,
           useCORS: true,
           allowTaint: true,
           backgroundColor: '#ffffff',
-          logging: false
+          logging: false,
+          width: F4_W,
+          height: F4_H
         });
 
         const imgData = canvas.toDataURL('image/png');
         const pdf = new jsPDF({
           orientation: 'portrait',
           unit: 'mm',
-          format: [210, 330] // F4 size: 210mm x 330mm
+          format: [210, 330]
         });
-
         pdf.addImage(imgData, 'PNG', 0, 0, 210, 330);
         pdf.save('Surat_Peminjaman_Kendaraan.pdf');
       } catch (e) {
         console.error('PDF export failed', e);
         alert('Gagal mengekspor PDF.');
       } finally {
-        // Restore original stylesheet values by resetting style properties
-        element.style.width = '';
-        element.style.maxWidth = '';
-        element.style.height = '';
-        element.style.minHeight = '';
-        element.style.paddingTop = '';
-        element.style.paddingBottom = '';
-        element.style.paddingLeft = '';
-        element.style.paddingRight = '';
-        element.style.boxShadow = '';
-        element.style.border = '';
-        element.style.borderRadius = '';
-        element.style.backgroundColor = '';
-
-        if (footerImg) {
-          if (originalFooterStyle) {
-            footerImg.setAttribute('style', originalFooterStyle);
-          } else {
-            footerImg.removeAttribute('style');
-          }
-        }
+        document.body.removeChild(pdfDiv);
       }
     } else {
-      // For finance, we parse markdown and convert to PDF
+      // Finance: parse markdown → PDF multi-halaman
       const tempDiv = document.createElement('div');
-      tempDiv.style.position = 'fixed';
-      tempDiv.style.top = '-9999px';
-      tempDiv.style.left = '-9999px';
-      tempDiv.style.width = '210mm';
-      tempDiv.style.padding = '20mm'; // Standard margins
-      tempDiv.style.backgroundColor = '#ffffff';
-      tempDiv.style.color = '#000000';
-      tempDiv.style.fontFamily = 'Times New Roman, serif';
-      tempDiv.style.fontSize = '12pt';
-      tempDiv.style.lineHeight = '1.5';
-
-      tempDiv.innerHTML = `<div class="prose-print">${marked.parse(result)}</div>`;
+      tempDiv.style.cssText = `
+        position:fixed;top:-9999px;left:-9999px;
+        width:794px;padding:76px;
+        background:#fff;color:#000;
+        font-family:'Times New Roman',serif;
+        font-size:12pt;line-height:1.5;
+        box-sizing:border-box;
+      `;
+      tempDiv.innerHTML = `<div>${marked.parse(result)}</div>`;
       document.body.appendChild(tempDiv);
 
       try {
-        const canvas = await html2canvas(tempDiv, { scale: 2 });
+        const canvas = await html2canvas(tempDiv, { scale: 2, backgroundColor: '#ffffff' });
         const imgData = canvas.toDataURL('image/png');
         const pdf = new jsPDF({ unit: 'mm', format: [210, 330] });
-        
-        const pdfWidth = 210;
-        const pdfHeight = 330;
-        const imgHeight = (canvas.height * pdfWidth) / canvas.width;
 
-        let heightLeft = imgHeight;
-        let position = 0;
+        const pdfW = 210;
+        const pdfH = 330;
+        const imgH = (canvas.height * pdfW) / canvas.width;
+        let heightLeft = imgH;
+        let pos = 0;
 
-        pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeight);
-        heightLeft -= pdfHeight;
+        pdf.addImage(imgData, 'PNG', 0, pos, pdfW, imgH);
+        heightLeft -= pdfH;
 
         while (heightLeft > 0) {
-          position = heightLeft - imgHeight;
+          pos = heightLeft - imgH;
           pdf.addPage([210, 330]);
-          pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeight);
-          heightLeft -= pdfHeight;
+          pdf.addImage(imgData, 'PNG', 0, pos, pdfW, imgH);
+          heightLeft -= pdfH;
         }
 
         pdf.save('Rekap_Keuangan.pdf');
       } catch (e) {
         console.error('PDF export failed', e);
+        alert('Gagal mengekspor PDF.');
       } finally {
         document.body.removeChild(tempDiv);
       }
