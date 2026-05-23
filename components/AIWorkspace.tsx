@@ -199,13 +199,9 @@ const AIWorkspace: React.FC<AIWorkspaceProps> = ({
             </style>
           </head>
           <body>
-            <div class="letter-container">
-              <div class="kop-surat">
-                <div class="kop-title-1">UNIVERSITAS ISLAM MALANG</div>
-                <div class="kop-title-2">( U N I S M A )</div>
-                <div class="kop-title-3">LEMBAGA PEMERIKSA HALAL</div>
-                <div class="kop-address">Jalan Mayjend Haryono 193 Malang, Jawa Timur 65144 Indonesia Telp 0341 551932 Faks. 0341 552249 E-mail: lph@unisma.ac.id Website: unisma.ac.id</div>
-              </div>
+            <div class="letter-container" style="position: relative; z-index: 1;">
+              <img src="/assets/letter_images/watermark.png" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80%; opacity: 0.15; z-index: -1;" alt="" />
+              <img src="/assets/letter_images/kop_surat.jpeg" style="width: 100%; margin-bottom: 25px;" alt="Kop Surat" />
               
               <div class="meta-section">
                 <div class="meta-left">
@@ -670,16 +666,15 @@ NPP 1950200019
             ) : result ? (
               activeTask === 'vehicle' ? (
                 /* Premium Simulated Letter Paper sheet */
-                <div className="bg-white p-8 md:p-12 shadow-lg border border-slate-300 rounded-lg max-w-[700px] mx-auto text-black text-[11pt] leading-relaxed relative selection:bg-indigo-100 font-serif" style={{ fontFamily: "'Times New Roman', Times, serif" }}>
+                <div className="bg-white p-8 md:p-12 shadow-lg border border-slate-300 rounded-lg max-w-[700px] mx-auto text-black text-[11pt] leading-relaxed relative selection:bg-indigo-100 font-serif z-10 overflow-hidden" style={{ fontFamily: "'Times New Roman', Times, serif" }}>
                   {/* Decorative green top bar */}
-                  <div className="absolute top-0 left-0 right-0 h-1 bg-emerald-700 rounded-t-lg"></div>
+                  <div className="absolute top-0 left-0 right-0 h-1 bg-emerald-700 rounded-t-lg z-20"></div>
 
-                  <div className="text-center border-b-[3px] border-double border-black pb-2 mb-6">
-                    <h2 className="text-[13pt] font-bold text-emerald-800 m-0 leading-tight">UNIVERSITAS ISLAM MALANG</h2>
-                    <h1 className="text-[16pt] font-bold text-emerald-800 m-0 tracking-wider leading-none">( U N I S M A )</h1>
-                    <h3 className="text-[11pt] font-bold text-emerald-800 m-0 leading-normal">LEMBAGA PEMERIKSA HALAL</h3>
-                    <p className="text-[7.5pt] text-emerald-800 m-0 mt-1 italic font-sans">Jalan Mayjend Haryono 193 Malang, Jawa Timur 65144 Indonesia Telp 0341 551932 Faks. 0341 552249 E-mail: lph@unisma.ac.id Website: unisma.ac.id</p>
-                  </div>
+                  {/* Watermark */}
+                  <img src="/assets/letter_images/watermark.png" alt="" className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] opacity-15 pointer-events-none z-0 select-none" />
+
+                  <div className="relative z-10">
+                    <img src="/assets/letter_images/kop_surat.jpeg" alt="Kop Surat" className="w-full mb-6" />
 
                   <div className="flex justify-between mb-6">
                     <div>
@@ -736,11 +731,12 @@ NPP 1950200019
                   </div>
 
                   <div className="flex justify-end">
-                    <div className="w-[300px] text-left">
+                    <div className="w-[300px] text-left relative z-10">
                       Kepala Lembaga Pemeriksa Halal UNISMA,<br /><br /><br /><br /><br />
                       <strong>Dr. Hj. Jeni Susyanti, SE, MM, BKP, C.B.V</strong><br />
                       <span className="text-[10pt]">NPP 1950200019</span>
                     </div>
+                  </div>
                   </div>
                 </div>
               ) : (
