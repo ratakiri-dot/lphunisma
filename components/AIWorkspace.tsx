@@ -149,32 +149,25 @@ const AIWorkspace: React.FC<AIWorkspaceProps> = ({
       const element = letterRef.current;
       if (!element) return;
 
-      // Clone the element to style it for precise F4 page capture
-      const clone = element.cloneNode(true) as HTMLDivElement;
-      
-      // Override style for precise F4 sizing and margins
-      clone.style.position = 'fixed';
-      clone.style.top = '-9999px';
-      clone.style.left = '-9999px';
-      clone.style.width = '210mm'; // F4 width
-      clone.style.minHeight = '330mm'; // F4 height
-      clone.style.paddingTop = '10mm'; // 1cm top margin
-      clone.style.paddingBottom = '20mm'; // 2cm bottom margin
-      clone.style.paddingLeft = '20mm'; // 2cm left margin
-      clone.style.paddingRight = '20mm'; // 2cm right margin
-      clone.style.boxShadow = 'none';
-      clone.style.border = 'none';
-      clone.style.borderRadius = '0';
-      clone.style.backgroundColor = '#ffffff';
-
-      document.body.appendChild(clone);
+      // Apply print styles to the live visible element temporarily for precise F4 page capture
+      element.style.width = '210mm';
+      element.style.maxWidth = '210mm';
+      element.style.minHeight = '330mm';
+      element.style.paddingTop = '10mm'; // 1cm top margin
+      element.style.paddingBottom = '20mm'; // 2cm bottom margin
+      element.style.paddingLeft = '20mm'; // 2cm left margin
+      element.style.paddingRight = '20mm'; // 2cm right margin
+      element.style.boxShadow = 'none';
+      element.style.border = 'none';
+      element.style.borderRadius = '0';
+      element.style.backgroundColor = '#ffffff';
 
       try {
-        // Wait a brief moment for styles/images to settle
-        await new Promise((resolve) => setTimeout(resolve, 150));
+        // Wait a brief moment for layout recalculation to complete
+        await new Promise((resolve) => setTimeout(resolve, 200));
 
-        const canvas = await html2canvas(clone, {
-          scale: 2, // High resolution
+        const canvas = await html2canvas(element, {
+          scale: 2.5, // High resolution print-ready scale
           useCORS: true,
           allowTaint: true,
           backgroundColor: '#ffffff',
@@ -194,7 +187,18 @@ const AIWorkspace: React.FC<AIWorkspaceProps> = ({
         console.error('PDF export failed', e);
         alert('Gagal mengekspor PDF.');
       } finally {
-        document.body.removeChild(clone);
+        // Restore original stylesheet values by resetting style properties
+        element.style.width = '';
+        element.style.maxWidth = '';
+        element.style.minHeight = '';
+        element.style.paddingTop = '';
+        element.style.paddingBottom = '';
+        element.style.paddingLeft = '';
+        element.style.paddingRight = '';
+        element.style.boxShadow = '';
+        element.style.border = '';
+        element.style.borderRadius = '';
+        element.style.backgroundColor = '';
       }
     } else {
       // For finance, we parse markdown and convert to PDF
@@ -614,8 +618,8 @@ NPP 1950200019
                   {/* Decorative green top bar */}
                   <div className="absolute top-0 left-0 right-0 h-1 bg-emerald-700 rounded-t-lg z-20"></div>
 
-                  {/* Watermark */}
-                  <img src="/assets/letter_images/watermark.png" alt="" className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] opacity-15 pointer-events-none z-0 select-none" />
+                  {/* Watermark centered cleanly for html2canvas */}
+                  <img src="/assets/letter_images/watermark.png" alt="" className="absolute top-0 left-0 right-0 bottom-0 m-auto w-[80%] opacity-15 pointer-events-none z-0 select-none" />
 
                   <div className="relative z-10">
                     <div className="flex justify-between items-center border-b-[3px] border-double border-black pb-2 mb-6">
