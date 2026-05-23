@@ -15,12 +15,14 @@ import {
   Wallet,
   Settings,
   ListTodo,
-  KeyRound
+  KeyRound,
+  Sparkles
 } from 'lucide-react';
 import { NavItem, PUCertified, PUOnProcess, PUProspect, InternalMember, Auditor, Partner, Documentation, Letter, Asset, Activity, FinanceRecord, Credential } from './types';
 
 export const MENU_ITEMS: { name: NavItem; icon: React.ReactNode; category: string }[] = [
   { name: 'Dashboard', icon: <LayoutDashboard size={20} />, category: 'Main' },
+  { name: 'AI Workspace', icon: <Sparkles size={20} />, category: 'Main' },
   { name: 'PU Certified', icon: <CheckCircle size={20} />, category: 'Business' },
   { name: 'PU On Process', icon: <Loader2 size={20} />, category: 'Business' },
   { name: 'PU Prospect', icon: <Target size={20} />, category: 'Business' },

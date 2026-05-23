@@ -28,6 +28,7 @@ export type NavItem =
   | 'Finance'
   | 'Credentials'
   | 'Settings'
+  | 'AI Workspace'
   | 'Tasks';
 
 export interface PUCertified {
@@ -139,6 +140,7 @@ export interface Letter {
   date: string;
   type: 'Incoming' | 'Outgoing';
   link: string;
+  content?: string;
   createdBy?: string;
   updatedBy?: string;
   updatedAt?: string;

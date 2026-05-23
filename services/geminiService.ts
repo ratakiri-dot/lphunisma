@@ -73,3 +73,175 @@ export async function chatWithAI(userMessage: string, contextData: any) {
     return "Assalamualaikum... Maaf, saya sedang mengalami kendala teknis. Silakan coba lagi nanti. Wassalamualaikum.";
   }
 }
+
+export async function generateFinancialRecap(year: string, financeData: any[]) {
+  try {
+    if (!ai) return "Assalamualaikum... Layanan AI belum dikonfigurasi. Wassalamualaikum.";
+
+    const yearData = financeData.filter((item: any) => {
+      if (!item.date) return false;
+      return new Date(item.date).getFullYear().toString() === year;
+    });
+
+    if (yearData.length === 0) {
+      return `Assalamualaikum... Tidak ditemukan data keuangan untuk tahun ${year}. Wassalamualaikum.`;
+    }
+
+    const prompt = `Analisis data keuangan LPH UNISMA berikut untuk tahun ${year} dan susun laporan rekapitulasi keuangan yang komprehensif.
+    
+    Data Transaksi Keuangan (${year}):
+    ${JSON.stringify(yearData)}
+    
+    Format Laporan Harus Mengikuti Struktur:
+    1. **Ringkasan Keuangan Global**: Total Pemasukan (Debit), Total Pengeluaran (Kredit), dan Saldo Bersih (Net Mutasi) selama tahun tersebut.
+    2. **Kategorisasi Transaksi**: Kelompokkan transaksi ke dalam beberapa kategori logis (misalnya: Biaya Sertifikasi/Pemasukan Mitra, Biaya Perjalanan Audit, Operasional Kantor/ATK, Kegiatan/Sponsorship, Pajak/Lainnya) lengkap dengan persentase estimasi terhadap total anggaran.
+    3. **Analisis Transaksi Terbesar**: Sebutkan transaksi masuk terbesar dan transaksi keluar terbesar dengan rincian keterangannya.
+    4. **Evaluasi & Rekomendasi Anggaran**: Berikan opini singkat dan profesional mengenai efisiensi keuangan di tahun tersebut serta rekomendasi alokasi anggaran untuk tahun berikutnya.
+    
+    Aturan Penulisan:
+    - Gunakan Bahasa Indonesia yang formal dan profesional.
+    - Format menggunakan Markdown yang rapi (gunakan bold, bullet points, dan tabel untuk data perbandingan).
+    - Selalu mulai laporan dengan "Assalamualaikum..." dan akhiri dengan "Wassalamualaikum."`;
+
+    const response = await ai.models.generateContent({
+      model: 'gemini-1.5-flash',
+      contents: prompt,
+      config: {
+        systemInstruction: "Anda adalah 'UNI AI Financial Analyst' untuk LPH UNISMA. Tugas Anda menganalisis data transaksi mentah dan menghasilkan laporan keuangan yang sangat detail, profesional, dan akurat menggunakan format Markdown.",
+        temperature: 0.2,
+      },
+    });
+
+    return response.text;
+  } catch (error) {
+    console.error("Error generating finance recap:", error);
+    return "Assalamualaikum... Gagal menyusun rekap keuangan tahunan karena kendala teknis. Wassalamualaikum.";
+  }
+}
+
+export async function generateCooperationLetter(partnerName: string, scope: string, signer: string, date: string) {
+  try {
+    if (!ai) return "Layanan AI belum dikonfigurasi.";
+
+    const formattedDate = date ? new Date(date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : 'Tanggal Surat';
+
+    const prompt = `Buatlah draf surat penawaran kerja sama resmi (surat keluar) dari LPH UNISMA.
+    
+    Informasi Detail:
+    - Nama Instansi/Mitra Penerima: ${partnerName}
+    - Ruang Lingkup Kerja Sama: ${scope}
+    - Nama Penandatangan Surat: ${signer}
+    - Tanggal Surat: ${formattedDate}
+    
+    Instruksi Format Surat Dinas Indonesia Resmi:
+    1. Tuliskan KOP SURAT resmi LPH UNISMA di bagian atas (menggunakan format teks tebal/bold, center):
+       **LEMBAGA PEMERIKSA HALAL (LPH) UNIVERSITAS ISLAM MALANG**
+       *Jl. MT Haryono 193 Malang, Jawa Timur | Telp: (0341) 551932 | Email: lph@unisma.ac.id*
+       ---------------------------------------------------------------------------------------
+    2. Bagian Administrasi Surat:
+       - Nomor Surat: [Nomor Surat/LPH-UNISMA/OUT/${new Date(date).getFullYear() || new Date().getFullYear()}] (biarkan nomor surat memiliki bagian placeholder agar staf bisa melengkapinya)
+       - Lampiran: 1 (satu) Berkas
+       - Perihal: Penawaran Kerja Sama Sertifikasi Halal (${scope})
+    3. Alamat Penerima:
+       Yth. Pimpinan/Kepala
+       ${partnerName}
+       di Tempat
+    4. Salam Pembuka: Assalamualaikum Wr. Wb.
+    5. Isi Surat:
+       - Paragraf Pembuka: Perkenalkan LPH UNISMA sebagai Lembaga Pemeriksa Halal yang terakreditasi dan berada di bawah naungan Universitas Islam Malang yang siap mendukung program jaminan produk halal.
+       - Paragraf Isi: Menawarkan kerja sama konkret terkait ${scope}. Jelaskan secara profesional keuntungan bermitra dengan LPH UNISMA (fasilitas, auditor berkompeten, layanan profesional, dll).
+       - Paragraf Penutup: Menyampaikan harapan agar penawaran ini dapat ditindaklanjuti dengan diskusi atau MoU.
+    6. Salam Penutup: Wassalamualaikum Wr. Wb.
+    7. Tanda Tangan (di bagian kanan bawah):
+       Malang, ${formattedDate}
+       Hormat kami,
+       LPH Universitas Islam Malang
+       
+       [Tanda Tangan]
+       
+       **${signer}**
+       Kepala LPH UNISMA
+    
+    Aturan Tambahan:
+    - Gunakan Bahasa Indonesia yang sangat formal, sopan, dan baku.
+    - Format output sebagai Markdown murni agar rapi saat ditampilkan dan disalin.`;
+
+    const response = await ai.models.generateContent({
+      model: 'gemini-1.5-flash',
+      contents: prompt,
+      config: {
+        systemInstruction: "Anda adalah 'UNI AI Document Drafter' khusus LPH UNISMA. Tugas Anda menyusun draf surat resmi instansi/surat dinas Indonesia yang sangat rapi, formal, mengikuti kaidah bahasa baku, dan berstruktur standar.",
+        temperature: 0.2,
+      },
+    });
+
+    return response.text;
+  } catch (error) {
+    console.error("Error generating cooperation letter:", error);
+    return "Gagal membuat draf surat penawaran kerja sama.";
+  }
+}
+
+export async function generateVehicleLoanLetter(auditorName: string, eventName: string, date: string, vehicleInfo: string, signer: string) {
+  try {
+    if (!ai) return "Layanan AI belum dikonfigurasi.";
+
+    const formattedDate = date ? new Date(date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : 'Tanggal Surat';
+
+    const prompt = `Buatlah draf surat permohonan peminjaman kendaraan operasional dinas resmi dari LPH UNISMA ditujukan kepada Bagian Umum/Sarana Prasarana UNISMA.
+    
+    Informasi Detail:
+    - Nama Auditor yang Bertugas: ${auditorName}
+    - Nama Kegiatan/Agenda Audit: ${eventName}
+    - Tanggal Kegiatan/Peminjaman: ${formattedDate}
+    - Detail Kendaraan yang Diminta: ${vehicleInfo}
+    - Nama Penandatangan Surat (Kepala LPH): ${signer}
+    
+    Instruksi Format Surat Dinas Indonesia Resmi:
+    1. Tuliskan KOP SURAT resmi LPH UNISMA di bagian atas (menggunakan format teks tebal/bold, center):
+       **LEMBAGA PEMERIKSA HALAL (LPH) UNIVERSITAS ISLAM MALANG**
+       *Jl. MT Haryono 193 Malang, Jawa Timur | Telp: (0341) 551932 | Email: lph@unisma.ac.id*
+       ---------------------------------------------------------------------------------------
+    2. Bagian Administrasi Surat:
+       - Nomor Surat: [Nomor Surat/LPH-UNISMA/OUT/${new Date().getFullYear()}]
+       - Lampiran: -
+       - Perihal: Permohonan Peminjaman Kendaraan Operasional untuk Audit Lapangan
+    3. Alamat Penerima:
+       Yth. Kepala Bagian Umum dan Sarana Prasarana
+       Universitas Islam Malang
+       di Tempat
+    4. Salam Pembuka: Assalamualaikum Wr. Wb.
+    5. Isi Surat:
+       - Menjelaskan bahwa sehubungan dengan adanya agenda kegiatan LPH UNISMA yaitu: "${eventName}" yang akan dilaksanakan pada tanggal ${formattedDate}.
+       - Menyatakan bahwa untuk kelancaran transportasi auditor pelaksana yaitu Bapak/Ibu **${auditorName}**, maka LPH UNISMA bermaksud memohon peminjaman kendaraan operasional berupa **${vehicleInfo}**.
+       - Menyebutkan komitmen untuk menjaga kebersihan dan keamanan kendaraan operasional tersebut selama digunakan.
+    6. Salam Penutup: Demikian permohonan ini kami sampaikan, atas perhatian dan kerja samanya kami ucapkan terima kasih. Wassalamualaikum Wr. Wb.
+    7. Tanda Tangan (di bagian kanan bawah):
+       Malang, ${new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
+       Hormat kami,
+       LPH Universitas Islam Malang
+       
+       [Tanda Tangan]
+       
+       **${signer}**
+       Kepala LPH UNISMA
+       
+    Aturan Tambahan:
+    - Gunakan Bahasa Indonesia yang sangat formal, sopan, dan baku.
+    - Format output sebagai Markdown murni agar rapi saat ditampilkan dan disalin.`;
+
+    const response = await ai.models.generateContent({
+      model: 'gemini-1.5-flash',
+      contents: prompt,
+      config: {
+        systemInstruction: "Anda adalah 'UNI AI Document Drafter' khusus LPH UNISMA. Tugas Anda menyusun draf surat resmi instansi/surat dinas Indonesia yang sangat rapi, formal, mengikuti kaidah bahasa baku, dan berstruktur standar.",
+        temperature: 0.2,
+      },
+    });
+
+    return response.text;
+  } catch (error) {
+    console.error("Error generating vehicle loan letter:", error);
+    return "Gagal membuat draf surat peminjaman kendaraan.";
+  }
+}

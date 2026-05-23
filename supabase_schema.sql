@@ -158,6 +158,7 @@ CREATE TABLE letters (
   date DATE,
   type TEXT CHECK (type IN ('Incoming', 'Outgoing')),
   link TEXT,
+  content TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 

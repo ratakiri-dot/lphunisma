@@ -6,6 +6,7 @@ import NeumorphicCard from './components/NeumorphicCard';
 import Dashboard from './components/Dashboard';
 import DataTable from './components/DataTable';
 import Login from './components/Login';
+import AIWorkspace from './components/AIWorkspace';
 import { dataService } from './services/dataService';
 import { Shield, UserCircle, LogOut, Menu, X, Loader2, Bell, Pin, CheckCircle2, Plus, Trash2, RefreshCcw } from 'lucide-react';
 
@@ -647,6 +648,19 @@ const App: React.FC = () => {
   const renderContent = () => {
     switch (activeTab) {
       case 'Dashboard': return <Dashboard role={role} data={{ puCertified, puOnProcess, puProspect, internal, auditors, partners, finance }} />;
+      case 'AI Workspace':
+        return (
+          <AIWorkspace
+            finance={finance}
+            auditors={auditors}
+            activities={schedule}
+            currentUser={currentUser}
+            onLetterSaved={async () => {
+              const updatedLetters = await dataService.getLetters();
+              setLetters(updatedLetters);
+            }}
+          />
+        );
       case 'PU Certified': {
         const enrichedData = puCertified.map(item => {
           let sla = '-';
@@ -1073,6 +1087,7 @@ const App: React.FC = () => {
             <option value="Outgoing">Surat Keluar</option>
           </select>
           <input name="link" defaultValue={editingItem?.link} placeholder="Link/URL" className="w-full p-4 neu-inset rounded-xl outline-none" />
+          <textarea name="content" defaultValue={editingItem?.content} placeholder="Isi/Konten Surat (Markdown didukung)" className="w-full p-4 neu-inset rounded-xl outline-none min-h-[150px]" />
         </>
       );
     }
