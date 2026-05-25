@@ -244,6 +244,8 @@ interface AuditorLetterTemplateProps {
   letterNo: string;
   auditorName: string;
   auditorNpp: string;
+  auditorName2?: string;
+  auditorNpp2?: string;
   visitDate: string;      // ISO yyyy-mm-dd
   visitPlace: string;
   businessName: string;
@@ -258,6 +260,8 @@ function buildAuditorLetterHTML({
   letterNo,
   auditorName,
   auditorNpp,
+  auditorName2,
+  auditorNpp2,
   visitDate,
   visitPlace,
   businessName,
@@ -274,6 +278,59 @@ function buildAuditorLetterHTML({
   const CONTENT_PAD_T = 56;   // ~15mm top padding
   const FOOTER_H      = 60;   // footer image height
   const FOOTER_PAD_B  = 28;   // gap from bottom edge
+
+  const hasSecondAuditor = !!(auditorName2 && auditorName2.trim());
+
+  const auditorDetailsHtml = hasSecondAuditor
+    ? `
+    <table style="border-collapse:collapse;margin-left:44px;margin-bottom:18px;font-size:14px;width:calc(100% - 44px);line-height:1.5;">
+      <tbody>
+        <tr>
+          <td style="width:90px;vertical-align:top;padding:2px 0;">1. nama</td>
+          <td style="vertical-align:top;padding:2px 0;">: ${auditorName}</td>
+        </tr>
+        <tr>
+          <td style="vertical-align:top;padding:2px 0;">&nbsp;&nbsp;&nbsp;NPP</td>
+          <td style="vertical-align:top;padding:2px 0;">: ${auditorNpp}</td>
+        </tr>
+        <tr>
+          <td style="vertical-align:top;padding:2px 0;">&nbsp;&nbsp;&nbsp;jabatan</td>
+          <td style="vertical-align:top;padding:2px 0;">: Auditor Halal Lembaga Pemeriksa Halal (LPH) UNISMA</td>
+        </tr>
+        <tr style="height:10px;"><td colspan="2"></td></tr>
+        <tr>
+          <td style="vertical-align:top;padding:2px 0;">2. nama</td>
+          <td style="vertical-align:top;padding:2px 0;">: ${auditorName2}</td>
+        </tr>
+        <tr>
+          <td style="vertical-align:top;padding:2px 0;">&nbsp;&nbsp;&nbsp;NPP</td>
+          <td style="vertical-align:top;padding:2px 0;">: ${auditorNpp2 || '-'}</td>
+        </tr>
+        <tr>
+          <td style="vertical-align:top;padding:2px 0;">&nbsp;&nbsp;&nbsp;jabatan</td>
+          <td style="vertical-align:top;padding:2px 0;">: Auditor Halal Lembaga Pemeriksa Halal (LPH) UNISMA</td>
+        </tr>
+      </tbody>
+    </table>
+    `
+    : `
+    <table style="border-collapse:collapse;margin-left:44px;margin-bottom:18px;font-size:14px;width:calc(100% - 44px);line-height:1.5;">
+      <tbody>
+        <tr>
+          <td style="width:90px;vertical-align:top;padding:2px 0;">nama</td>
+          <td style="vertical-align:top;padding:2px 0;">: ${auditorName}</td>
+        </tr>
+        <tr>
+          <td style="vertical-align:top;padding:2px 0;">NPP</td>
+          <td style="vertical-align:top;padding:2px 0;">: ${auditorNpp}</td>
+        </tr>
+        <tr>
+          <td style="vertical-align:top;padding:2px 0;">jabatan</td>
+          <td style="vertical-align:top;padding:2px 0;">: Auditor Halal Lembaga Pemeriksa Halal (LPH) UNISMA</td>
+        </tr>
+      </tbody>
+    </table>
+    `;
 
   return `
 <div style="
@@ -358,22 +415,7 @@ function buildAuditorLetterHTML({
     </div>
 
     <!-- AUDITOR DETAILS ───────────────────────────────────────── -->
-    <table style="border-collapse:collapse;margin-left:44px;margin-bottom:18px;font-size:14px;width:calc(100% - 44px);line-height:1.5;">
-      <tbody>
-        <tr>
-          <td style="width:90px;vertical-align:top;padding:2px 0;">nama</td>
-          <td style="vertical-align:top;padding:2px 0;">: ${auditorName}</td>
-        </tr>
-        <tr>
-          <td style="vertical-align:top;padding:2px 0;">NPP</td>
-          <td style="vertical-align:top;padding:2px 0;">: ${auditorNpp}</td>
-        </tr>
-        <tr>
-          <td style="vertical-align:top;padding:2px 0;">jabatan</td>
-          <td style="vertical-align:top;padding:2px 0;">: Auditor Halal Lembaga Pemeriksa Halal (LPH) UNISMA</td>
-        </tr>
-      </tbody>
-    </table>
+    ${auditorDetailsHtml}
 
     <!-- MISSION INTRO ─────────────────────────────────────────── -->
     <div style="margin-bottom:12px;text-align:justify;font-size:14px;line-height:1.5;">
@@ -486,6 +528,9 @@ const AIWorkspace: React.FC<AIWorkspaceProps> = ({
     ];
     return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
   });
+  const [auditorCount, setAuditorCount] = useState<number>(1);
+  const [auditorName2, setAuditorName2] = useState<string>('');
+  const [auditorNpp2, setAuditorNpp2] = useState<string>('');
 
   // ── derived ──────────────────────────────────────────────────────────────
   const availableYears = Array.from(
@@ -540,6 +585,8 @@ const AIWorkspace: React.FC<AIWorkspaceProps> = ({
     letterNo:      auditorLetterNo,
     auditorName:   auditorName,
     auditorNpp:    auditorNpp,
+    auditorName2:  auditorCount === 2 ? auditorName2 : undefined,
+    auditorNpp2:   auditorCount === 2 ? auditorNpp2 : undefined,
     visitDate:     auditorVisitDate,
     visitPlace:    auditorVisitPlace,
     businessName:  auditorBusinessName,
@@ -770,6 +817,11 @@ Tempat : ${loanVisitPlace}
           setIsLoading(false);
           return;
         }
+        if (auditorCount === 2 && !auditorName2.trim()) {
+          alert('Mohon lengkapi parameter Nama Auditor Ke-2.');
+          setIsLoading(false);
+          return;
+        }
         if (!auditorVisitPlace.trim()) {
           alert('Mohon lengkapi parameter Lokasi Audit.');
           setIsLoading(false);
@@ -786,7 +838,8 @@ Tempat : ${loanVisitPlace}
 
         const letterContent = `
 Nomor : ${auditorLetterNo}
-Auditor : ${auditorName} (NPP: ${auditorNpp})
+Auditor 1 : ${auditorName} (NPP: ${auditorNpp})
+${auditorCount === 2 ? `Auditor 2 : ${auditorName2} (NPP: ${auditorNpp2})` : ''}
 Hari : ${dayOfVisit}
 Tanggal Audit : ${formattedVisitDate}
 Lokasi Audit : ${auditorVisitPlace}
@@ -939,7 +992,18 @@ Tanggal Ttd : ${auditorSignDate}
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="block pl-1 text-[10px] text-slate-400 uppercase">Nama Auditor</label>
+                  <label className="block pl-1 text-[10px] text-slate-400 uppercase">Jumlah Auditor</label>
+                  <select
+                    value={auditorCount}
+                    onChange={(e) => setAuditorCount(Number(e.target.value))}
+                    className="w-full p-4 neu-inset rounded-xl outline-none bg-transparent cursor-pointer font-sans"
+                  >
+                    <option value={1}>1 Auditor</option>
+                    <option value={2}>2 Auditor</option>
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <label className="block pl-1 text-[10px] text-slate-400 uppercase">{auditorCount === 2 ? 'Nama Auditor Ke-1' : 'Nama Auditor'}</label>
                   <input
                     value={auditorName}
                     onChange={(e) => setAuditorName(e.target.value)}
@@ -948,7 +1012,7 @@ Tanggal Ttd : ${auditorSignDate}
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="block pl-1 text-[10px] text-slate-400 uppercase">NPP Auditor</label>
+                  <label className="block pl-1 text-[10px] text-slate-400 uppercase">{auditorCount === 2 ? 'NPP Auditor Ke-1' : 'NPP Auditor'}</label>
                   <input
                     value={auditorNpp}
                     onChange={(e) => setAuditorNpp(e.target.value)}
@@ -956,6 +1020,30 @@ Tanggal Ttd : ${auditorSignDate}
                     className="w-full p-4 neu-inset rounded-xl outline-none bg-transparent font-sans"
                   />
                 </div>
+
+                {auditorCount === 2 && (
+                  <>
+                    <div className="space-y-2">
+                      <label className="block pl-1 text-[10px] text-slate-400 uppercase">Nama Auditor Ke-2</label>
+                      <input
+                        value={auditorName2}
+                        onChange={(e) => setAuditorName2(e.target.value)}
+                        placeholder="e.g. Auditor Kedua, S.T."
+                        className="w-full p-4 neu-inset rounded-xl outline-none bg-transparent font-sans"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="block pl-1 text-[10px] text-slate-400 uppercase">NPP Auditor Ke-2</label>
+                      <input
+                        value={auditorNpp2}
+                        onChange={(e) => setAuditorNpp2(e.target.value)}
+                        placeholder="e.g. 198239812938129"
+                        className="w-full p-4 neu-inset rounded-xl outline-none bg-transparent font-sans"
+                      />
+                    </div>
+                  </>
+                )}
+
                 <div className="space-y-2">
                   <label className="block pl-1 text-[10px] text-slate-400 uppercase">Tanggal Audit</label>
                   <input
