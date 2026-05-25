@@ -777,6 +777,7 @@ const App: React.FC = () => {
                 { key: 'displayOrder', label: 'No.', isPublic: true },
                 { key: 'fullName', label: 'Nama Lengkap', isPublic: true },
                 { key: 'position', label: 'Jabatan', isPublic: true },
+                { key: 'npp', label: 'NPP', isPublic: true },
                 { key: 'waNumber', label: 'WhatsApp' },
                 { key: 'createdBy', label: 'Nama Penginput' },
               ]}
@@ -1036,6 +1037,7 @@ const App: React.FC = () => {
           <input name="displayOrder" type="number" defaultValue={editingItem?.displayOrder ?? 0} placeholder="Urutan Tampil (Angka kecil tampil duluan)" className="w-full p-4 neu-inset rounded-xl outline-none" required />
           <input name="fullName" defaultValue={editingItem?.fullName} placeholder="Nama Lengkap" className="w-full p-4 neu-inset rounded-xl outline-none" required />
           <input name="position" defaultValue={editingItem?.position} placeholder="Jabatan" className="w-full p-4 neu-inset rounded-xl outline-none" required />
+          <input name="npp" defaultValue={editingItem?.npp} placeholder="NPP (Opsional)" className="w-full p-4 neu-inset rounded-xl outline-none" />
           <input name="waNumber" defaultValue={editingItem?.waNumber} placeholder="WhatsApp" className="w-full p-4 neu-inset rounded-xl outline-none" required />
         </>
       );

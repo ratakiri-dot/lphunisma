@@ -73,6 +73,7 @@ CREATE TABLE internal_members (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   full_name TEXT NOT NULL,
   position TEXT,
+  npp TEXT,
   address TEXT,
   wa_number TEXT,
   email TEXT,

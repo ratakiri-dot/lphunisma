@@ -88,6 +88,7 @@ export interface InternalMember {
   id: string;
   fullName: string; // public
   position: string; // public
+  npp?: string;
   address: string;
   waNumber: string;
   email: string;
