@@ -127,13 +127,167 @@ export async function chatWithAI(userMessage: string, contextData: any) {
     return "Assalamualaikum... Maaf, saya sedang mengalami kendala teknis. Silakan coba lagi nanti. Wassalamualaikum.";
   }
 }
+function formatRupiah(value: number): string {
+  return "Rp " + Math.round(value).toLocaleString("id-ID");
+}
+
+function generateLocalFinancialRecap(periodLabel: string, filteredData: any[]): string {
+  // 1. Calculate global summaries
+  let totalDebit = 0;
+  let totalCredit = 0;
+  
+  filteredData.forEach(item => {
+    totalDebit += Number(item.debit || 0);
+    totalCredit += Number(item.credit || 0);
+  });
+  
+  const netMutasi = totalDebit - totalCredit;
+  const statusKeuangan = netMutasi >= 0 ? "Surplus (Sehat/Positif)" : "Defisit (Negatif)";
+
+  // 2. Categorize transactions
+  const categories = {
+    sertifikasi: { name: "Biaya Sertifikasi & Mitra", debit: 0, credit: 0, count: 0 },
+    perjalanan: { name: "Perjalanan Audit & Akomodasi", debit: 0, credit: 0, count: 0 },
+    operasional: { name: "Operasional Kantor & ATK", debit: 0, credit: 0, count: 0 },
+    kegiatan: { name: "Kegiatan & Pertemuan", debit: 0, credit: 0, count: 0 },
+    lainnya: { name: "Lain-lain / Umum", debit: 0, credit: 0, count: 0 }
+  };
+
+  filteredData.forEach(item => {
+    const desc = (item.description || "").toLowerCase();
+    let cat: keyof typeof categories = "lainnya";
+
+    if (desc.includes("sertifikasi") || desc.includes("mitra") || desc.includes("pembayaran") || desc.includes("tarif") || desc.includes("debit")) {
+      cat = "sertifikasi";
+    } else if (desc.includes("audit") || desc.includes("jalan") || desc.includes("perdin") || desc.includes("bensin") || desc.includes("transport") || desc.includes("akomodasi") || desc.includes("makan") || desc.includes("hotel") || desc.includes("tol")) {
+      cat = "perjalanan";
+    } else if (desc.includes("operasional") || desc.includes("atk") || desc.includes("kertas") || desc.includes("kantor") || desc.includes("listrik") || desc.includes("internet") || desc.includes("sewa") || desc.includes("telepon") || desc.includes("print") || desc.includes("tinta")) {
+      cat = "operasional";
+    } else if (desc.includes("panitia") || desc.includes("kegiatan") || desc.includes("rapat") || desc.includes("konsumsi") || desc.includes("acara") || desc.includes("sponsorship") || desc.includes("workshop") || desc.includes("seminar")) {
+      cat = "kegiatan";
+    }
+
+    categories[cat].debit += Number(item.debit || 0);
+    categories[cat].credit += Number(item.credit || 0);
+    categories[cat].count += 1;
+  });
+
+  // 3. Find largest transactions
+  let largestDebitItem: any = null;
+  let largestCreditItem: any = null;
+
+  filteredData.forEach(item => {
+    const debit = Number(item.debit || 0);
+    const credit = Number(item.credit || 0);
+
+    if (debit > 0 && (!largestDebitItem || debit > Number(largestDebitItem.debit || 0))) {
+      largestDebitItem = item;
+    }
+    if (credit > 0 && (!largestCreditItem || credit > Number(largestCreditItem.credit || 0))) {
+      largestCreditItem = item;
+    }
+  });
+
+  // 4. Build recommendations and evaluations
+  let evaluasiText = "";
+  let rekomendasiPoints = [];
+
+  if (netMutasi >= 0) {
+    evaluasiText = `Arus kas pada periode ini menunjukkan kondisi yang sangat sehat dengan mencatatkan **surplus bersih** sebesar **${formatRupiah(netMutasi)}**. Total pemasukan (debit) sebesar ${formatRupiah(totalDebit)} berhasil menutupi pengeluaran (kredit) yang sebesar ${formatRupiah(totalCredit)}. Rasio efisiensi pengeluaran terhadap pendapatan berada pada tingkat yang aman.`;
+    rekomendasiPoints = [
+      "Pertahankan kestabilan alokasi dana operasional dan pastikan cadangan kas (surplus) dialokasikan untuk dana darurat atau pengembangan sarana pendukung LPH.",
+      "Optimalkan proses penagihan biaya sertifikasi halal dari pelaku usaha agar perputaran kas tetap terjaga dengan cepat.",
+      "Lakukan investasi atau program peningkatan kapasitas kompetensi bagi para auditor halal memanfaatkan dana surplus yang ada."
+    ];
+  } else {
+    evaluasiText = `Arus kas pada periode ini mencatatkan **defisit bersih** sebesar **${formatRupiah(Math.abs(netMutasi))}**. Total pengeluaran operasional dan akomodasi mencapai ${formatRupiah(totalCredit)}, melebihi pemasukan yang hanya sebesar ${formatRupiah(totalDebit)}. Kondisi ini memerlukan evaluasi segera terhadap efisiensi anggaran belanja lembaga.`;
+    rekomendasiPoints = [
+      "Lakukan peninjauan ulang dan pengetatan anggaran operasional kantor serta biaya akomodasi/perjalanan audit yang tidak mendesak.",
+      "Tingkatkan volume sertifikasi halal atau jangkauan promosi LPH UNISMA untuk memperbesar arus kas masuk (debit) di periode mendatang.",
+      "Susun skala prioritas pengeluaran bulanan dan lakukan negosiasi ulang dengan vendor atau mitra penyedia layanan jika memungkinkan."
+    ];
+  }
+
+  // 5. Generate Markdown Report
+  let md = `Assalamualaikum...
+
+Berikut adalah **Laporan Rekapitulasi Keuangan LPH UNISMA** yang disusun secara profesional dan sistematis untuk periode **${periodLabel}**.
+
+---
+
+### 1. PERIODE LAPORAN
+* **Rentang Waktu:** ${periodLabel}
+* **Jumlah Transaksi Tercatat:** ${filteredData.length} transaksi
+
+---
+
+### 2. RINGKASAN KEUANGAN GLOBAL
+Di bawah ini adalah ringkasan keseluruhan mutasi keuangan selama periode laporan berlangsung:
+
+| Parameter Keuangan | Nilai Nominal | Keterangan |
+| :--- | :--- | :--- |
+| **Total Pemasukan (Debit)** | **${formatRupiah(totalDebit)}** | Seluruh arus kas masuk |
+| **Total Pengeluaran (Kredit)** | **${formatRupiah(totalCredit)}** | Seluruh arus kas keluar |
+| **Net Mutasi / Saldo Bersih** | **${formatRupiah(netMutasi)}** | Selisih bersih pemasukan dan pengeluaran |
+| **Status Neraca** | **${statusKeuangan}** | Kondisi likuiditas kas |
+
+---
+
+### 3. KATEGORISASI TRANSAKSI
+Rincian alokasi keuangan yang dikelompokkan berdasarkan kategori operasional lembaga:
+
+| Kategori Operasional | Jml Transaksi | Total Debit (Pemasukan) | Total Kredit (Pengeluaran) | Estimasi Kontribusi |
+| :--- | :---: | :--- | :--- | :---: |
+`;
+
+  Object.values(categories).forEach(cat => {
+    const totalCat = cat.debit + cat.credit;
+    if (totalCat > 0 || cat.count > 0) {
+      const percentage = totalDebit > 0 ? ((cat.debit / totalDebit) * 100).toFixed(1) + "%" : "0%";
+      md += `| ${cat.name} | ${cat.count} | ${formatRupiah(cat.debit)} | ${formatRupiah(cat.credit)} | ${percentage} dari Pemasukan |\n`;
+    }
+  });
+
+  md += `
+---
+
+### 4. ANALISIS TRANSAKSI TERBESAR
+* **Transaksi Masuk Terbesar (Pemasukan Utama):**
+  ${largestDebitItem 
+    ? `Tercatat pada tanggal **${new Date(largestDebitItem.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}** sebesar **${formatRupiah(largestDebitItem.debit)}** dengan keterangan: *"${largestDebitItem.description}"*.`
+    : "Tidak ada transaksi masuk yang tercatat."}
+  
+* **Transaksi Keluar Terbesar (Pengeluaran Terbesar):**
+  ${largestCreditItem 
+    ? `Tercatat pada tanggal **${new Date(largestCreditItem.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}** sebesar **${formatRupiah(largestCreditItem.credit)}** dengan keterangan: *"${largestCreditItem.description}"*.`
+    : "Tidak ada transaksi keluar yang tercatat."}
+
+---
+
+### 5. EVALUASI KONDISI KEUANGAN
+${evaluasiText}
+
+---
+
+### 6. REKOMENDASI STRATEGIS
+${rekomendasiPoints.map((point, index) => `${index + 1}. **${point.split(':')[0]}**: ${point.substring(point.indexOf('.') + 1).trim()}`).join('\n')}
+
+---
+
+Laporan rekapitulasi keuangan ini dibuat secara otomatis dan komprehensif berdasarkan data transaksi riil LPH UNISMA. Semoga dapat menjadi bahan pertimbangan yang andal bagi pengambilan kebijakan berikutnya.
+
+Wassalamualaikum.`;
+
+  return md;
+}
 
 export async function generateFinancialRecap(year: string, financeData: any[], startMonth?: string, endMonth?: string) {
+  let periodLabel = `Tahun ${year}`;
+  let filteredData: any[] = [];
+  
   try {
-    if (!isAIReady()) return "Assalamualaikum... Layanan AI belum dikonfigurasi. Wassalamualaikum.";
-
     // Filter berdasarkan tahun
-    let filteredData = financeData.filter((item: any) => {
+    filteredData = financeData.filter((item: any) => {
       if (!item.date) return false;
       return new Date(item.date).getFullYear().toString() === year;
     });
@@ -152,7 +306,6 @@ export async function generateFinancialRecap(year: string, financeData: any[], s
       '09': 'September', '10': 'Oktober', '11': 'November', '12': 'Desember'
     };
     
-    let periodLabel = `Tahun ${year}`;
     if (startMonth && endMonth) {
       if (startMonth === endMonth) {
         periodLabel = `Bulan ${MONTH_NAMES[startMonth]} ${year}`;
@@ -165,6 +318,11 @@ export async function generateFinancialRecap(year: string, financeData: any[], s
 
     if (filteredData.length === 0) {
       return `Assalamualaikum... Tidak ditemukan data keuangan untuk periode ${periodLabel}. Wassalamualaikum.`;
+    }
+
+    // If Gemini API Key is missing or invalid, fall back to local generator immediately
+    if (!isAIReady()) {
+      return generateLocalFinancialRecap(periodLabel, filteredData);
     }
 
     const prompt = `Analisis data keuangan LPH UNISMA berikut untuk periode **${periodLabel}** dan susun laporan rekapitulasi keuangan yang komprehensif.
@@ -202,7 +360,15 @@ export async function generateFinancialRecap(year: string, financeData: any[], s
 
     return response.text;
   } catch (error) {
-    console.error("Error generating finance recap:", error);
+    console.error("Error generating finance recap via Gemini, falling back to local generator:", error);
+    // If the API call fails (e.g. Quota Exceeded), return the locally generated beautiful report!
+    try {
+      if (filteredData.length > 0) {
+        return generateLocalFinancialRecap(periodLabel, filteredData);
+      }
+    } catch (localErr) {
+      console.error("Local fallback generator also failed:", localErr);
+    }
     return "Assalamualaikum... Gagal menyusun rekap keuangan karena kendala teknis. Wassalamualaikum.";
   }
 }
