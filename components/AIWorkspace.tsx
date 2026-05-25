@@ -286,7 +286,7 @@ function buildAuditorLetterHTML({
     <table style="border-collapse:collapse;margin-left:44px;margin-bottom:18px;font-size:14px;width:calc(100% - 44px);line-height:1.5;">
       <tbody>
         <tr>
-          <td style="width:90px;vertical-align:top;padding:2px 0;">1. nama</td>
+          <td style="width:90px;vertical-align:top;padding:2px 0;">1. Nama</td>
           <td style="vertical-align:top;padding:2px 0;">: ${auditorName}</td>
         </tr>
         <tr>
@@ -294,12 +294,12 @@ function buildAuditorLetterHTML({
           <td style="vertical-align:top;padding:2px 0;">: ${auditorNpp}</td>
         </tr>
         <tr>
-          <td style="vertical-align:top;padding:2px 0;">&nbsp;&nbsp;&nbsp;jabatan</td>
+          <td style="vertical-align:top;padding:2px 0;">&nbsp;&nbsp;&nbsp;Jabatan</td>
           <td style="vertical-align:top;padding:2px 0;">: Auditor Halal Lembaga Pemeriksa Halal (LPH) UNISMA</td>
         </tr>
         <tr style="height:10px;"><td colspan="2"></td></tr>
         <tr>
-          <td style="vertical-align:top;padding:2px 0;">2. nama</td>
+          <td style="vertical-align:top;padding:2px 0;">2. Nama</td>
           <td style="vertical-align:top;padding:2px 0;">: ${auditorName2}</td>
         </tr>
         <tr>
@@ -307,7 +307,7 @@ function buildAuditorLetterHTML({
           <td style="vertical-align:top;padding:2px 0;">: ${auditorNpp2 || '-'}</td>
         </tr>
         <tr>
-          <td style="vertical-align:top;padding:2px 0;">&nbsp;&nbsp;&nbsp;jabatan</td>
+          <td style="vertical-align:top;padding:2px 0;">&nbsp;&nbsp;&nbsp;Jabatan</td>
           <td style="vertical-align:top;padding:2px 0;">: Auditor Halal Lembaga Pemeriksa Halal (LPH) UNISMA</td>
         </tr>
       </tbody>
@@ -317,7 +317,7 @@ function buildAuditorLetterHTML({
     <table style="border-collapse:collapse;margin-left:44px;margin-bottom:18px;font-size:14px;width:calc(100% - 44px);line-height:1.5;">
       <tbody>
         <tr>
-          <td style="width:90px;vertical-align:top;padding:2px 0;">nama</td>
+          <td style="width:90px;vertical-align:top;padding:2px 0;">Nama</td>
           <td style="vertical-align:top;padding:2px 0;">: ${auditorName}</td>
         </tr>
         <tr>
@@ -325,7 +325,7 @@ function buildAuditorLetterHTML({
           <td style="vertical-align:top;padding:2px 0;">: ${auditorNpp}</td>
         </tr>
         <tr>
-          <td style="vertical-align:top;padding:2px 0;">jabatan</td>
+          <td style="vertical-align:top;padding:2px 0;">Jabatan</td>
           <td style="vertical-align:top;padding:2px 0;">: Auditor Halal Lembaga Pemeriksa Halal (LPH) UNISMA</td>
         </tr>
       </tbody>
