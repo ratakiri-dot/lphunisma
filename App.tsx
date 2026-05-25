@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
-import { NavItem, UserRole, PUCertified, PUOnProcess, PUProspect, FinanceRecord, Activity, AppUser, Asset, Documentation, Letter, InternalMember, Auditor, Partner, UserTask, Credential } from './types';
-import { MENU_ITEMS, MOCK_PU_CERTIFIED, MOCK_PU_ON_PROCESS, MOCK_PU_PROSPECT, MOCK_FINANCE, MOCK_SCHEDULE, MOCK_ASSETS, MOCK_DOCS, MOCK_LETTERS, MOCK_INTERNAL, MOCK_AUDITORS, MOCK_PARTNERS } from './constants';
+import { NavItem, UserRole, PUCertified, PUOnProcess, PUProspect, FinanceRecord, Activity, AppUser, Asset, Documentation, Letter, InternalMember, Auditor, SdmSyariah, Partner, UserTask, Credential } from './types';
+import { MENU_ITEMS, MOCK_PU_CERTIFIED, MOCK_PU_ON_PROCESS, MOCK_PU_PROSPECT, MOCK_FINANCE, MOCK_SCHEDULE, MOCK_ASSETS, MOCK_DOCS, MOCK_LETTERS, MOCK_INTERNAL, MOCK_AUDITORS, MOCK_SDM_SYARIAH, MOCK_PARTNERS } from './constants';
 import NeumorphicCard from './components/NeumorphicCard';
 import Dashboard from './components/Dashboard';
 import DataTable from './components/DataTable';
@@ -27,6 +27,7 @@ const App: React.FC = () => {
   const [letters, setLetters] = useState<Letter[]>([]);
   const [internal, setInternal] = useState<InternalMember[]>([]);
   const [auditors, setAuditors] = useState<Auditor[]>([]);
+  const [sdmSyariah, setSdmSyariah] = useState<SdmSyariah[]>([]);
   const [partners, setPartners] = useState<Partner[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [users, setUsers] = useState<AppUser[]>([]);
@@ -87,7 +88,7 @@ const App: React.FC = () => {
       const auth = await dataService.getUsers();
       setUsers(auth);
 
-      const [certified, onProcess, prospect, financeData, scheduleData, assetsData, members, auditorsData, partnersData, docsData, lettersData, credentialsData] = await Promise.all([
+      const [certified, onProcess, prospect, financeData, scheduleData, assetsData, members, auditorsData, sdmSyariahData, partnersData, docsData, lettersData, credentialsData] = await Promise.all([
         dataService.getPUCertified(),
         dataService.getPUOnProcess(),
         dataService.getPUProspect(),
@@ -96,6 +97,7 @@ const App: React.FC = () => {
         dataService.getAssets(),
         dataService.getInternal(),
         dataService.getAuditors(),
+        dataService.getSdmSyariah(),
         dataService.getPartners(),
         dataService.getDocs(),
         dataService.getLetters(),
@@ -109,6 +111,7 @@ const App: React.FC = () => {
       setAssets(assetsData);
       setInternal(members);
       setAuditors(auditorsData);
+      setSdmSyariah(sdmSyariahData);
       setPartners(partnersData);
       setDocs(docsData);
       setLetters(lettersData);
@@ -273,6 +276,10 @@ const App: React.FC = () => {
           await dataService.deleteAuditor(item.id);
           setAuditors(prev => prev.filter(i => i.id !== item.id));
         }
+        if (activeTab === 'SDM Syariah') {
+          await dataService.deleteSdmSyariah(item.id);
+          setSdmSyariah(prev => prev.filter(i => i.id !== item.id));
+        }
         if (activeTab === 'Partners') {
           await dataService.deletePartner(item.id);
           setPartners(prev => prev.filter(i => i.id !== item.id));
@@ -378,6 +385,11 @@ const App: React.FC = () => {
         const item = { ...data, ...auditData, id: editingItem?.id } as Auditor;
         const saved = await dataService.upsertAuditor(item);
         setAuditors(prev => editingItem ? prev.map(i => i.id === saved.id ? saved : i) : [...prev, saved]);
+      }
+      if (activeTab === 'SDM Syariah') {
+        const item = { ...data, ...auditData, id: editingItem?.id } as SdmSyariah;
+        const saved = await dataService.upsertSdmSyariah(item);
+        setSdmSyariah(prev => editingItem ? prev.map(i => i.id === saved.id ? saved : i) : [...prev, saved]);
       }
       if (activeTab === 'Partners') {
         const item = { ...data, ...auditData, id: editingItem?.id } as Partner;
@@ -789,6 +801,25 @@ const App: React.FC = () => {
             ]}
           />
         );
+      case 'SDM Syariah':
+        return (
+          <DataTable<SdmSyariah>
+            title="Daftar SDM Syariah"
+            data={sdmSyariah}
+            role={role}
+            onAdd={handleAdd}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+            accentColor="teal"
+            columns={[
+              { key: 'fullName', label: 'Nama', isPublic: true },
+              { key: 'position', label: 'Jabatan', isPublic: true },
+              { key: 'npp', label: 'NPP', isPublic: true },
+              { key: 'waNumber', label: 'No. Telepon', isPublic: true },
+              { key: 'createdBy', label: 'Nama Penginput' },
+            ]}
+          />
+        );
       case 'Partners':
         return (
           <DataTable<Partner>
@@ -1015,6 +1046,16 @@ const App: React.FC = () => {
           <input name="position" defaultValue={editingItem?.position} placeholder="Bidang" className="w-full p-4 neu-inset rounded-xl outline-none" required />
           <input name="certNumber" defaultValue={editingItem?.certNumber} placeholder="No Sertifikat" className="w-full p-4 neu-inset rounded-xl outline-none" required />
           <input name="waNumber" defaultValue={editingItem?.waNumber} placeholder="Nomor WhatsApp" className="w-full p-4 neu-inset rounded-xl outline-none" required />
+        </>
+      );
+    }
+    if (activeTab === 'SDM Syariah') {
+      return (
+        <>
+          <input name="fullName" defaultValue={editingItem?.fullName} placeholder="Nama Lengkap" className="w-full p-4 neu-inset rounded-xl outline-none" required />
+          <input name="position" defaultValue={editingItem?.position} placeholder="Jabatan" className="w-full p-4 neu-inset rounded-xl outline-none" required />
+          <input name="npp" defaultValue={editingItem?.npp} placeholder="NPP" className="w-full p-4 neu-inset rounded-xl outline-none" />
+          <input name="waNumber" defaultValue={editingItem?.waNumber} placeholder="Nomor Telepon" className="w-full p-4 neu-inset rounded-xl outline-none" required />
         </>
       );
     }

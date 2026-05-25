@@ -1,6 +1,6 @@
 
 import { supabase } from './supabaseClient';
-import { PUCertified, PUOnProcess, PUProspect, FinanceRecord, Activity, Asset, Documentation, Letter, InternalMember, Auditor, Partner, AppUser, UserTask, Credential } from '../types';
+import { PUCertified, PUOnProcess, PUProspect, FinanceRecord, Activity, Asset, Documentation, Letter, InternalMember, Auditor, SdmSyariah, Partner, AppUser, UserTask, Credential } from '../types';
 
 const mapToSnake = (obj: any) => {
     if (!obj) return obj;
@@ -162,6 +162,23 @@ export const dataService = {
     },
     async deleteAuditor(id: string) {
         const { error } = await supabase.from('auditors').delete().eq('id', id);
+        if (error) throw error;
+    },
+
+    // SDM Syariah
+    async getSdmSyariah() {
+        const { data, error } = await supabase.from('sdm_syariah').select('*').order('created_at', { ascending: true });
+        if (error) throw error;
+        return data.map(mapToCamel);
+    },
+    async upsertSdmSyariah(item: Partial<SdmSyariah>) {
+        const snakeItem = mapToSnake(item);
+        const { data, error } = await supabase.from('sdm_syariah').upsert(snakeItem).select().single();
+        if (error) throw error;
+        return mapToCamel(data);
+    },
+    async deleteSdmSyariah(id: string) {
+        const { error } = await supabase.from('sdm_syariah').delete().eq('id', id);
         if (error) throw error;
     },
 

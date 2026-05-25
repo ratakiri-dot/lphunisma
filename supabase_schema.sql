@@ -93,7 +93,20 @@ CREATE TABLE auditors (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
--- 7. Partners
+-- 7. SDM Syariah
+CREATE TABLE sdm_syariah (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  full_name TEXT NOT NULL,
+  position TEXT,
+  npp TEXT,
+  wa_number TEXT,
+  created_by TEXT,
+  updated_by TEXT,
+  updated_at TIMESTAMP WITH TIME ZONE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- 8. Partners
 CREATE TABLE partners (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   full_name TEXT NOT NULL,

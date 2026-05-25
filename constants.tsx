@@ -16,9 +16,10 @@ import {
   Settings,
   ListTodo,
   KeyRound,
-  Sparkles
+  Sparkles,
+  GraduationCap
 } from 'lucide-react';
-import { NavItem, PUCertified, PUOnProcess, PUProspect, InternalMember, Auditor, Partner, Documentation, Letter, Asset, Activity, FinanceRecord, Credential } from './types';
+import { NavItem, PUCertified, PUOnProcess, PUProspect, InternalMember, Auditor, SdmSyariah, Partner, Documentation, Letter, Asset, Activity, FinanceRecord, Credential } from './types';
 
 export const MENU_ITEMS: { name: NavItem; icon: React.ReactNode; category: string }[] = [
   { name: 'Dashboard', icon: <LayoutDashboard size={20} />, category: 'Main' },
@@ -28,6 +29,7 @@ export const MENU_ITEMS: { name: NavItem; icon: React.ReactNode; category: strin
   { name: 'PU Prospect', icon: <Target size={20} />, category: 'Business' },
   { name: 'Internal', icon: <Users size={20} />, category: 'Management' },
   { name: 'Auditor', icon: <UserCheck size={20} />, category: 'Management' },
+  { name: 'SDM Syariah', icon: <GraduationCap size={20} />, category: 'Management' },
   { name: 'Partners', icon: <Handshake size={20} />, category: 'Management' },
   { name: 'Docs', icon: <FileText size={20} />, category: 'Office' },
   { name: 'Letters', icon: <Mail size={20} />, category: 'Office' },
@@ -95,6 +97,11 @@ export const MOCK_INTERNAL: InternalMember[] = [
 export const MOCK_AUDITORS: Auditor[] = [
   { id: '1', fullName: 'H. Abdullah, Ph.D', npp: '192082199332294', position: 'Senior Auditor', certNumber: 'AUD-99212', address: 'Surabaya', waNumber: '081122334455', email: 'abdullah@audit.id' },
   { id: '2', fullName: 'Ir. Maria Ulfa', npp: '198239812938129', position: 'Lead Auditor Food', certNumber: 'AUD-88123', address: 'Malang', waNumber: '087766554433', email: 'maria@audit.id' },
+];
+
+export const MOCK_SDM_SYARIAH: SdmSyariah[] = [
+  { id: '1', fullName: 'Dr. H. Moh. Sholeh, M.Ag', position: 'Pengawas Syariah', npp: '196504251992031001', waNumber: '081233445566' },
+  { id: '2', fullName: 'Ustadz Ahmad Zainuri, Lc', position: 'Konsultan Syariah', npp: '197803102005011002', waNumber: '082244556677' },
 ];
 
 export const MOCK_PARTNERS: Partner[] = [

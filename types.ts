@@ -20,6 +20,7 @@ export type NavItem =
   | 'PU Prospect'
   | 'Internal'
   | 'Auditor'
+  | 'SDM Syariah'
   | 'Partners'
   | 'Docs'
   | 'Letters'
@@ -105,6 +106,17 @@ export interface Auditor {
   address: string;
   waNumber: string;
   email: string;
+  createdBy?: string;
+  updatedBy?: string;
+  updatedAt?: string;
+}
+
+export interface SdmSyariah {
+  id: string;
+  fullName: string;  // public
+  position: string;  // public
+  npp?: string;
+  waNumber: string;
   createdBy?: string;
   updatedBy?: string;
   updatedAt?: string;
