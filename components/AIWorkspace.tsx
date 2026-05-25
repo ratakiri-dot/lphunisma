@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+﻿import React, { useState, useEffect, useRef } from 'react';
 import { Sparkles, Wallet, Copy, Loader2, Printer, Save, CheckCircle2, FileText, ChevronRight } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -70,7 +70,7 @@ function buildLetterHTML({
   min-height:1247px;
   background:#fff;
   font-family:'Times New Roman',Times,serif;
-  font-size:14px;
+  font-size:12pt;
   line-height:1.65;
   color:#000;
   box-sizing:border-box;
@@ -139,7 +139,7 @@ function buildLetterHTML({
 
     <!-- NOMOR / TANGGAL ──────────────────────────────────────── -->
     <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;">
-      <table style="border-collapse:collapse;font-size:14px;">
+      <table style="border-collapse:collapse;font-size:12pt;">
         <tbody>
           <tr>
             <td style="width:80px;vertical-align:top;padding:1px 0;">Nomor</td>
@@ -155,35 +155,35 @@ function buildLetterHTML({
           </tr>
         </tbody>
       </table>
-      <div style="text-align:right;font-size:14px;">${letterDate}</div>
+      <div style="text-align:right;font-size:12pt;">${letterDate}</div>
     </div>
 
     <!-- PENERIMA ─────────────────────────────────────────────── -->
-    <div style="margin-bottom:20px;line-height:1.8;font-size:14px;">
+    <div style="margin-bottom:20px;line-height:1.8;font-size:12pt;">
       Yth. Bapak Wakil Rektor<br/>
       Bagian Administrasi Umum, Keuangan, dan Personalia<br/>
       Universitas Islam Malang
     </div>
 
     <!-- SALAM PEMBUKA ────────────────────────────────────────── -->
-    <div style="font-style:italic;margin-bottom:14px;font-size:14px;">
+    <div style="font-style:italic;margin-bottom:14px;font-size:12pt;">
       Assalamualaikum War. Wab.
     </div>
 
     <!-- PARAGRAF 1 ───────────────────────────────────────────── -->
-    <div style="margin-bottom:14px;text-align:justify;font-size:14px;">
+    <div style="margin-bottom:14px;text-align:justify;font-size:12pt;">
       Salam silaturahmi semoga kita senantiasa dalam lindungan Allah Swt. dan dapat
       menyelesaikan tugas sehari-hari. Aamiin.
     </div>
 
     <!-- PARAGRAF 2 ───────────────────────────────────────────── -->
-    <div style="margin-bottom:12px;text-align:justify;font-size:14px;">
+    <div style="margin-bottom:12px;text-align:justify;font-size:12pt;">
       Sehubungan dengan adanya <strong>Audit Sertifikasi Halal Pelaku Usaha</strong>
       yang akan dilaksanakan pada:
     </div>
 
     <!-- TABEL KEGIATAN ───────────────────────────────────────── -->
-    <table style="border-collapse:collapse;margin-left:44px;margin-bottom:14px;font-size:14px;">
+    <table style="border-collapse:collapse;margin-left:44px;margin-bottom:14px;font-size:12pt;">
       <tbody>
         <tr><td style="width:70px;font-weight:bold;padding:2px 0;">Hari</td><td style="padding:2px 0;">: ${dayOfVisit}</td></tr>
         <tr><td style="font-weight:bold;padding:2px 0;">Tanggal</td><td style="padding:2px 0;">: ${formattedDate}</td></tr>
@@ -193,22 +193,22 @@ function buildLetterHTML({
     </table>
 
     <!-- PARAGRAF 3 ───────────────────────────────────────────── -->
-    <div style="margin-bottom:14px;text-align:justify;font-size:14px;">
+    <div style="margin-bottom:14px;text-align:justify;font-size:12pt;">
       dengan ini kami mengajukan permohonan peminjaman kendaraan untuk kegiatan tersebut.
     </div>
 
     <!-- PARAGRAF 4 ───────────────────────────────────────────── -->
-    <div style="margin-bottom:14px;text-align:justify;font-size:14px;">
+    <div style="margin-bottom:14px;text-align:justify;font-size:12pt;">
       Demikian permohonan ini, atas perhatiannya disampaikan terimakasih.
     </div>
 
     <!-- SALAM PENUTUP ────────────────────────────────────────── -->
-    <div style="font-style:italic;margin-bottom:24px;font-size:14px;">
+    <div style="font-style:italic;margin-bottom:24px;font-size:12pt;">
       Wassalamualaikum War. Wab.
     </div>
 
     <!-- TANDA TANGAN ─────────────────────────────────────────── -->
-    <div style="text-align:right;margin-bottom:14px;font-size:14px;">
+    <div style="text-align:right;margin-bottom:14px;font-size:12pt;">
       <div style="display:inline-block;text-align:left;width:300px;">
         Kepala Lembaga Pemeriksa Halal UNISMA,<br/><br/><br/><br/><br/>
         <strong>Dr. Hj. Jeni Susyanti, SE, MM, BKP, C.B.V</strong><br/>
@@ -283,7 +283,7 @@ function buildAuditorLetterHTML({
 
   const auditorDetailsHtml = hasSecondAuditor
     ? `
-    <table style="border-collapse:collapse;margin-left:44px;margin-bottom:18px;font-size:14px;width:calc(100% - 44px);line-height:1.5;">
+    <table style="border-collapse:collapse;margin-left:44px;margin-bottom:18px;font-size:12pt;width:calc(100% - 44px);line-height:1.5;">
       <tbody>
         <tr>
           <td style="width:90px;vertical-align:top;padding:2px 0;">1. Nama</td>
@@ -314,7 +314,7 @@ function buildAuditorLetterHTML({
     </table>
     `
     : `
-    <table style="border-collapse:collapse;margin-left:44px;margin-bottom:18px;font-size:14px;width:calc(100% - 44px);line-height:1.5;">
+    <table style="border-collapse:collapse;margin-left:44px;margin-bottom:18px;font-size:12pt;width:calc(100% - 44px);line-height:1.5;">
       <tbody>
         <tr>
           <td style="width:90px;vertical-align:top;padding:2px 0;">Nama</td>
@@ -339,7 +339,7 @@ function buildAuditorLetterHTML({
   min-height:1247px;
   background:#fff;
   font-family:'Times New Roman',Times,serif;
-  font-size:14px;
+  font-size:12pt;
   line-height:1.65;
   color:#000;
   box-sizing:border-box;
@@ -410,7 +410,7 @@ function buildAuditorLetterHTML({
     </div>
 
     <!-- INTRO ─────────────────────────────────────────────────── -->
-    <div style="margin-bottom:14px;text-align:justify;font-size:14px;line-height:1.5;">
+    <div style="margin-bottom:14px;text-align:justify;font-size:12pt;line-height:1.5;">
       Kepala Lembaga Pemeriksa Halal (LPH) Universitas Islam Malang memberikan tugas kepada :
     </div>
 
@@ -418,12 +418,12 @@ function buildAuditorLetterHTML({
     ${auditorDetailsHtml}
 
     <!-- MISSION INTRO ─────────────────────────────────────────── -->
-    <div style="margin-bottom:12px;text-align:justify;font-size:14px;line-height:1.5;">
+    <div style="margin-bottom:12px;text-align:justify;font-size:12pt;line-height:1.5;">
       Untuk melakukan Audit Sertifikasi Halal di Fasilitas Produksi Pelaku Usaha pada :
     </div>
 
     <!-- AUDIT ACTIVITY DETAILS ────────────────────────────────── -->
-    <table style="border-collapse:collapse;margin-left:44px;margin-bottom:18px;font-size:14px;width:calc(100% - 44px);line-height:1.6;">
+    <table style="border-collapse:collapse;margin-left:44px;margin-bottom:18px;font-size:12pt;width:calc(100% - 44px);line-height:1.6;">
       <tbody>
         <tr>
           <td style="width:110px;font-weight:bold;vertical-align:top;padding:2px 0;">Hari</td>
@@ -449,12 +449,12 @@ function buildAuditorLetterHTML({
     </table>
 
     <!-- OUTRO ─────────────────────────────────────────────────── -->
-    <div style="margin-bottom:28px;text-align:justify;font-size:14px;line-height:1.6;">
+    <div style="margin-bottom:28px;text-align:justify;font-size:12pt;line-height:1.6;">
       Demikian surat tugas ini dibuat untuk dilaksanakan dengan penuh tanggung jawab. Surat tugas ini berlaku sejak tanggal dikeluarkan sampai selesai proses Audit Sertifikasi Halal.
     </div>
 
     <!-- TANDA TANGAN ──────────────────────────────────────────── -->
-    <div style="text-align:right;margin-bottom:14px;font-size:14px;line-height:1.5;">
+    <div style="text-align:right;margin-bottom:14px;font-size:12pt;line-height:1.5;">
       <div style="display:inline-block;text-align:left;width:300px;position:relative;z-index:10;">
         Malang, ${signDate}<br/>
         Kepala Lembaga Pemeriksa Halal UNISMA,<br/><br/><br/><br/><br/>
