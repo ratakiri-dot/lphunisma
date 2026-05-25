@@ -5,13 +5,14 @@ import remarkGfm from 'remark-gfm';
 import NeumorphicCard from './NeumorphicCard';
 import { generateFinancialRecap } from '../services/geminiService';
 import { dataService } from '../services/dataService';
-import { FinanceRecord, AppUser, Letter } from '../types';
+import { FinanceRecord, AppUser, Letter, Auditor } from '../types';
 import { marked } from 'marked';
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
 
 interface AIWorkspaceProps {
   finance: FinanceRecord[];
+  auditors: Auditor[];
   currentUser: AppUser | null;
   onLetterSaved?: () => void;
 }
@@ -510,6 +511,7 @@ function buildAuditorLetterHTML({
 
 const AIWorkspace: React.FC<AIWorkspaceProps> = ({
   finance,
+  auditors,
   currentUser,
   onLetterSaved
 }) => {
@@ -1039,6 +1041,27 @@ Tanggal Ttd : ${auditorSignDate}
                   </select>
                 </div>
                 <div className="space-y-2">
+                  <label className="block pl-1 text-[10px] text-slate-400 uppercase">Pilih {auditorCount === 2 ? 'Auditor Ke-1' : 'Auditor'}</label>
+                  <select
+                    onChange={(e) => {
+                      const selectedId = e.target.value;
+                      if (selectedId === 'manual') return;
+                      const selectedAuditor = auditors.find(a => a.id === selectedId);
+                      if (selectedAuditor) {
+                        setAuditorName(selectedAuditor.fullName);
+                        setAuditorNpp(selectedAuditor.npp || '');
+                      }
+                    }}
+                    defaultValue="manual"
+                    className="w-full p-4 neu-inset rounded-xl outline-none bg-transparent cursor-pointer font-sans"
+                  >
+                    <option value="manual">-- Input Manual --</option>
+                    {auditors.map(a => (
+                      <option key={a.id} value={a.id}>{a.fullName} {a.npp ? `(NPP: ${a.npp})` : ''}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="space-y-2">
                   <label className="block pl-1 text-[10px] text-slate-400 uppercase">{auditorCount === 2 ? 'Nama Auditor Ke-1' : 'Nama Auditor'}</label>
                   <input
                     value={auditorName}
@@ -1059,6 +1082,27 @@ Tanggal Ttd : ${auditorSignDate}
 
                 {auditorCount === 2 && (
                   <>
+                    <div className="space-y-2">
+                      <label className="block pl-1 text-[10px] text-slate-400 uppercase">Pilih Auditor Ke-2</label>
+                      <select
+                        onChange={(e) => {
+                          const selectedId = e.target.value;
+                          if (selectedId === 'manual') return;
+                          const selectedAuditor = auditors.find(a => a.id === selectedId);
+                          if (selectedAuditor) {
+                            setAuditorName2(selectedAuditor.fullName);
+                            setAuditorNpp2(selectedAuditor.npp || '');
+                          }
+                        }}
+                        defaultValue="manual"
+                        className="w-full p-4 neu-inset rounded-xl outline-none bg-transparent cursor-pointer font-sans"
+                      >
+                        <option value="manual">-- Input Manual --</option>
+                        {auditors.map(a => (
+                          <option key={a.id} value={a.id}>{a.fullName} {a.npp ? `(NPP: ${a.npp})` : ''}</option>
+                        ))}
+                      </select>
+                    </div>
                     <div className="space-y-2">
                       <label className="block pl-1 text-[10px] text-slate-400 uppercase">Nama Auditor Ke-2</label>
                       <input

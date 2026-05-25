@@ -84,6 +84,7 @@ CREATE TABLE internal_members (
 CREATE TABLE auditors (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   full_name TEXT NOT NULL,
+  npp TEXT,
   position TEXT,
   cert_number TEXT,
   address TEXT,

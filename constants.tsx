@@ -93,8 +93,8 @@ export const MOCK_INTERNAL: InternalMember[] = [
 ];
 
 export const MOCK_AUDITORS: Auditor[] = [
-  { id: '1', fullName: 'H. Abdullah, Ph.D', position: 'Senior Auditor', certNumber: 'AUD-99212', address: 'Surabaya', waNumber: '081122334455', email: 'abdullah@audit.id' },
-  { id: '2', fullName: 'Ir. Maria Ulfa', position: 'Lead Auditor Food', certNumber: 'AUD-88123', address: 'Malang', waNumber: '087766554433', email: 'maria@audit.id' },
+  { id: '1', fullName: 'H. Abdullah, Ph.D', npp: '192082199332294', position: 'Senior Auditor', certNumber: 'AUD-99212', address: 'Surabaya', waNumber: '081122334455', email: 'abdullah@audit.id' },
+  { id: '2', fullName: 'Ir. Maria Ulfa', npp: '198239812938129', position: 'Lead Auditor Food', certNumber: 'AUD-88123', address: 'Malang', waNumber: '087766554433', email: 'maria@audit.id' },
 ];
 
 export const MOCK_PARTNERS: Partner[] = [

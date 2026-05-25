@@ -652,6 +652,7 @@ const App: React.FC = () => {
         return (
           <AIWorkspace
             finance={finance}
+            auditors={auditors}
             currentUser={currentUser}
             onLetterSaved={async () => {
               const updatedLetters = await dataService.getLetters();
@@ -780,6 +781,7 @@ const App: React.FC = () => {
             accentColor="violet"
             columns={[
               { key: 'fullName', label: 'Nama', isPublic: true },
+              { key: 'npp', label: 'NPP', isPublic: true },
               { key: 'position', label: 'Bidang', isPublic: true },
               { key: 'certNumber', label: 'No Sertifikat' },
               { key: 'waNumber', label: 'WhatsApp' },
@@ -1009,6 +1011,7 @@ const App: React.FC = () => {
       return (
         <>
           <input name="fullName" defaultValue={editingItem?.fullName} placeholder="Nama Auditor" className="w-full p-4 neu-inset rounded-xl outline-none" required />
+          <input name="npp" defaultValue={editingItem?.npp} placeholder="NPP Auditor (Opsional)" className="w-full p-4 neu-inset rounded-xl outline-none" />
           <input name="position" defaultValue={editingItem?.position} placeholder="Bidang" className="w-full p-4 neu-inset rounded-xl outline-none" required />
           <input name="certNumber" defaultValue={editingItem?.certNumber} placeholder="No Sertifikat" className="w-full p-4 neu-inset rounded-xl outline-none" required />
           <input name="waNumber" defaultValue={editingItem?.waNumber} placeholder="Nomor WhatsApp" className="w-full p-4 neu-inset rounded-xl outline-none" required />

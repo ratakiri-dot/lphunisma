@@ -99,6 +99,7 @@ export interface InternalMember {
 export interface Auditor {
   id: string;
   fullName: string; // public
+  npp?: string;     // NPP auditor
   position: string; // public
   certNumber: string;
   address: string;
