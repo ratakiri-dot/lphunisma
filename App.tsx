@@ -464,8 +464,10 @@ const App: React.FC = () => {
       setIsPromoting(false);
       setPromoteSourceTab(null);
       setIsModalOpen(false);
-    } catch (err) {
-      alert('Gagal menyimpan data');
+    } catch (err: any) {
+      console.error('Error saving data:', err);
+      const msg = err?.message || err?.details || (typeof err === 'object' ? JSON.stringify(err) : String(err));
+      alert(`Gagal menyimpan data: ${msg}`);
     }
   };
 
