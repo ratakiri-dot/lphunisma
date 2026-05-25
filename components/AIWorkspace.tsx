@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Sparkles, Wallet, Copy, Loader2, Printer, Save, CheckCircle2, FileText, ChevronRight } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -248,6 +248,7 @@ interface AuditorLetterTemplateProps {
   auditorNpp2?: string;
   visitDate: string;      // ISO yyyy-mm-dd
   visitPlace: string;
+  visitPlace2?: string;
   businessName: string;
   contactPerson: string;
   signDate: string;
@@ -264,6 +265,7 @@ function buildAuditorLetterHTML({
   auditorNpp2,
   visitDate,
   visitPlace,
+  visitPlace2,
   businessName,
   contactPerson,
   signDate,
@@ -273,6 +275,24 @@ function buildAuditorLetterHTML({
 }: AuditorLetterTemplateProps): string {
   const dayOfVisit = getDay(visitDate);
   const formattedDate = formatDate(visitDate);
+
+  const hasSecondPlace = !!(visitPlace2 && visitPlace2.trim());
+
+  const visitPlaceHtml = hasSecondPlace
+    ? `<table style="border-collapse:collapse;width:100%;font-size:12pt;line-height:1.6;">
+        <tbody>
+          <tr>
+            <td style="width:20px;vertical-align:top;padding:0;">1.</td>
+            <td style="vertical-align:top;padding:0;white-space:pre-line;">${visitPlace}</td>
+          </tr>
+          <tr style="height:6px;"><td colspan="2"></td></tr>
+          <tr>
+            <td style="width:20px;vertical-align:top;padding:0;">2.</td>
+            <td style="vertical-align:top;padding:0;white-space:pre-line;">${visitPlace2}</td>
+          </tr>
+        </tbody>
+      </table>`
+    : `<span style="white-space:pre-line;">${visitPlace}</span>`;
 
   const CONTENT_PAD_H = 72;   // ~19mm horizontal padding
   const CONTENT_PAD_T = 56;   // ~15mm top padding
@@ -427,23 +447,30 @@ function buildAuditorLetterHTML({
       <tbody>
         <tr>
           <td style="width:110px;font-weight:bold;vertical-align:top;padding:2px 0;">Hari</td>
-          <td style="vertical-align:top;padding:2px 0;">: ${dayOfVisit}</td>
+          <td style="width:15px;vertical-align:top;padding:2px 0;">:</td>
+          <td style="vertical-align:top;padding:2px 0;">${dayOfVisit}</td>
         </tr>
         <tr>
           <td style="font-weight:bold;vertical-align:top;padding:2px 0;">Tanggal</td>
-          <td style="vertical-align:top;padding:2px 0;">: ${formattedDate}</td>
+          <td style="vertical-align:top;padding:2px 0;">:</td>
+          <td style="vertical-align:top;padding:2px 0;">${formattedDate}</td>
         </tr>
         <tr>
           <td style="font-weight:bold;vertical-align:top;padding:2px 0;">Lokasi Audit</td>
-          <td style="vertical-align:top;padding:2px 0;white-space:pre-line;">: ${visitPlace}</td>
+          <td style="vertical-align:top;padding:2px 0;">:</td>
+          <td style="vertical-align:top;padding:2px 0;">
+            ${visitPlaceHtml}
+          </td>
         </tr>
         <tr>
           <td style="font-weight:bold;vertical-align:top;padding:2px 0;">Pelaku Usaha</td>
-          <td style="vertical-align:top;padding:2px 0;">: ${businessName}</td>
+          <td style="vertical-align:top;padding:2px 0;">:</td>
+          <td style="vertical-align:top;padding:2px 0;">${businessName}</td>
         </tr>
         <tr>
           <td style="font-weight:bold;vertical-align:top;padding:2px 0;">Kontak Person</td>
-          <td style="vertical-align:top;padding:2px 0;">: ${contactPerson}</td>
+          <td style="vertical-align:top;padding:2px 0;">:</td>
+          <td style="vertical-align:top;padding:2px 0;">${contactPerson}</td>
         </tr>
       </tbody>
     </table>
@@ -531,6 +558,8 @@ const AIWorkspace: React.FC<AIWorkspaceProps> = ({
   const [auditorCount, setAuditorCount] = useState<number>(1);
   const [auditorName2, setAuditorName2] = useState<string>('');
   const [auditorNpp2, setAuditorNpp2] = useState<string>('');
+  const [auditorLocationCount, setAuditorLocationCount] = useState<number>(1);
+  const [auditorVisitPlace2, setAuditorVisitPlace2] = useState<string>('');
 
   // ── derived ──────────────────────────────────────────────────────────────
   const availableYears = Array.from(
@@ -589,6 +618,7 @@ const AIWorkspace: React.FC<AIWorkspaceProps> = ({
     auditorNpp2:   auditorCount === 2 ? auditorNpp2 : undefined,
     visitDate:     auditorVisitDate,
     visitPlace:    auditorVisitPlace,
+    visitPlace2:   auditorLocationCount === 2 ? auditorVisitPlace2 : undefined,
     businessName:  auditorBusinessName,
     contactPerson: auditorContact,
     signDate:      auditorSignDate,
@@ -827,6 +857,11 @@ Tempat : ${loanVisitPlace}
           setIsLoading(false);
           return;
         }
+        if (auditorLocationCount === 2 && !auditorVisitPlace2.trim()) {
+          alert('Mohon lengkapi parameter Lokasi Audit Ke-2.');
+          setIsLoading(false);
+          return;
+        }
         if (!auditorBusinessName.trim()) {
           alert('Mohon lengkapi parameter Pelaku Usaha.');
           setIsLoading(false);
@@ -842,7 +877,8 @@ Auditor 1 : ${auditorName} (NPP: ${auditorNpp})
 ${auditorCount === 2 ? `Auditor 2 : ${auditorName2} (NPP: ${auditorNpp2})` : ''}
 Hari : ${dayOfVisit}
 Tanggal Audit : ${formattedVisitDate}
-Lokasi Audit : ${auditorVisitPlace}
+Lokasi Audit 1 : ${auditorVisitPlace}
+${auditorLocationCount === 2 ? `Lokasi Audit 2 : ${auditorVisitPlace2}` : ''}
 Pelaku Usaha : ${auditorBusinessName}
 Kontak Person : ${auditorContact}
 Tanggal Ttd : ${auditorSignDate}
@@ -1056,8 +1092,23 @@ Tanggal Ttd : ${auditorSignDate}
                     Hari Terdeteksi: {getIndonesianDay(auditorVisitDate) || '-'}
                   </p>
                 </div>
+
                 <div className="space-y-2">
-                  <label className="block pl-1 text-[10px] text-slate-400 uppercase">Lokasi Audit</label>
+                  <label className="block pl-1 text-[10px] text-slate-400 uppercase">Jumlah Lokasi Audit</label>
+                  <select
+                    value={auditorLocationCount}
+                    onChange={(e) => setAuditorLocationCount(Number(e.target.value))}
+                    className="w-full p-4 neu-inset rounded-xl outline-none bg-transparent cursor-pointer font-sans"
+                  >
+                    <option value={1}>1 Lokasi</option>
+                    <option value={2}>2 Lokasi</option>
+                  </select>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="block pl-1 text-[10px] text-slate-400 uppercase">
+                    {auditorLocationCount === 2 ? 'Lokasi Audit Ke-1' : 'Lokasi Audit'}
+                  </label>
                   <textarea
                     value={auditorVisitPlace}
                     onChange={(e) => setAuditorVisitPlace(e.target.value)}
@@ -1065,6 +1116,18 @@ Tanggal Ttd : ${auditorSignDate}
                     className="w-full p-4 neu-inset rounded-xl outline-none bg-transparent font-sans h-20 resize-none"
                   />
                 </div>
+
+                {auditorLocationCount === 2 && (
+                  <div className="space-y-2">
+                    <label className="block pl-1 text-[10px] text-slate-400 uppercase">Lokasi Audit Ke-2</label>
+                    <textarea
+                      value={auditorVisitPlace2}
+                      onChange={(e) => setAuditorVisitPlace2(e.target.value)}
+                      placeholder="e.g. Fasilitas Produksi Kedua&#10;Jl. Sunan Kalijaga No. 10, Kota Malang"
+                      className="w-full p-4 neu-inset rounded-xl outline-none bg-transparent font-sans h-20 resize-none"
+                    />
+                  </div>
+                )}
                 <div className="space-y-2">
                   <label className="block pl-1 text-[10px] text-slate-400 uppercase">Pelaku Usaha</label>
                   <input
