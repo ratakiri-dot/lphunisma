@@ -16,7 +16,7 @@ interface AIWorkspaceProps {
   onLetterSaved?: () => void;
 }
 
-type AITaskType = 'finance' | 'vehicle';
+type AITaskType = 'finance' | 'vehicle' | 'auditor';
 
 /* ─────────────────────────────────────────────────────────────────────────────
    SHARED LETTER TEMPLATE
@@ -235,6 +235,208 @@ function buildLetterHTML({
 </div>`;
 }
 
+/* ─────────────────────────────────────────────────────────────────────────────
+   SHARED LETTER TEMPLATE - AUDITOR ASSIGNMENT LETTER
+   Renders the auditor assignment letter as inline-styled HTML.
+───────────────────────────────────────────────────────────────────────────── */
+
+interface AuditorLetterTemplateProps {
+  letterNo: string;
+  auditorName: string;
+  auditorNpp: string;
+  visitDate: string;      // ISO yyyy-mm-dd
+  visitPlace: string;
+  businessName: string;
+  contactPerson: string;
+  signDate: string;
+  getDay: (d: string) => string;
+  formatDate: (d: string) => string;
+  base?: string;
+}
+
+function buildAuditorLetterHTML({
+  letterNo,
+  auditorName,
+  auditorNpp,
+  visitDate,
+  visitPlace,
+  businessName,
+  contactPerson,
+  signDate,
+  getDay,
+  formatDate,
+  base = '',
+}: AuditorLetterTemplateProps): string {
+  const dayOfVisit = getDay(visitDate);
+  const formattedDate = formatDate(visitDate);
+
+  const CONTENT_PAD_H = 72;   // ~19mm horizontal padding
+  const CONTENT_PAD_T = 56;   // ~15mm top padding
+  const FOOTER_H      = 60;   // footer image height
+  const FOOTER_PAD_B  = 28;   // gap from bottom edge
+
+  return `
+<div style="
+  position:relative;
+  width:794px;
+  min-height:1247px;
+  background:#fff;
+  font-family:'Times New Roman',Times,serif;
+  font-size:14px;
+  line-height:1.65;
+  color:#000;
+  box-sizing:border-box;
+  overflow:hidden;
+">
+  <!-- WATERMARK -->
+  <img
+    src="${base}/assets/letter_images/watermark.png"
+    style="
+      position:absolute;
+      top:50%; left:50%;
+      transform:translate(-50%,-50%);
+      width:68%;
+      opacity:0.13;
+      pointer-events:none;
+      z-index:0;
+      display:block;
+    "
+    crossorigin="anonymous"
+  />
+  <!-- MAIN CONTENT AREA -->
+  <div style="
+    position:relative;
+    z-index:1;
+    padding:${CONTENT_PAD_T}px ${CONTENT_PAD_H}px ${FOOTER_H + FOOTER_PAD_B + 32}px ${CONTENT_PAD_H}px;
+    box-sizing:border-box;
+  ">
+    <!-- KOP SURAT ─────────────────────────────────────────────── -->
+    <div style="
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      border-bottom:3px double #13894B;
+      padding-bottom:8px;
+      margin-bottom:20px;
+    ">
+      <img
+        src="${base}/assets/letter_images/image2.jpeg"
+        style="width:76px;height:76px;object-fit:contain;display:block;"
+        crossorigin="anonymous"
+      />
+      <div style="
+        text-align:center;
+        flex:1;
+        padding:0 16px;
+        font-family:'Bookman Old Style','Book Antiqua',Palatino,serif;
+        color:#13894B;
+      ">
+        <div style="font-size:15pt;font-weight:bold;line-height:1.2;">UNIVERSITAS ISLAM MALANG</div>
+        <div style="font-size:18pt;font-weight:bold;letter-spacing:4px;line-height:1.1;">( U N I S M A )</div>
+        <div style="font-size:12.5pt;font-weight:bold;line-height:1.3;">LEMBAGA PEMERIKSA HALAL</div>
+        <div style="font-size:7.5pt;margin-top:5px;font-family:Arial,Helvetica,sans-serif;color:#13894B;">
+          Jalan Mayjend Haryono 193 Malang, Jawa Timur 65144 Indonesia
+          Telp 0341 551932 &nbsp;Faks. 0341 552249 &nbsp;E-mail: lph@unisma.ac.id &nbsp;Website: unisma.ac.id
+        </div>
+      </div>
+      <img
+        src="${base}/assets/letter_images/image3.jpeg"
+        style="width:76px;height:76px;object-fit:contain;display:block;"
+        crossorigin="anonymous"
+      />
+    </div>
+
+    <!-- TITLE SURAT TUGAS ──────────────────────────────────────── -->
+    <div style="text-align:center;margin-bottom:20px;font-family:'Times New Roman',serif;">
+      <div style="font-size:14pt;font-weight:bold;text-decoration:underline;letter-spacing:1px;line-height:1.2;">SURAT TUGAS</div>
+      <div style="font-size:11pt;font-weight:bold;line-height:1.2;">NOMOR : ${letterNo}</div>
+    </div>
+
+    <!-- INTRO ─────────────────────────────────────────────────── -->
+    <div style="margin-bottom:14px;text-align:justify;font-size:14px;line-height:1.5;">
+      Kepala Lembaga Pemeriksa Halal (LPH) Universitas Islam Malang memberikan tugas kepada :
+    </div>
+
+    <!-- AUDITOR DETAILS ───────────────────────────────────────── -->
+    <table style="border-collapse:collapse;margin-left:44px;margin-bottom:18px;font-size:14px;width:calc(100% - 44px);line-height:1.5;">
+      <tbody>
+        <tr>
+          <td style="width:90px;vertical-align:top;padding:2px 0;">nama</td>
+          <td style="vertical-align:top;padding:2px 0;">: ${auditorName}</td>
+        </tr>
+        <tr>
+          <td style="vertical-align:top;padding:2px 0;">NPP</td>
+          <td style="vertical-align:top;padding:2px 0;">: ${auditorNpp}</td>
+        </tr>
+        <tr>
+          <td style="vertical-align:top;padding:2px 0;">jabatan</td>
+          <td style="vertical-align:top;padding:2px 0;">: Auditor Halal Lembaga Pemeriksa Halal (LPH) UNISMA</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- MISSION INTRO ─────────────────────────────────────────── -->
+    <div style="margin-bottom:12px;text-align:justify;font-size:14px;line-height:1.5;">
+      Untuk melakukan Audit Sertifikasi Halal di Fasilitas Produksi Pelaku Usaha pada :
+    </div>
+
+    <!-- AUDIT ACTIVITY DETAILS ────────────────────────────────── -->
+    <table style="border-collapse:collapse;margin-left:44px;margin-bottom:18px;font-size:14px;width:calc(100% - 44px);line-height:1.6;">
+      <tbody>
+        <tr>
+          <td style="width:110px;font-weight:bold;vertical-align:top;padding:2px 0;">Hari</td>
+          <td style="vertical-align:top;padding:2px 0;">: ${dayOfVisit}</td>
+        </tr>
+        <tr>
+          <td style="font-weight:bold;vertical-align:top;padding:2px 0;">Tanggal</td>
+          <td style="vertical-align:top;padding:2px 0;">: ${formattedDate}</td>
+        </tr>
+        <tr>
+          <td style="font-weight:bold;vertical-align:top;padding:2px 0;">Lokasi Audit</td>
+          <td style="vertical-align:top;padding:2px 0;white-space:pre-line;">: ${visitPlace}</td>
+        </tr>
+        <tr>
+          <td style="font-weight:bold;vertical-align:top;padding:2px 0;">Pelaku Usaha</td>
+          <td style="vertical-align:top;padding:2px 0;">: ${businessName}</td>
+        </tr>
+        <tr>
+          <td style="font-weight:bold;vertical-align:top;padding:2px 0;">Kontak Person</td>
+          <td style="vertical-align:top;padding:2px 0;">: ${contactPerson}</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- OUTRO ─────────────────────────────────────────────────── -->
+    <div style="margin-bottom:28px;text-align:justify;font-size:14px;line-height:1.6;">
+      Demikian surat tugas ini dibuat untuk dilaksanakan dengan penuh tanggung jawab. Surat tugas ini berlaku sejak tanggal dikeluarkan sampai selesai proses Audit Sertifikasi Halal.
+    </div>
+
+    <!-- TANDA TANGAN ──────────────────────────────────────────── -->
+    <div style="text-align:right;margin-bottom:14px;font-size:14px;line-height:1.5;">
+      <div style="display:inline-block;text-align:left;width:300px;position:relative;z-index:10;">
+        Malang, ${signDate}<br/>
+        Kepala Lembaga Pemeriksa Halal UNISMA,<br/><br/><br/><br/><br/>
+        <strong>Dr. Hj. Jeni Susyanti, SE, MM, BKP, C.B.V</strong><br/>
+        <span style="font-size:10.5pt;">NPP 1950200019</span>
+      </div>
+    </div>
+  </div><!-- /MAIN CONTENT -->
+  <!-- FOOTER ─────────────────────────────────────────────────── -->
+  <img
+    src="${base}/assets/letter_images/footer.jpeg"
+    style="
+      position:absolute;
+      bottom:${FOOTER_PAD_B}px;
+      left:${CONTENT_PAD_H}px;
+      width:${794 - CONTENT_PAD_H * 2}px;
+      display:block;
+      z-index:2;
+    "
+    crossorigin="anonymous"
+  />
+</div>`;
+}
+
 /* ─────────────────────────────────────────────────────────────────────────── */
 
 const AIWorkspace: React.FC<AIWorkspaceProps> = ({
@@ -267,6 +469,23 @@ const AIWorkspace: React.FC<AIWorkspaceProps> = ({
   const [loanVisitDate, setLoanVisitDate] = useState<string>(new Date().toISOString().split('T')[0]);
   const [loanVisitTime, setLoanVisitTime] = useState<string>('Pukul 09.00 - Selesai');
   const [loanVisitPlace, setLoanVisitPlace] = useState<string>('');
+
+  // Auditor form states
+  const [auditorLetterNo, setAuditorLetterNo] = useState<string>('17/P44/U.LPH/K/F.05/IV/2025');
+  const [auditorName, setAuditorName] = useState<string>('Majida Ramadhan, S.Si., M.Si');
+  const [auditorNpp, setAuditorNpp] = useState<string>('192082199332294');
+  const [auditorVisitDate, setAuditorVisitDate] = useState<string>(new Date().toISOString().split('T')[0]);
+  const [auditorVisitPlace, setAuditorVisitPlace] = useState<string>('');
+  const [auditorBusinessName, setAuditorBusinessName] = useState<string>('');
+  const [auditorContact, setAuditorContact] = useState<string>('');
+  const [auditorSignDate, setAuditorSignDate] = useState<string>(() => {
+    const d = new Date();
+    const months = [
+      'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+      'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+    ];
+    return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
+  });
 
   // ── derived ──────────────────────────────────────────────────────────────
   const availableYears = Array.from(
@@ -317,6 +536,19 @@ const AIWorkspace: React.FC<AIWorkspaceProps> = ({
     formatDate: formatIndonesianDate,
   });
 
+  const auditorLetterProps = (): AuditorLetterTemplateProps => ({
+    letterNo:      auditorLetterNo,
+    auditorName:   auditorName,
+    auditorNpp:    auditorNpp,
+    visitDate:     auditorVisitDate,
+    visitPlace:    auditorVisitPlace,
+    businessName:  auditorBusinessName,
+    contactPerson: auditorContact,
+    signDate:      auditorSignDate,
+    getDay:        getIndonesianDay,
+    formatDate:    formatIndonesianDate,
+  });
+
   // ── action handlers ───────────────────────────────────────────────────────
   const handleCopy = () => {
     if (!result) return;
@@ -354,20 +586,22 @@ const AIWorkspace: React.FC<AIWorkspaceProps> = ({
 
   /**
    * Export PDF.
-   * For vehicle letters: renders the SAME HTML that buildLetterHTML() produces
+   * For vehicle/auditor letters: renders the SAME HTML that buildLetterHTML() produces
    * into a fixed off-screen div, then captures with html2canvas.
    * For finance: converts markdown → image → multi-page PDF.
    */
   const handleExportPdf = async () => {
     if (!result) return;
 
-    if (activeTask === 'vehicle') {
+    if (activeTask === 'vehicle' || activeTask === 'auditor') {
       const BASE  = window.location.origin;
       const F4_W  = 794;
       const F4_H  = 1247;
 
       // Build the exact same HTML used for the preview
-      const html = buildLetterHTML({ ...letterProps(), base: BASE });
+      const html = activeTask === 'vehicle'
+        ? buildLetterHTML({ ...letterProps(), base: BASE })
+        : buildAuditorLetterHTML({ ...auditorLetterProps(), base: BASE });
 
       const pdfDiv = document.createElement('div');
       pdfDiv.style.cssText = `
@@ -408,7 +642,11 @@ const AIWorkspace: React.FC<AIWorkspaceProps> = ({
         const imgData = canvas.toDataURL('image/png');
         const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: [210, 330] });
         pdf.addImage(imgData, 'PNG', 0, 0, 210, 330);
-        pdf.save('Surat_Peminjaman_Kendaraan.pdf');
+        
+        const filename = activeTask === 'vehicle'
+          ? 'Surat_Peminjaman_Kendaraan.pdf'
+          : 'Surat_Tugas_Auditor.pdf';
+        pdf.save(filename);
       } catch (e) {
         console.error('PDF export failed', e);
         alert('Gagal mengekspor PDF.');
@@ -465,7 +703,11 @@ const AIWorkspace: React.FC<AIWorkspaceProps> = ({
       const username = currentUser?.fullName || currentUser?.username || 'System';
       const letterData: Partial<Letter> = {
         title,
-        letterNumber: activeTask === 'vehicle' ? loanLetterNo : `[DRAF/${new Date().getFullYear()}]`,
+        letterNumber: activeTask === 'vehicle'
+          ? loanLetterNo
+          : activeTask === 'auditor'
+          ? auditorLetterNo
+          : `[DRAF/${new Date().getFullYear()}]`,
         date: new Date().toISOString().split('T')[0],
         type,
         link: '',
@@ -521,6 +763,40 @@ Tempat : ${loanVisitPlace}
 
         await new Promise((resolve) => setTimeout(resolve, 800));
         setResult(letterContent);
+
+      } else if (activeTask === 'auditor') {
+        if (!auditorName.trim()) {
+          alert('Mohon lengkapi parameter Nama Auditor.');
+          setIsLoading(false);
+          return;
+        }
+        if (!auditorVisitPlace.trim()) {
+          alert('Mohon lengkapi parameter Lokasi Audit.');
+          setIsLoading(false);
+          return;
+        }
+        if (!auditorBusinessName.trim()) {
+          alert('Mohon lengkapi parameter Pelaku Usaha.');
+          setIsLoading(false);
+          return;
+        }
+
+        const dayOfVisit = getIndonesianDay(auditorVisitDate);
+        const formattedVisitDate = formatIndonesianDate(auditorVisitDate);
+
+        const letterContent = `
+Nomor : ${auditorLetterNo}
+Auditor : ${auditorName} (NPP: ${auditorNpp})
+Hari : ${dayOfVisit}
+Tanggal Audit : ${formattedVisitDate}
+Lokasi Audit : ${auditorVisitPlace}
+Pelaku Usaha : ${auditorBusinessName}
+Kontak Person : ${auditorContact}
+Tanggal Ttd : ${auditorSignDate}
+        `.trim();
+
+        await new Promise((resolve) => setTimeout(resolve, 800));
+        setResult(letterContent);
       }
     } catch (error) {
       console.error(error);
@@ -563,6 +839,18 @@ Tempat : ${loanVisitPlace}
               }`}
             >
               <div className="flex items-center gap-3"><FileText size={18} /><span className="text-sm">Peminjaman Kendaraan</span></div>
+              <ChevronRight size={16} />
+            </button>
+
+            <button
+              onClick={() => { setActiveTask('auditor'); setResult(''); }}
+              className={`w-full flex items-center justify-between p-4 rounded-2xl transition-all ${
+                activeTask === 'auditor'
+                  ? 'neu-inset text-indigo-600 font-black'
+                  : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50/50'
+              }`}
+            >
+              <div className="flex items-center gap-3"><FileText size={18} /><span className="text-sm">Surat Tugas Auditor</span></div>
               <ChevronRight size={16} />
             </button>
           </div>
@@ -638,6 +926,87 @@ Tempat : ${loanVisitPlace}
               </div>
             )}
 
+            {/* Auditor Assignment Form */}
+            {activeTask === 'auditor' && (
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <label className="block pl-1 text-[10px] text-slate-400 uppercase">Nomor Surat</label>
+                  <input
+                    value={auditorLetterNo}
+                    onChange={(e) => setAuditorLetterNo(e.target.value)}
+                    placeholder="e.g. 17/P44/U.LPH/K/F.05/IV/2025"
+                    className="w-full p-4 neu-inset rounded-xl outline-none bg-transparent font-sans"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="block pl-1 text-[10px] text-slate-400 uppercase">Nama Auditor</label>
+                  <input
+                    value={auditorName}
+                    onChange={(e) => setAuditorName(e.target.value)}
+                    placeholder="e.g. Majida Ramadhan, S.Si., M.Si"
+                    className="w-full p-4 neu-inset rounded-xl outline-none bg-transparent font-sans"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="block pl-1 text-[10px] text-slate-400 uppercase">NPP Auditor</label>
+                  <input
+                    value={auditorNpp}
+                    onChange={(e) => setAuditorNpp(e.target.value)}
+                    placeholder="e.g. 192082199332294"
+                    className="w-full p-4 neu-inset rounded-xl outline-none bg-transparent font-sans"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="block pl-1 text-[10px] text-slate-400 uppercase">Tanggal Audit</label>
+                  <input
+                    type="date"
+                    value={auditorVisitDate}
+                    onChange={(e) => setAuditorVisitDate(e.target.value)}
+                    className="w-full p-4 neu-inset rounded-xl outline-none bg-transparent cursor-pointer font-sans"
+                  />
+                  <p className="text-[9px] text-indigo-500 pl-1 font-bold">
+                    Hari Terdeteksi: {getIndonesianDay(auditorVisitDate) || '-'}
+                  </p>
+                </div>
+                <div className="space-y-2">
+                  <label className="block pl-1 text-[10px] text-slate-400 uppercase">Lokasi Audit</label>
+                  <textarea
+                    value={auditorVisitPlace}
+                    onChange={(e) => setAuditorVisitPlace(e.target.value)}
+                    placeholder="e.g. Outlet Jack's & Co&#10;Jl. Raya Tlogomas No. 5 Lowokwaru, Kota Malang"
+                    className="w-full p-4 neu-inset rounded-xl outline-none bg-transparent font-sans h-20 resize-none"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="block pl-1 text-[10px] text-slate-400 uppercase">Pelaku Usaha</label>
+                  <input
+                    value={auditorBusinessName}
+                    onChange={(e) => setAuditorBusinessName(e.target.value)}
+                    placeholder="e.g. Davin Gunawan Alim"
+                    className="w-full p-4 neu-inset rounded-xl outline-none bg-transparent font-sans"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="block pl-1 text-[10px] text-slate-400 uppercase">Kontak Person</label>
+                  <input
+                    value={auditorContact}
+                    onChange={(e) => setAuditorContact(e.target.value)}
+                    placeholder="e.g. 0341575589"
+                    className="w-full p-4 neu-inset rounded-xl outline-none bg-transparent font-sans"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="block pl-1 text-[10px] text-slate-400 uppercase">Tanggal Tanda Tangan (Malang, ...)</label>
+                  <input
+                    value={auditorSignDate}
+                    onChange={(e) => setAuditorSignDate(e.target.value)}
+                    placeholder="e.g. 29 April 2025"
+                    className="w-full p-4 neu-inset rounded-xl outline-none bg-transparent font-sans"
+                  />
+                </div>
+              </div>
+            )}
+
             <button
               onClick={handleExecuteAI}
               disabled={isLoading}
@@ -702,9 +1071,14 @@ Tempat : ${loanVisitPlace}
                   </button>
                 )}
 
-                {activeTask === 'vehicle' && (
+                {(activeTask === 'vehicle' || activeTask === 'auditor') && (
                   <button
-                    onClick={() => handleSaveToLetters(`Peminjaman Kendaraan - ${loanVisitPlace}`, 'Outgoing')}
+                    onClick={() => handleSaveToLetters(
+                      activeTask === 'vehicle'
+                        ? `Peminjaman Kendaraan - ${loanVisitPlace}`
+                        : `Surat Tugas Auditor - ${auditorBusinessName}`,
+                      'Outgoing'
+                    )}
                     disabled={isSaved}
                     className="p-2 bg-emerald-500 hover:bg-emerald-600 disabled:bg-emerald-700 rounded-lg transition-colors flex items-center gap-1.5 text-xs font-bold"
                   >
@@ -747,6 +1121,31 @@ Tempat : ${loanVisitPlace}
                     dangerouslySetInnerHTML={{
                       __html: buildLetterHTML({
                         ...letterProps(),
+                        base: window.location.origin,
+                      })
+                    }}
+                  />
+                </div>
+
+              ) : activeTask === 'auditor' ? (
+                /*
+                  AUDITOR LETTER PREVIEW
+                  ─────────────────────
+                  Rendered via dangerouslySetInnerHTML using the exact same
+                  buildAuditorLetterHTML() function.
+                */
+                <div className="overflow-x-auto flex justify-center">
+                  <div
+                    style={{
+                      transformOrigin: 'top center',
+                      /* Scale 794px template to fit preview area */
+                      transform: 'scale(0.82)',
+                      width:  '794px',
+                      marginBottom: '-18%', // compensate for scale shrink
+                    }}
+                    dangerouslySetInnerHTML={{
+                      __html: buildAuditorLetterHTML({
+                        ...auditorLetterProps(),
                         base: window.location.origin,
                       })
                     }}
