@@ -667,6 +667,7 @@ const App: React.FC = () => {
           <AIWorkspace
             finance={finance}
             auditors={auditors}
+            internal={internal}
             currentUser={currentUser}
             onLetterSaved={async () => {
               const updatedLetters = await dataService.getLetters();

@@ -89,9 +89,9 @@ export const MOCK_LETTERS: Letter[] = [
 ];
 
 export const MOCK_INTERNAL: InternalMember[] = [
-  { id: '1', fullName: 'Dr. Ahmad Fauzi, M.Si', position: 'Kepala LPH', address: 'Malang', waNumber: '08123456789', email: 'fauzi@unisma.ac.id' },
-  { id: '2', fullName: 'Siti Rohmah, M.E', position: 'Sekretaris', address: 'Batu', waNumber: '08567891234', email: 'rohmah@unisma.ac.id' },
-  { id: '3', fullName: 'Budi Santoso', position: 'Staff IT', address: 'Malang', waNumber: '08991122334', email: 'budi@unisma.ac.id' },
+  { id: '1', fullName: 'Dr. Ahmad Fauzi, M.Si', position: 'Kepala LPH', npp: '196504251992031001', address: 'Malang', waNumber: '08123456789', email: 'fauzi@unisma.ac.id' },
+  { id: '2', fullName: 'Siti Rohmah, M.E', position: 'Sekretaris', npp: '197803102005011002', address: 'Batu', waNumber: '08567891234', email: 'rohmah@unisma.ac.id' },
+  { id: '3', fullName: 'Budi Santoso', position: 'Staff IT', npp: '199005122015081003', address: 'Malang', waNumber: '08991122334', email: 'budi@unisma.ac.id' },
 ];
 
 export const MOCK_AUDITORS: Auditor[] = [

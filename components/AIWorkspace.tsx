@@ -5,7 +5,7 @@ import remarkGfm from 'remark-gfm';
 import NeumorphicCard from './NeumorphicCard';
 import { generateFinancialRecap } from '../services/geminiService';
 import { dataService } from '../services/dataService';
-import { FinanceRecord, AppUser, Letter, Auditor } from '../types';
+import { FinanceRecord, AppUser, Letter, Auditor, InternalMember } from '../types';
 import { marked } from 'marked';
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
@@ -13,11 +13,12 @@ import { jsPDF } from 'jspdf';
 interface AIWorkspaceProps {
   finance: FinanceRecord[];
   auditors: Auditor[];
+  internal: InternalMember[];
   currentUser: AppUser | null;
   onLetterSaved?: () => void;
 }
 
-type AITaskType = 'finance' | 'vehicle' | 'auditor';
+type AITaskType = 'finance' | 'vehicle' | 'auditor' | 'internal';
 
 /* ─────────────────────────────────────────────────────────────────────────────
    SHARED LETTER TEMPLATE
@@ -507,11 +508,289 @@ function buildAuditorLetterHTML({
 </div>`;
 }
 
+/* ─────────────────────────────────────────────────────────────────────────────
+   SHARED LETTER TEMPLATE - INTERNAL ASSIGNMENT LETTER
+   Renders the internal member assignment letter as inline-styled HTML.
+   Personnel (Nama, NPP, Jabatan) come from the InternalMember data.
+───────────────────────────────────────────────────────────────────────────── */
+
+interface InternalLetterTemplateProps {
+  letterNo: string;
+  memberName: string;
+  memberNpp: string;
+  memberPosition: string;
+  memberName2?: string;
+  memberNpp2?: string;
+  memberPosition2?: string;
+  visitDate: string;      // ISO yyyy-mm-dd
+  visitPlace: string;
+  visitPlace2?: string;
+  businessName: string;
+  contactPerson: string;
+  signDate: string;
+  getDay: (d: string) => string;
+  formatDate: (d: string) => string;
+  base?: string;
+}
+
+function buildInternalLetterHTML({
+  letterNo,
+  memberName,
+  memberNpp,
+  memberPosition,
+  memberName2,
+  memberNpp2,
+  memberPosition2,
+  visitDate,
+  visitPlace,
+  visitPlace2,
+  businessName,
+  contactPerson,
+  signDate,
+  getDay,
+  formatDate,
+  base = '',
+}: InternalLetterTemplateProps): string {
+  const dayOfVisit = getDay(visitDate);
+  const formattedDate = formatDate(visitDate);
+
+  const hasSecondPlace = !!(visitPlace2 && visitPlace2.trim());
+
+  const visitPlaceHtml = hasSecondPlace
+    ? `<table style="border-collapse:collapse;width:100%;font-size:12pt;line-height:1.6;">
+        <tbody>
+          <tr>
+            <td style="width:20px;vertical-align:top;padding:0;">1.</td>
+            <td style="vertical-align:top;padding:0;white-space:pre-line;">${visitPlace}</td>
+          </tr>
+          <tr style="height:6px;"><td colspan="2"></td></tr>
+          <tr>
+            <td style="width:20px;vertical-align:top;padding:0;">2.</td>
+            <td style="vertical-align:top;padding:0;white-space:pre-line;">${visitPlace2}</td>
+          </tr>
+        </tbody>
+      </table>`
+    : `<span style="white-space:pre-line;">${visitPlace}</span>`;
+
+  const CONTENT_PAD_H = 72;
+  const CONTENT_PAD_T = 56;
+  const FOOTER_H      = 60;
+  const FOOTER_PAD_B  = 28;
+
+  const hasSecondMember = !!(memberName2 && memberName2.trim());
+
+  const memberDetailsHtml = hasSecondMember
+    ? `
+    <table style="border-collapse:collapse;margin-left:44px;margin-bottom:18px;font-size:12pt;width:calc(100% - 44px);line-height:1.5;">
+      <tbody>
+        <tr>
+          <td style="width:90px;vertical-align:top;padding:2px 0;">1. Nama</td>
+          <td style="vertical-align:top;padding:2px 0;">: ${memberName}</td>
+        </tr>
+        <tr>
+          <td style="vertical-align:top;padding:2px 0;">&nbsp;&nbsp;&nbsp;NPP</td>
+          <td style="vertical-align:top;padding:2px 0;">: ${memberNpp || '-'}</td>
+        </tr>
+        <tr>
+          <td style="vertical-align:top;padding:2px 0;">&nbsp;&nbsp;&nbsp;Jabatan</td>
+          <td style="vertical-align:top;padding:2px 0;">: ${memberPosition}</td>
+        </tr>
+        <tr style="height:10px;"><td colspan="2"></td></tr>
+        <tr>
+          <td style="vertical-align:top;padding:2px 0;">2. Nama</td>
+          <td style="vertical-align:top;padding:2px 0;">: ${memberName2}</td>
+        </tr>
+        <tr>
+          <td style="vertical-align:top;padding:2px 0;">&nbsp;&nbsp;&nbsp;NPP</td>
+          <td style="vertical-align:top;padding:2px 0;">: ${memberNpp2 || '-'}</td>
+        </tr>
+        <tr>
+          <td style="vertical-align:top;padding:2px 0;">&nbsp;&nbsp;&nbsp;Jabatan</td>
+          <td style="vertical-align:top;padding:2px 0;">: ${memberPosition2 || '-'}</td>
+        </tr>
+      </tbody>
+    </table>
+    `
+    : `
+    <table style="border-collapse:collapse;margin-left:44px;margin-bottom:18px;font-size:12pt;width:calc(100% - 44px);line-height:1.5;">
+      <tbody>
+        <tr>
+          <td style="width:90px;vertical-align:top;padding:2px 0;">Nama</td>
+          <td style="vertical-align:top;padding:2px 0;">: ${memberName}</td>
+        </tr>
+        <tr>
+          <td style="vertical-align:top;padding:2px 0;">NPP</td>
+          <td style="vertical-align:top;padding:2px 0;">: ${memberNpp || '-'}</td>
+        </tr>
+        <tr>
+          <td style="vertical-align:top;padding:2px 0;">Jabatan</td>
+          <td style="vertical-align:top;padding:2px 0;">: ${memberPosition}</td>
+        </tr>
+      </tbody>
+    </table>
+    `;
+
+  return `
+<div style="
+  position:relative;
+  width:794px;
+  min-height:1247px;
+  background:#fff;
+  font-family:'Times New Roman',Times,serif;
+  font-size:12pt;
+  line-height:1.65;
+  color:#000;
+  box-sizing:border-box;
+  overflow:hidden;
+">
+  <!-- WATERMARK -->
+  <img
+    src="${base}/assets/letter_images/watermark.png"
+    style="
+      position:absolute;
+      top:50%; left:50%;
+      transform:translate(-50%,-50%);
+      width:68%;
+      opacity:0.13;
+      pointer-events:none;
+      z-index:0;
+      display:block;
+    "
+    crossorigin="anonymous"
+  />
+  <!-- MAIN CONTENT AREA -->
+  <div style="
+    position:relative;
+    z-index:1;
+    padding:${CONTENT_PAD_T}px ${CONTENT_PAD_H}px ${FOOTER_H + FOOTER_PAD_B + 32}px ${CONTENT_PAD_H}px;
+    box-sizing:border-box;
+  ">
+    <!-- KOP SURAT -->
+    <div style="
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      border-bottom:3px double #13894B;
+      padding-bottom:8px;
+      margin-bottom:20px;
+    ">
+      <img
+        src="${base}/assets/letter_images/image2.jpeg"
+        style="width:76px;height:76px;object-fit:contain;display:block;"
+        crossorigin="anonymous"
+      />
+      <div style="
+        text-align:center;
+        flex:1;
+        padding:0 16px;
+        font-family:'Bookman Old Style','Book Antiqua',Palatino,serif;
+        color:#13894B;
+      ">
+        <div style="font-size:15pt;font-weight:bold;line-height:1.2;">UNIVERSITAS ISLAM MALANG</div>
+        <div style="font-size:18pt;font-weight:bold;letter-spacing:4px;line-height:1.1;">( U N I S M A )</div>
+        <div style="font-size:12.5pt;font-weight:bold;line-height:1.3;">LEMBAGA PEMERIKSA HALAL</div>
+        <div style="font-size:7.5pt;margin-top:5px;font-family:Arial,Helvetica,sans-serif;color:#13894B;">
+          Jalan Mayjend Haryono 193 Malang, Jawa Timur 65144 Indonesia
+          Telp 0341 551932 &nbsp;Faks. 0341 552249 &nbsp;E-mail: lph@unisma.ac.id &nbsp;Website: unisma.ac.id
+        </div>
+      </div>
+      <img
+        src="${base}/assets/letter_images/image3.jpeg"
+        style="width:76px;height:76px;object-fit:contain;display:block;"
+        crossorigin="anonymous"
+      />
+    </div>
+
+    <!-- TITLE SURAT TUGAS -->
+    <div style="text-align:center;margin-bottom:20px;font-family:'Times New Roman',serif;">
+      <div style="font-size:14pt;font-weight:bold;text-decoration:underline;letter-spacing:1px;line-height:1.2;">SURAT TUGAS</div>
+      <div style="font-size:11pt;font-weight:bold;line-height:1.2;">NOMOR : ${letterNo}</div>
+    </div>
+
+    <!-- INTRO -->
+    <div style="margin-bottom:14px;text-align:justify;font-size:12pt;line-height:1.5;">
+      Kepala Lembaga Pemeriksa Halal (LPH) Universitas Islam Malang memberikan tugas kepada :
+    </div>
+
+    <!-- MEMBER DETAILS -->
+    ${memberDetailsHtml}
+
+    <!-- MISSION INTRO -->
+    <div style="margin-bottom:12px;text-align:justify;font-size:12pt;line-height:1.5;">
+      Untuk memberikan pelayanan Lembaga Pemeriksa Halal (LPH) Universitas Islam Malang di Fasilitas Produksi Pelaku Usaha pada :
+    </div>
+
+    <!-- ACTIVITY DETAILS -->
+    <table style="border-collapse:collapse;margin-left:44px;margin-bottom:18px;font-size:12pt;width:calc(100% - 44px);line-height:1.6;">
+      <tbody>
+        <tr>
+          <td style="width:110px;font-weight:bold;vertical-align:top;padding:2px 0;">Hari</td>
+          <td style="width:15px;vertical-align:top;padding:2px 0;">:</td>
+          <td style="vertical-align:top;padding:2px 0;">${dayOfVisit}</td>
+        </tr>
+        <tr>
+          <td style="font-weight:bold;vertical-align:top;padding:2px 0;">Tanggal</td>
+          <td style="vertical-align:top;padding:2px 0;">:</td>
+          <td style="vertical-align:top;padding:2px 0;">${formattedDate}</td>
+        </tr>
+        <tr>
+          <td style="font-weight:bold;vertical-align:top;padding:2px 0;">Lokasi</td>
+          <td style="vertical-align:top;padding:2px 0;">:</td>
+          <td style="vertical-align:top;padding:2px 0;">
+            ${visitPlaceHtml}
+          </td>
+        </tr>
+        <tr>
+          <td style="font-weight:bold;vertical-align:top;padding:2px 0;">Pelaku Usaha</td>
+          <td style="vertical-align:top;padding:2px 0;">:</td>
+          <td style="vertical-align:top;padding:2px 0;">${businessName}</td>
+        </tr>
+        <tr>
+          <td style="font-weight:bold;vertical-align:top;padding:2px 0;">Kontak Person</td>
+          <td style="vertical-align:top;padding:2px 0;">:</td>
+          <td style="vertical-align:top;padding:2px 0;">${contactPerson}</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- OUTRO -->
+    <div style="margin-bottom:28px;text-align:justify;font-size:12pt;line-height:1.6;">
+      Demikian surat tugas ini dibuat untuk dilaksanakan dengan penuh tanggung jawab. Surat tugas ini berlaku sejak tanggal dikeluarkan sampai selesai proses Audit Sertifikasi Halal.
+    </div>
+
+    <!-- TANDA TANGAN -->
+    <div style="text-align:right;margin-bottom:14px;font-size:12pt;line-height:1.5;">
+      <div style="display:inline-block;text-align:left;width:300px;position:relative;z-index:10;">
+        Malang, ${signDate}<br/>
+        Kepala Lembaga Pemeriksa Halal UNISMA,<br/><br/><br/><br/><br/>
+        <strong>Dr. Hj. Jeni Susyanti, SE, MM, BKP, C.B.V</strong><br/>
+        <span style="font-size:10.5pt;">NPP 1950200019</span>
+      </div>
+    </div>
+  </div><!-- /MAIN CONTENT -->
+  <!-- FOOTER -->
+  <img
+    src="${base}/assets/letter_images/footer.jpeg"
+    style="
+      position:absolute;
+      bottom:${FOOTER_PAD_B}px;
+      left:${CONTENT_PAD_H}px;
+      width:${794 - CONTENT_PAD_H * 2}px;
+      display:block;
+      z-index:2;
+    "
+    crossorigin="anonymous"
+  />
+</div>`;
+}
+
 /* ─────────────────────────────────────────────────────────────────────────── */
+
 
 const AIWorkspace: React.FC<AIWorkspaceProps> = ({
   finance,
   auditors,
+  internal,
   currentUser,
   onLetterSaved
 }) => {
@@ -563,6 +842,30 @@ const AIWorkspace: React.FC<AIWorkspaceProps> = ({
   const [auditorLocationCount, setAuditorLocationCount] = useState<number>(1);
   const [auditorVisitPlace2, setAuditorVisitPlace2] = useState<string>('');
 
+  // Internal Assignment Letter form states
+  const [internalLetterNo, setInternalLetterNo] = useState<string>('18/P44/U.LPH/K/F.05/IV/2025');
+  const [internalMemberName, setInternalMemberName] = useState<string>('');
+  const [internalMemberNpp, setInternalMemberNpp] = useState<string>('');
+  const [internalMemberPosition, setInternalMemberPosition] = useState<string>('');
+  const [internalMemberCount, setInternalMemberCount] = useState<number>(1);
+  const [internalMemberName2, setInternalMemberName2] = useState<string>('');
+  const [internalMemberNpp2, setInternalMemberNpp2] = useState<string>('');
+  const [internalMemberPosition2, setInternalMemberPosition2] = useState<string>('');
+  const [internalVisitDate, setInternalVisitDate] = useState<string>(new Date().toISOString().split('T')[0]);
+  const [internalVisitPlace, setInternalVisitPlace] = useState<string>('');
+  const [internalLocationCount, setInternalLocationCount] = useState<number>(1);
+  const [internalVisitPlace2, setInternalVisitPlace2] = useState<string>('');
+  const [internalBusinessName, setInternalBusinessName] = useState<string>('');
+  const [internalContact, setInternalContact] = useState<string>('');
+  const [internalSignDate, setInternalSignDate] = useState<string>(() => {
+    const d = new Date();
+    const months = [
+      'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+      'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+    ];
+    return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
+  });
+
   // ── derived ──────────────────────────────────────────────────────────────
   const availableYears = Array.from(
     new Set(finance.map((item) => new Date(item.date).getFullYear().toString()))
@@ -573,6 +876,15 @@ const AIWorkspace: React.FC<AIWorkspaceProps> = ({
       setFinanceYear(availableYears[0]);
     }
   }, [availableYears, financeYear]);
+
+  // Auto-populate first internal member form states when data loaded
+  useEffect(() => {
+    if (internal && internal.length > 0 && !internalMemberName) {
+      setInternalMemberName(internal[0].fullName);
+      setInternalMemberNpp(internal[0].npp || '');
+      setInternalMemberPosition(internal[0].position || '');
+    }
+  }, [internal, internalMemberName]);
 
   const ALL_MONTHS = [
     { value: '01', label: 'Januari' }, { value: '02', label: 'Februari' }, { value: '03', label: 'Maret' },
@@ -628,6 +940,24 @@ const AIWorkspace: React.FC<AIWorkspaceProps> = ({
     formatDate:    formatIndonesianDate,
   });
 
+  const internalLetterProps = (): InternalLetterTemplateProps => ({
+    letterNo:        internalLetterNo,
+    memberName:      internalMemberName,
+    memberNpp:       internalMemberNpp,
+    memberPosition:  internalMemberPosition,
+    memberName2:     internalMemberCount === 2 ? internalMemberName2 : undefined,
+    memberNpp2:      internalMemberCount === 2 ? internalMemberNpp2 : undefined,
+    memberPosition2: internalMemberCount === 2 ? internalMemberPosition2 : undefined,
+    visitDate:       internalVisitDate,
+    visitPlace:      internalVisitPlace,
+    visitPlace2:     internalLocationCount === 2 ? internalVisitPlace2 : undefined,
+    businessName:    internalBusinessName,
+    contactPerson:   internalContact,
+    signDate:        internalSignDate,
+    getDay:          getIndonesianDay,
+    formatDate:      formatIndonesianDate,
+  });
+
   // ── action handlers ───────────────────────────────────────────────────────
   const handleCopy = () => {
     if (!result) return;
@@ -672,7 +1002,7 @@ const AIWorkspace: React.FC<AIWorkspaceProps> = ({
   const handleExportPdf = async () => {
     if (!result) return;
 
-    if (activeTask === 'vehicle' || activeTask === 'auditor') {
+    if (activeTask === 'vehicle' || activeTask === 'auditor' || activeTask === 'internal') {
       const BASE  = window.location.origin;
       const F4_W  = 794;
       const F4_H  = 1247;
@@ -680,7 +1010,9 @@ const AIWorkspace: React.FC<AIWorkspaceProps> = ({
       // Build the exact same HTML used for the preview
       const html = activeTask === 'vehicle'
         ? buildLetterHTML({ ...letterProps(), base: BASE })
-        : buildAuditorLetterHTML({ ...auditorLetterProps(), base: BASE });
+        : activeTask === 'auditor'
+        ? buildAuditorLetterHTML({ ...auditorLetterProps(), base: BASE })
+        : buildInternalLetterHTML({ ...internalLetterProps(), base: BASE });
 
       const pdfDiv = document.createElement('div');
       pdfDiv.style.cssText = `
@@ -724,7 +1056,9 @@ const AIWorkspace: React.FC<AIWorkspaceProps> = ({
         
         const filename = activeTask === 'vehicle'
           ? 'Surat_Peminjaman_Kendaraan.pdf'
-          : 'Surat_Tugas_Auditor.pdf';
+          : activeTask === 'auditor'
+          ? 'Surat_Tugas_Auditor.pdf'
+          : 'Surat_Tugas_Internal.pdf';
         pdf.save(filename);
       } catch (e) {
         console.error('PDF export failed', e);
@@ -786,6 +1120,8 @@ const AIWorkspace: React.FC<AIWorkspaceProps> = ({
           ? loanLetterNo
           : activeTask === 'auditor'
           ? auditorLetterNo
+          : activeTask === 'internal'
+          ? internalLetterNo
           : `[DRAF/${new Date().getFullYear()}]`,
         date: new Date().toISOString().split('T')[0],
         type,
@@ -888,6 +1224,52 @@ Tanggal Ttd : ${auditorSignDate}
 
         await new Promise((resolve) => setTimeout(resolve, 800));
         setResult(letterContent);
+
+      } else if (activeTask === 'internal') {
+        if (!internalMemberName.trim()) {
+          alert('Mohon lengkapi parameter Nama Anggota Internal.');
+          setIsLoading(false);
+          return;
+        }
+        if (internalMemberCount === 2 && !internalMemberName2.trim()) {
+          alert('Mohon lengkapi parameter Nama Anggota Internal Ke-2.');
+          setIsLoading(false);
+          return;
+        }
+        if (!internalVisitPlace.trim()) {
+          alert('Mohon lengkapi parameter Lokasi Kunjungan.');
+          setIsLoading(false);
+          return;
+        }
+        if (internalLocationCount === 2 && !internalVisitPlace2.trim()) {
+          alert('Mohon lengkapi parameter Lokasi Kunjungan Ke-2.');
+          setIsLoading(false);
+          return;
+        }
+        if (!internalBusinessName.trim()) {
+          alert('Mohon lengkapi parameter Pelaku Usaha.');
+          setIsLoading(false);
+          return;
+        }
+
+        const dayOfVisit = getIndonesianDay(internalVisitDate);
+        const formattedVisitDate = formatIndonesianDate(internalVisitDate);
+
+        const letterContent = `
+Nomor : ${internalLetterNo}
+Anggota 1 : ${internalMemberName} (NPP: ${internalMemberNpp || '-'}) - ${internalMemberPosition}
+${internalMemberCount === 2 ? `Anggota 2 : ${internalMemberName2} (NPP: ${internalMemberNpp2 || '-'}) - ${internalMemberPosition2}` : ''}
+Hari : ${dayOfVisit}
+Tanggal : ${formattedVisitDate}
+Lokasi 1 : ${internalVisitPlace}
+${internalLocationCount === 2 ? `Lokasi 2 : ${internalVisitPlace2}` : ''}
+Pelaku Usaha : ${internalBusinessName}
+Kontak Person : ${internalContact}
+Tanggal Ttd : ${internalSignDate}
+        `.trim();
+
+        await new Promise((resolve) => setTimeout(resolve, 800));
+        setResult(letterContent);
       }
     } catch (error) {
       console.error(error);
@@ -942,6 +1324,18 @@ Tanggal Ttd : ${auditorSignDate}
               }`}
             >
               <div className="flex items-center gap-3"><FileText size={18} /><span className="text-sm">Surat Tugas Auditor</span></div>
+              <ChevronRight size={16} />
+            </button>
+
+            <button
+              onClick={() => { setActiveTask('internal'); setResult(''); }}
+              className={`w-full flex items-center justify-between p-4 rounded-2xl transition-all ${
+                activeTask === 'internal'
+                  ? 'neu-inset text-indigo-600 font-black'
+                  : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50/50'
+              }`}
+            >
+              <div className="flex items-center gap-3"><FileText size={18} /><span className="text-sm">Surat Tugas Internal</span></div>
               <ChevronRight size={16} />
             </button>
           </div>
@@ -1202,6 +1596,212 @@ Tanggal Ttd : ${auditorSignDate}
               </div>
             )}
 
+            {/* Internal Assignment Letter Form */}
+            {activeTask === 'internal' && (
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <label className="block pl-1 text-[10px] text-slate-400 uppercase">Nomor Surat</label>
+                  <input
+                    value={internalLetterNo}
+                    onChange={(e) => setInternalLetterNo(e.target.value)}
+                    placeholder="e.g. 18/P44/U.LPH/K/F.05/IV/2025"
+                    className="w-full p-4 neu-inset rounded-xl outline-none bg-transparent font-sans"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="block pl-1 text-[10px] text-slate-400 uppercase">Jumlah Anggota Internal</label>
+                  <select
+                    value={internalMemberCount}
+                    onChange={(e) => setInternalMemberCount(Number(e.target.value))}
+                    className="w-full p-4 neu-inset rounded-xl outline-none bg-transparent cursor-pointer font-sans"
+                  >
+                    <option value={1}>1 Anggota</option>
+                    <option value={2}>2 Anggota</option>
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <label className="block pl-1 text-[10px] text-slate-400 uppercase">Pilih {internalMemberCount === 2 ? 'Anggota Ke-1' : 'Anggota Internal'}</label>
+                  <select
+                    onChange={(e) => {
+                      const selectedId = e.target.value;
+                      if (selectedId === 'manual') return;
+                      const sel = internal.find(m => m.id === selectedId);
+                      if (sel) {
+                        setInternalMemberName(sel.fullName);
+                        setInternalMemberNpp(sel.npp || '');
+                        setInternalMemberPosition(sel.position || '');
+                      }
+                    }}
+                    defaultValue="manual"
+                    className="w-full p-4 neu-inset rounded-xl outline-none bg-transparent cursor-pointer font-sans"
+                  >
+                    <option value="manual">-- Input Manual --</option>
+                    {internal.map(m => (
+                      <option key={m.id} value={m.id}>{m.fullName} {m.npp ? `(NPP: ${m.npp})` : ''}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <label className="block pl-1 text-[10px] text-slate-400 uppercase">{internalMemberCount === 2 ? 'Nama Anggota Ke-1' : 'Nama Anggota'}</label>
+                  <input
+                    value={internalMemberName}
+                    onChange={(e) => setInternalMemberName(e.target.value)}
+                    placeholder="e.g. Ahmad Fauzi, S.E."
+                    className="w-full p-4 neu-inset rounded-xl outline-none bg-transparent font-sans"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="block pl-1 text-[10px] text-slate-400 uppercase">{internalMemberCount === 2 ? 'NPP Anggota Ke-1' : 'NPP Anggota'}</label>
+                  <input
+                    value={internalMemberNpp}
+                    onChange={(e) => setInternalMemberNpp(e.target.value)}
+                    placeholder="e.g. 192082199332294"
+                    className="w-full p-4 neu-inset rounded-xl outline-none bg-transparent font-sans"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="block pl-1 text-[10px] text-slate-400 uppercase">{internalMemberCount === 2 ? 'Jabatan Anggota Ke-1' : 'Jabatan Anggota'}</label>
+                  <input
+                    value={internalMemberPosition}
+                    onChange={(e) => setInternalMemberPosition(e.target.value)}
+                    placeholder="e.g. Staff Administrasi"
+                    className="w-full p-4 neu-inset rounded-xl outline-none bg-transparent font-sans"
+                  />
+                </div>
+
+                {internalMemberCount === 2 && (
+                  <>
+                    <div className="space-y-2">
+                      <label className="block pl-1 text-[10px] text-slate-400 uppercase">Pilih Anggota Ke-2</label>
+                      <select
+                        onChange={(e) => {
+                          const selectedId = e.target.value;
+                          if (selectedId === 'manual') return;
+                          const sel = internal.find(m => m.id === selectedId);
+                          if (sel) {
+                            setInternalMemberName2(sel.fullName);
+                            setInternalMemberNpp2(sel.npp || '');
+                            setInternalMemberPosition2(sel.position || '');
+                          }
+                        }}
+                        defaultValue="manual"
+                        className="w-full p-4 neu-inset rounded-xl outline-none bg-transparent cursor-pointer font-sans"
+                      >
+                        <option value="manual">-- Input Manual --</option>
+                        {internal.map(m => (
+                          <option key={m.id} value={m.id}>{m.fullName} {m.npp ? `(NPP: ${m.npp})` : ''}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="block pl-1 text-[10px] text-slate-400 uppercase">Nama Anggota Ke-2</label>
+                      <input
+                        value={internalMemberName2}
+                        onChange={(e) => setInternalMemberName2(e.target.value)}
+                        placeholder="e.g. Siti Rahayu, S.T."
+                        className="w-full p-4 neu-inset rounded-xl outline-none bg-transparent font-sans"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="block pl-1 text-[10px] text-slate-400 uppercase">NPP Anggota Ke-2</label>
+                      <input
+                        value={internalMemberNpp2}
+                        onChange={(e) => setInternalMemberNpp2(e.target.value)}
+                        placeholder="e.g. 198239812938129"
+                        className="w-full p-4 neu-inset rounded-xl outline-none bg-transparent font-sans"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="block pl-1 text-[10px] text-slate-400 uppercase">Jabatan Anggota Ke-2</label>
+                      <input
+                        value={internalMemberPosition2}
+                        onChange={(e) => setInternalMemberPosition2(e.target.value)}
+                        placeholder="e.g. Koordinator Lapangan"
+                        className="w-full p-4 neu-inset rounded-xl outline-none bg-transparent font-sans"
+                      />
+                    </div>
+                  </>
+                )}
+
+                <div className="space-y-2">
+                  <label className="block pl-1 text-[10px] text-slate-400 uppercase">Tanggal Kunjungan</label>
+                  <input
+                    type="date"
+                    value={internalVisitDate}
+                    onChange={(e) => setInternalVisitDate(e.target.value)}
+                    className="w-full p-4 neu-inset rounded-xl outline-none bg-transparent cursor-pointer font-sans"
+                  />
+                  <p className="text-[9px] text-indigo-500 pl-1 font-bold">
+                    Hari Terdeteksi: {getIndonesianDay(internalVisitDate) || '-'}
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="block pl-1 text-[10px] text-slate-400 uppercase">Jumlah Lokasi</label>
+                  <select
+                    value={internalLocationCount}
+                    onChange={(e) => setInternalLocationCount(Number(e.target.value))}
+                    className="w-full p-4 neu-inset rounded-xl outline-none bg-transparent cursor-pointer font-sans"
+                  >
+                    <option value={1}>1 Lokasi</option>
+                    <option value={2}>2 Lokasi</option>
+                  </select>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="block pl-1 text-[10px] text-slate-400 uppercase">
+                    {internalLocationCount === 2 ? 'Lokasi Kunjungan Ke-1' : 'Lokasi Kunjungan'}
+                  </label>
+                  <textarea
+                    value={internalVisitPlace}
+                    onChange={(e) => setInternalVisitPlace(e.target.value)}
+                    placeholder="e.g. Outlet Jack's &amp; Co&#10;Jl. Raya Tlogomas No. 5 Lowokwaru, Kota Malang"
+                    className="w-full p-4 neu-inset rounded-xl outline-none bg-transparent font-sans h-20 resize-none"
+                  />
+                </div>
+
+                {internalLocationCount === 2 && (
+                  <div className="space-y-2">
+                    <label className="block pl-1 text-[10px] text-slate-400 uppercase">Lokasi Kunjungan Ke-2</label>
+                    <textarea
+                      value={internalVisitPlace2}
+                      onChange={(e) => setInternalVisitPlace2(e.target.value)}
+                      placeholder="e.g. Fasilitas Produksi Kedua&#10;Jl. Sunan Kalijaga No. 10, Kota Malang"
+                      className="w-full p-4 neu-inset rounded-xl outline-none bg-transparent font-sans h-20 resize-none"
+                    />
+                  </div>
+                )}
+
+                <div className="space-y-2">
+                  <label className="block pl-1 text-[10px] text-slate-400 uppercase">Pelaku Usaha</label>
+                  <input
+                    value={internalBusinessName}
+                    onChange={(e) => setInternalBusinessName(e.target.value)}
+                    placeholder="e.g. Davin Gunawan Alim"
+                    className="w-full p-4 neu-inset rounded-xl outline-none bg-transparent font-sans"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="block pl-1 text-[10px] text-slate-400 uppercase">Kontak Person</label>
+                  <input
+                    value={internalContact}
+                    onChange={(e) => setInternalContact(e.target.value)}
+                    placeholder="e.g. 0341575589"
+                    className="w-full p-4 neu-inset rounded-xl outline-none bg-transparent font-sans"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="block pl-1 text-[10px] text-slate-400 uppercase">Tanggal Tanda Tangan (Malang, ...)</label>
+                  <input
+                    value={internalSignDate}
+                    onChange={(e) => setInternalSignDate(e.target.value)}
+                    placeholder="e.g. 29 April 2025"
+                    className="w-full p-4 neu-inset rounded-xl outline-none bg-transparent font-sans"
+                  />
+                </div>
+              </div>
+            )}
+
             <button
               onClick={handleExecuteAI}
               disabled={isLoading}
@@ -1266,12 +1866,14 @@ Tanggal Ttd : ${auditorSignDate}
                   </button>
                 )}
 
-                {(activeTask === 'vehicle' || activeTask === 'auditor') && (
+                {(activeTask === 'vehicle' || activeTask === 'auditor' || activeTask === 'internal') && (
                   <button
                     onClick={() => handleSaveToLetters(
                       activeTask === 'vehicle'
                         ? `Peminjaman Kendaraan - ${loanVisitPlace}`
-                        : `Surat Tugas Auditor - ${auditorBusinessName}`,
+                        : activeTask === 'auditor'
+                        ? `Surat Tugas Auditor - ${auditorBusinessName}`
+                        : `Surat Tugas Internal - ${internalBusinessName}`,
                       'Outgoing'
                     )}
                     disabled={isSaved}
@@ -1341,6 +1943,30 @@ Tanggal Ttd : ${auditorSignDate}
                     dangerouslySetInnerHTML={{
                       __html: buildAuditorLetterHTML({
                         ...auditorLetterProps(),
+                        base: window.location.origin,
+                      })
+                    }}
+                  />
+                </div>
+
+              ) : activeTask === 'internal' ? (
+                /*
+                  INTERNAL ASSIGNMENT LETTER PREVIEW
+                  ───────────────────────────────────
+                  Rendered via dangerouslySetInnerHTML using the exact same
+                  buildInternalLetterHTML() function.
+                */
+                <div className="overflow-x-auto flex justify-center">
+                  <div
+                    style={{
+                      transformOrigin: 'top center',
+                      transform: 'scale(0.82)',
+                      width:  '794px',
+                      marginBottom: '-18%',
+                    }}
+                    dangerouslySetInnerHTML={{
+                      __html: buildInternalLetterHTML({
+                        ...internalLetterProps(),
                         base: window.location.origin,
                       })
                     }}

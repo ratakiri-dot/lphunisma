@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, AreaChart, Area, LineChart, Line, Legend } from 'recharts';
 import NeumorphicCard from './NeumorphicCard';
 import { getDashboardInsight } from '../services/geminiService';
@@ -27,115 +27,149 @@ const Dashboard: React.FC<DashboardProps> = ({ role, data }) => {
 
   // Real data for charts
   const totalPU = puCertified.length + puOnProcess.length + puProspect.length || 1; // avoid div by zero
-  const puData = [
+  
+  const puData = useMemo(() => [
     { name: 'Certified', value: Math.round((puCertified.length / totalPU) * 100), color: '#4CAF50' },
     { name: 'On Process', value: Math.round((puOnProcess.length / totalPU) * 100), color: '#FFC107' },
     { name: 'Prospect', value: Math.round((puProspect.length / totalPU) * 100), color: '#2196F3' },
-  ];
+  ], [puCertified.length, puOnProcess.length, puProspect.length, totalPU]);
 
-  const peopleData = [
+  const peopleData = useMemo(() => [
     { name: 'Internal', count: internal.length, color: '#6366F1' },
     { name: 'Auditor', count: auditors.length, color: '#A855F7' },
     { name: 'Partners', count: partners.length, color: '#0EA5E9' },
-  ];
+  ], [internal.length, auditors.length, partners.length]);
 
   // Calculate the actual total balance manually from all records to ensure perfect accuracy
-  const manualBalance = finance.reduce((acc, curr) => acc + (Number(curr.debit) || 0) - (Number(curr.credit) || 0), 0);
-  const dbBalance = finance.length > 0 ? Number(finance[0].balance) : 0;
-  const latestBalance = manualBalance; // We trust manual sum for the primary display
-  const hasDiscrepancy = Math.abs(manualBalance - dbBalance) > 1;
+  const { latestBalance, manualBalance, dbBalance, hasDiscrepancy } = useMemo(() => {
+    const manualBalance = finance.reduce((acc, curr) => acc + (Number(curr.debit) || 0) - (Number(curr.credit) || 0), 0);
+    const dbBalance = finance.length > 0 ? Number(finance[0].balance) : 0;
+    const latestBalance = manualBalance; // We trust manual sum for the primary display
+    const hasDiscrepancy = Math.abs(manualBalance - dbBalance) > 1;
+    return { latestBalance, manualBalance, dbBalance, hasDiscrepancy };
+  }, [finance]);
 
   // Group finance by month-year to show the latest balance of each month
-  const financeSorted = [...finance].sort((a, b) => {
-    const dateDiff = new Date(a.date).getTime() - new Date(b.date).getTime();
-    if (dateDiff !== 0) return dateDiff;
-    return (a.createdAt || '').localeCompare(b.createdAt || '');
-  });
-  
-  const monthGroups: { [key: string]: { month: string, balance: number, timestamp: number } } = {};
-  
-  financeSorted.forEach(curr => {
-    const d = new Date(curr.date);
-    const monthLabel = d.toLocaleDateString('id-ID', { month: 'short' });
-    const yearLabel = d.getFullYear();
-    const fullLabel = `${monthLabel} ${yearLabel}`;
-    // Use first day of month as timestamp for stable chronological sorting of groups
-    const timestamp = new Date(yearLabel, d.getMonth(), 1).getTime();
+  const financeData = useMemo(() => {
+    const financeSorted = [...finance].sort((a, b) => {
+      const dateDiff = new Date(a.date).getTime() - new Date(b.date).getTime();
+      if (dateDiff !== 0) return dateDiff;
+      return (a.createdAt || '').localeCompare(b.createdAt || '');
+    });
     
-    // For the chart, we need the running balance at the end of each month.
-    // We'll calculate this by finding the latest transaction of the month and using its balance field,
-    // but since we're now being extra careful, let's ensure we use the record that has the highest chronological position.
+    const monthGroups: { [key: string]: { month: string, balance: number, timestamp: number } } = {};
     
-    monthGroups[fullLabel] = {
-      month: fullLabel,
-      balance: Number(curr.balance),
-      timestamp: timestamp
-    };
-  });
-  
-  // Final verification: ensure the last point on the chart EXACTLY matches our manual latestBalance
-  const financeDataArray = Object.values(monthGroups).sort((a, b) => a.timestamp - b.timestamp);
-  if (financeDataArray.length > 0) {
-    financeDataArray[financeDataArray.length - 1].balance = latestBalance;
-  }
-  
-  const financeData = financeDataArray.length > 0
-    ? financeDataArray
-    : [
-      { month: 'Jan 2025', balance: 0 },
-      { month: 'Feb 2025', balance: 0 },
-      { month: 'Mar 2025', balance: 0 },
-    ];
+    financeSorted.forEach(curr => {
+      const d = new Date(curr.date);
+      const monthLabel = d.toLocaleDateString('id-ID', { month: 'short' });
+      const yearLabel = d.getFullYear();
+      const fullLabel = `${monthLabel} ${yearLabel}`;
+      // Use first day of month as timestamp for stable chronological sorting of groups
+      const timestamp = new Date(yearLabel, d.getMonth(), 1).getTime();
+      
+      // For the chart, we need the running balance at the end of each month.
+      monthGroups[fullLabel] = {
+        month: fullLabel,
+        balance: Number(curr.balance),
+        timestamp: timestamp
+      };
+    });
+    
+    // Final verification: ensure the last point on the chart EXACTLY matches our manual latestBalance
+    const financeDataArray = Object.values(monthGroups).sort((a, b) => a.timestamp - b.timestamp);
+    if (financeDataArray.length > 0) {
+      financeDataArray[financeDataArray.length - 1].balance = latestBalance;
+    }
+    
+    return financeDataArray.length > 0
+      ? financeDataArray
+      : [
+        { month: 'Jan 2025', balance: 0 },
+        { month: 'Feb 2025', balance: 0 },
+        { month: 'Mar 2025', balance: 0 },
+      ];
+  }, [finance, latestBalance]);
 
   // SLA Calculation
-  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
-  
-  // Initialize data array with all months
-  const initialSlaData = months.map(month => ({ 
-    month, 
-    "2024": null, 
-    "2025": null, 
-    "2026": null, 
-    counts: { "2024": 0, "2025": 0, "2026": 0 }, 
-    totals: { "2024": 0, "2025": 0, "2026": 0 } 
-  }));
+  const slaData = useMemo(() => {
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+    
+    // Initialize data array with all months
+    const initialSlaData = months.map(month => ({ 
+      month, 
+      "2024": null, 
+      "2025": null, 
+      "2026": null, 
+      counts: { "2024": 0, "2025": 0, "2026": 0 }, 
+      totals: { "2024": 0, "2025": 0, "2026": 0 } 
+    }));
 
-  const slaDataByMonth = puCertified.reduce((acc: any[], curr) => {
-    if (curr.lphProcessDate && curr.lphFinishedDate) {
-      const processDate = new Date(curr.lphProcessDate);
-      const finishedDate = new Date(curr.lphFinishedDate);
-      
-      const monthIndex = processDate.getMonth();
-      const year = processDate.getFullYear().toString();
-      
-      const diffTime = finishedDate.getTime() - processDate.getTime();
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-      
-      if (['2024', '2025', '2026'].includes(year)) {
-        acc[monthIndex].totals[year] += diffDays;
-        acc[monthIndex].counts[year] += 1;
+    const slaDataByMonth = puCertified.reduce((acc: any[], curr) => {
+      if (curr.lphProcessDate && curr.lphFinishedDate) {
+        const processDate = new Date(curr.lphProcessDate);
+        const finishedDate = new Date(curr.lphFinishedDate);
+        
+        const monthIndex = processDate.getMonth();
+        const year = processDate.getFullYear().toString();
+        
+        const diffTime = finishedDate.getTime() - processDate.getTime();
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        
+        if (['2024', '2025', '2026'].includes(year)) {
+          acc[monthIndex].totals[year] += diffDays;
+          acc[monthIndex].counts[year] += 1;
+        }
       }
-    }
-    return acc;
-  }, initialSlaData);
+      return acc;
+    }, initialSlaData);
 
-  const slaData = slaDataByMonth.map(item => {
-    const result: any = { month: item.month };
-    ['2024', '2025', '2026'].forEach(year => {
-      if (item.counts[year] > 0) {
-        result[year] = Math.round(item.totals[year] / item.counts[year]);
-      }
+    return slaDataByMonth.map(item => {
+      const result: any = { month: item.month };
+      ['2024', '2025', '2026'].forEach(year => {
+        if (item.counts[year] > 0) {
+          result[year] = Math.round(item.totals[year] / item.counts[year]);
+        }
+      });
+      return result;
     });
-    return result;
-  });
+  }, [puCertified]);
 
   useEffect(() => {
     const fetchInsight = async () => {
-      const summary = await getDashboardInsight({ puData, peopleData, financeData, slaData });
+      setInsight("Menganalisis data...");
+      const summary = await getDashboardInsight({
+        certifiedCount: puCertified.length,
+        onProcessCount: puOnProcess.length,
+        prospectCount: puProspect.length,
+        internalCount: internal.length,
+        auditorCount: auditors.length,
+        partnerCount: partners.length,
+        financeSummary: {
+          latestBalance: latestBalance,
+          monthlyBalances: financeData.map(f => ({ month: f.month, balance: f.balance }))
+        },
+        slaSummary: slaData.map(s => {
+          const sClean: any = { month: s.month };
+          if (s['2024'] !== undefined && s['2024'] !== null) sClean['2024'] = s['2024'];
+          if (s['2025'] !== undefined && s['2025'] !== null) sClean['2025'] = s['2025'];
+          if (s['2026'] !== undefined && s['2026'] !== null) sClean['2026'] = s['2026'];
+          return sClean;
+        }).filter(s => Object.keys(s).length > 1)
+      });
       setInsight(summary || "Data siap dianalisis.");
     };
     fetchInsight();
-  }, []);
+  }, [
+    puCertified.length,
+    puOnProcess.length,
+    puProspect.length,
+    internal.length,
+    auditors.length,
+    partners.length,
+    latestBalance,
+    financeData,
+    slaData
+  ]);
 
   const CustomSLATooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
